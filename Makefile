@@ -1,5 +1,5 @@
 
-INCLUDE=-I Authentication
+INCLUDE=-I Authentication -I Messaging -I Messaging/Channels -I Socket
 C_FILES=
 O_FILES=$(patsubst %.c,%.o,${C_FILES})
 
