@@ -1,5 +1,5 @@
 
-INCLUDE=-I Authentication
+INCLUDE=-I Authentication -I Messaging -I Messaging/Channels -I Socket
 C_FILES=
 O_FILES=$(patsubst %.c,%.o,${C_FILES})
 
@@ -18,3 +18,13 @@ ${NAME}: ${O_FILES}
 
 %.o: %.c
 	c++ -c ${COMPILING_FLAGS} $? -o $@
+
+re: fclean all
+
+fclean: clean
+	rm -f ${NAME}
+
+clean:
+	rm -f ${O_FILES}
+
+.PHONY: all re fclean clean

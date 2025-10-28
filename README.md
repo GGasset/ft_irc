@@ -8,3 +8,9 @@ El protocolo que inspira a slack y esta en la base del chat de Twitch es el obje
 * Don't make functions much bigger than a A4 (~40 lines, ~60 chars)
 * for loop good, too much nesting bad
 * Empty lines in functions are pretty
+
+* When creating files, in the Makefile:
+	* Don't add the relative path from the Makefile
+	* Instead, create, or add to, a variable containing the paths of that folder.
+	* Add to that variable the name of the folder incrementally (outwards) with addprefix
+	* Concatenate C_FILES with that variable
