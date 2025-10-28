@@ -7,3 +7,4 @@ El protocolo que inspira a slack y esta en la base del chat de Twitch es el obje
 * Clean file structure, makes sense for that function to be in the same file or else?
 * Don't make functions much bigger than a A4 (~40 lines, ~60 chars)
 * for loop good, too much nesting bad
+* Empty lines in functions are pretty
