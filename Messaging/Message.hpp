@@ -1,0 +1,6 @@
+
+class Message
+{
+private:
+public:
+};
