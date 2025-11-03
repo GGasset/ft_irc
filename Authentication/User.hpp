@@ -1,13 +1,15 @@
 #pragma once
 
-#include "Server.hpp"
 #include <cstddef>
+#include <string>
+
+#include "Server.hpp"
 
 class User
 {
 private:
 	// current state of the received msg, may not be complete
-	std::vector<char> current_message;
+	std::string current_message;
 
 	// Called when the user sent a complete message by msg_sent
 	// Should parse the message and call the corresponding functions
