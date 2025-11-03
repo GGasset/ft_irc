@@ -4,7 +4,7 @@ std::vector<std::string> User::msg_sent(void *what_he_wants, size_t msg_len)
 {
 	if (!what_he_wants || !msg_len) return;
 
-	auto out = std::vector<std::string>();
+	std::vector<std::string> out;
 	for (size_t i = 0; i < msg_len; i++)
 	{
 		char prev = i? -1 : ((char*)what_he_wants)[i - 1];
