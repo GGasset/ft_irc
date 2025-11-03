@@ -6,28 +6,11 @@
 /*   By: alvaro <alvaro@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/03 19:24:23 by alvmoral          #+#    #+#             */
-/*   Updated: 2025/11/03 23:44:32 by alvaro           ###   ########.fr       */
+/*   Updated: 2025/11/04 00:55:40 by alvaro           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Message.hpp"
-
-enum ParseStatus {
-    VALID_MSG,
-	PERR_MSG_LENGTH,
-	PERR_NO_CRLF,
-	PERR_NO_SPACE_AFTER_PREFIX,
-	PERR_PREFIX_LENGTH,
-	PERR_PREFIX_MISSING_NICK,
-	PERR_PREFIX_MISSING_USER,
-	PERR_PREFIX_MISSING_HOST,
-	PERR_INVALID_COMMAND,
-	PERR_NUMERIC_COMMAND_TOO_LONG,
-	PERR_INVALID_CHARACTERS,
-	PERR_EMPTY_SPACE,
-	PERR_EXCEED_15_PARAM,
-	PERR_NONE // must always be the last one
-};
 
 const std::string g_parseErrors[PERR_NONE] = {
     "Valid message",
@@ -38,6 +21,7 @@ const std::string g_parseErrors[PERR_NONE] = {
 	"Missing nickname in prefix",
 	"Missing user in prefix",
 	"Missing host in prefix",
+	"Invalid server name in prefix",
 	"Invalid command",
 	"Numeric command has more than three digits",
 	"Invalid characters in nospcrlfcl range",
@@ -80,6 +64,46 @@ COMMAND getCMD(const std::string &cmd) {
 		return COMMAND0;
 }
 
+// RFC 1035: 63 chars per label, 255 total max
+bool isValidServerName(const std::string& name)
+{
+    if (name.empty() || name.size() > 255)
+        return false;
+
+    size_t label_len = 0;
+
+    for (size_t i = 0; i < name.size(); ++i)
+    {
+        char c = name[i];
+        // Solo caracteres válidos: letras, dígitos, '-' o '.'
+        if (!(std::isalnum(c) || c == '-' || c == '.'))
+            return false;
+        if (c == '.')
+        {
+            // No puede empezar ni terminar con '.'
+            if (i == 0 || i == name.size() - 1)
+                return false;
+            // No puede tener dos '.' consecutivos
+            if (name[i - 1] == '.')
+                return false;
+            // Cada etiqueta <= 63 caracteres
+            if (label_len == 0 || label_len > 63)
+                return false;
+            label_len = 0; // Reset para el siguiente label
+        }
+        else
+            ++label_len;
+    }
+    // Última etiqueta no vacía ni mayor de 63 caracteres
+    if (label_len == 0 || label_len > 63)
+        return false;
+    // No puede empezar ni terminar con '-'
+    if (name.front() == '-' || name.back() == '-')
+        return false;
+    return true;
+}
+
+
 ParseStatus	checkPrefix(const msgTokens &tokens, size_t &i) {
 	std::string prefix = tokens[i++].str;
 	if (i == tokens.size() || tokens[i].type != PREFIX)
@@ -101,6 +125,9 @@ ParseStatus	checkPrefix(const msgTokens &tokens, size_t &i) {
 		if (tokens[i++].type != SPACE)
 			return (PERR_NO_SPACE_AFTER_PREFIX);
 	}
+	//Comprobar el serverName: longitud <= 63, isAlnum || -, no incluye espacios ni comas.
+	if (!isValidServerName(prefix))
+		return (PERR_PREFIX_INVALID_SERVERNAME);
 	return (VALID_MSG);
 }
 

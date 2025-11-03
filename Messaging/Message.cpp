@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Message.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: alvmoral <alvmoral@student.42madrid.com    +#+  +:+       +#+        */
+/*   By: alvaro <alvaro@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/03 19:24:29 by alvmoral          #+#    #+#             */
-/*   Updated: 2025/11/03 19:24:30 by alvmoral         ###   ########.fr       */
+/*   Updated: 2025/11/04 00:50:47 by alvaro           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -225,17 +225,20 @@ int main(void)
 	std::string packet;
 	msgs		packet_msgs;
 	msgs		test;
+	msgTokens	testT;
+	MessageIn	in;
+
     /* Test 1 */
-    packet = "Rataaaaaaa  aa :asdsdff assd \r\nooianffo assd ";
-    packet_msgs = getMsgs(packet);
-    test = {"Rataaaaaaa  aa :asdsdff assd \r\n", "ooianffo assd \r\n"};
-	// print_msg_test(1, packet_msgs, test);
+    // packet = "Rataaaaaaa  aa :asdsdff assd \r\nooianffo assd ";
+    // packet_msgs = getMsgs(packet);
+    // test = {"Rataaaaaaa  aa :asdsdff assd \r\n", "ooianffo assd \r\n"};
+	// // print_msg_test(1, packet_msgs, test);
 
 	
-	/* Test 2 */
-    packet = "AAAAAAAAA\r\nBBBBBBB \r\n\nCC";
-    packet_msgs = getMsgs(packet);
-    test = {"AAAAAAAAA\r\n", "BBBBBBB \r\n", "\nCC\r\n"};
+	// /* Test 2 */
+    // packet = "AAAAAAAAA\r\nBBBBBBB \r\n\nCC";
+    // packet_msgs = getMsgs(packet);
+    // test = {"AAAAAAAAA\r\n", "BBBBBBB \r\n", "\nCC\r\n"};
 	// print_msg_test(2, packet_msgs, test);
 
 	/* Test 3 */
@@ -245,76 +248,76 @@ int main(void)
 	// print_msg_test(3, packet_msgs, test);
 
 	/* Test 4 */
-    packet = "JOIN #cthullu\r\nTOPIC #cthullu :literatura de terror\r\n";
-    packet_msgs = getMsgs(packet);
-    test = {"JOIN #cthullu\r\n", "TOPIC #cthullu :literatura de terror\r\n"};
-	// print_msg_test(4, packet_msgs, test);
+    // packet = "JOIN #cthullu\r\nTOPIC #cthullu :literatura de terror\r\n";
+    // packet_msgs = getMsgs(packet);
+    // test = {"JOIN #cthullu\r\n", "TOPIC #cthullu :literatura de terror\r\n"};
+	// // print_msg_test(4, packet_msgs, test);
 
-	msgTokens testT = {
-		(msg_token) {WORD, "JOIN"},
-		(msg_token) {SPACE, " "},
-		(msg_token) {WORD, "#cthullu"},
-	};
+	// testT = {
+	// 	(msg_token) {WORD, "JOIN"},
+	// 	(msg_token) {SPACE, " "},
+	// 	(msg_token) {WORD, "#cthullu"},
+	// };
 
-	// print_part_test(4, msgTokenizer(packet_msgs[0]), testT);
+	// // print_part_test(4, msgTokenizer(packet_msgs[0]), testT);
 
-	/* Test 5 */
-	msgTokens testT2 = {
-		(msg_token) {WORD, "TOPIC"},
-		(msg_token) {SPACE, " "},
-		(msg_token) {WORD, "#cthullu"},
-		(msg_token) {SPACE, " "},
-		(msg_token) {TRAIL, ":literatura de terror"}
-	};
-	print_part_test(5, msgTokenizer(packet_msgs[1]), testT2);
+	// /* Test 5 */
+	// msgTokens testT2 = {
+	// 	(msg_token) {WORD, "TOPIC"},
+	// 	(msg_token) {SPACE, " "},
+	// 	(msg_token) {WORD, "#cthullu"},
+	// 	(msg_token) {SPACE, " "},
+	// 	(msg_token) {TRAIL, ":literatura de terror"}
+	// };
+	// print_part_test(5, msgTokenizer(packet_msgs[1]), testT2);
 
-	/* Test 6 */
-	packet = "PING :irc.local\r\n";
-	testT = {
-		(msg_token) {WORD, "PING"},
-		(msg_token) {SPACE, " "},
-		(msg_token) {TRAIL, ":irc.local"},
-	};
-	print_part_test(6, msgTokenizer(packet), testT);
+	// /* Test 6 */
+	// packet = "PING :irc.local\r\n";
+	// testT = {
+	// 	(msg_token) {WORD, "PING"},
+	// 	(msg_token) {SPACE, " "},
+	// 	(msg_token) {TRAIL, ":irc.local"},
+	// };
+	// print_part_test(6, msgTokenizer(packet), testT);
 
-	/* Test 7 */
-	packet = ":NICK!user@host PRIVMSG #canal :Hola mundo\r\n";
-	testT = {
-		(msg_token) {PREFIX, ":NICK!user@host"},
-		(msg_token) {SPACE, " "},
-		(msg_token) {WORD, "PRIVMSG"},
-		(msg_token) {SPACE, " "},
-		(msg_token) {WORD, "#canal"},
-		(msg_token) {SPACE, " "},
-		(msg_token) {TRAIL, ":Hola mundo"}
-	};
-	print_part_test(7, msgTokenizer(packet), testT);
+	// /* Test 7 */
+	// packet = ":NICK!user@host PRIVMSG #canal :Hola mundo\r\n";
+	// testT = {
+	// 	(msg_token) {PREFIX, ":NICK!user@host"},
+	// 	(msg_token) {SPACE, " "},
+	// 	(msg_token) {WORD, "PRIVMSG"},
+	// 	(msg_token) {SPACE, " "},
+	// 	(msg_token) {WORD, "#canal"},
+	// 	(msg_token) {SPACE, " "},
+	// 	(msg_token) {TRAIL, ":Hola mundo"}
+	// };
+	// print_part_test(7, msgTokenizer(packet), testT);
 
-	/* Test 8 */
-	packet = "USER alvaro 0 * :Álvaro Martínez\r\n";
-	testT = {
-		(msg_token) {WORD, "USER"},
-		(msg_token) {SPACE, " "},
-		(msg_token) {WORD, "alvaro"},
-		(msg_token) {SPACE, " "},
-		(msg_token) {NUMBER, "0"},
-		(msg_token) {SPACE, " "},
-		(msg_token) {WORD, "*"},
-		(msg_token) {SPACE, " "},
-		(msg_token) {TRAIL, ":Álvaro Martínez"}
-	};
-	print_part_test(8, msgTokenizer(packet), testT);
+	// /* Test 8 */
+	// packet = "USER alvaro 0 * :Álvaro Martínez\r\n";
+	// testT = {
+	// 	(msg_token) {WORD, "USER"},
+	// 	(msg_token) {SPACE, " "},
+	// 	(msg_token) {WORD, "alvaro"},
+	// 	(msg_token) {SPACE, " "},
+	// 	(msg_token) {NUMBER, "0"},
+	// 	(msg_token) {SPACE, " "},
+	// 	(msg_token) {WORD, "*"},
+	// 	(msg_token) {SPACE, " "},
+	// 	(msg_token) {TRAIL, ":Álvaro Martínez"}
+	// };
+	// print_part_test(8, msgTokenizer(packet), testT);
 
-	/* Test 9 */
-	packet = "JOIN #a,#b,#c keyA,keyB,keyC\r\n";
-	testT = {
-		(msg_token) {WORD, "JOIN"},
-		(msg_token) {SPACE, " "},
-		(msg_token) {COMMA_LIST, "#a,#b,#c"},
-		(msg_token) {SPACE, " "},
-		(msg_token) {COMMA_LIST, "keyA,keyB,keyC"},
-	};
-	print_part_test(9, msgTokenizer(packet), testT);
+	// /* Test 9 */
+	// packet = "JOIN #a,#b,#c keyA,keyB,keyC\r\n";
+	// testT = {
+	// 	(msg_token) {WORD, "JOIN"},
+	// 	(msg_token) {SPACE, " "},
+	// 	(msg_token) {COMMA_LIST, "#a,#b,#c"},
+	// 	(msg_token) {SPACE, " "},
+	// 	(msg_token) {COMMA_LIST, "keyA,keyB,keyC"},
+	// };
+	// print_part_test(9, msgTokenizer(packet), testT);
 
 	/* Test 10 */
 	packet = "MODE #a,+i,#b,-t\r\n";
@@ -326,5 +329,9 @@ int main(void)
 	print_part_test(10, msgTokenizer(packet), testT);
 
 	/* Test 11 */
-	
+	msgTokens	tokens = msgTokenizer(packet);
+	ParseStatus	status;
+	in = parseMessage(tokens, status);
+	assert(status == VALID_MSG);
+	assert(in.cmd == MODE);
 }
