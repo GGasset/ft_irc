@@ -32,9 +32,15 @@ enum msgState
 	PARAM
 };
 
-// Please, make message a POD type 😵🤙
-struct MessageOut
+typedef struct  MessageIn
 {
-    char msg[512];
+	msgTokens	tokens;
+	COMMAND		cmd;
+}   MessageIn;
+
+// Please, make message a POD type 😵🤙
+typedef struct MessageOut
+{
+    char    msg[512];
     void    fillMsgOut();
-};
+}   MessageOut;
