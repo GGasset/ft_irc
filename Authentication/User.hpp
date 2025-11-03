@@ -8,15 +8,18 @@
 class User
 {
 private:
+	// id set to -1 means user not registered
+	ssize_t id = -1;
+	bool is_channel_operator = false;
+	std::string nick = "";
+	std::vector<size_t> joined_channels_ids;
+
 	// current state of the received msg, may not be complete
+	// Is not saved to disk
 	std::string current_message;
 
-	// Called when the user sent a complete message by msg_sent
-	// Should parse the message and call the corresponding functions
-	// When called, current message will contain a completed message, no need to empty it
-	void msg_completed();
 public:
-	// Called when this user sent a message
+	// Called when this user sends a message
 	// This function is part of the socket function collection
-	void msg_sent(void *what_he_wants, size_t msg_len);
+	std::vector<std::string> msg_sent(void *what_he_wants, size_t msg_len);
 };

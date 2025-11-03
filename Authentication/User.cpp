@@ -1,8 +1,10 @@
 #include "User.hpp"
 
-void User::msg_sent(void *what_he_wants, size_t msg_len)
+std::vector<std::string> User::msg_sent(void *what_he_wants, size_t msg_len)
 {
 	if (!what_he_wants || !msg_len) return;
+
+	auto out = std::vector<std::string>();
 	for (size_t i = 0; i < msg_len; i++)
 	{
 		char prev = i? -1 : ((char*)what_he_wants)[i - 1];
@@ -17,7 +19,8 @@ void User::msg_sent(void *what_he_wants, size_t msg_len)
 		// Empty message
 		if (i == 2 && current_message.size() == 2) {current_message.clear(); continue;}
 
-		msg_completed();
+		out.push_back(current_message);
 		current_message.clear();
 	}
+	return out;
 }
