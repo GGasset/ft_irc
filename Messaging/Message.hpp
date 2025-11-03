@@ -6,6 +6,8 @@
 
 typedef std::vector<std::string> msgs;
 
+#define NPOS 18446744073709551615UL
+
 enum msg_token_type
 {
 	PREFIX,
@@ -32,6 +34,26 @@ enum msgState
 	PARAM
 };
 
+enum COMMAND {
+	NICK,
+	USER,
+	PING,
+	PONG,
+	PASS,
+	QUIT,
+	JOIN,
+	PART,
+	PRIVMSG,
+	MODE,
+	TOPIC,
+	INVITE,
+	KICK,
+	NOTICE,
+	NAMES,
+	COMMAND0
+};
+
+
 typedef struct  MessageIn
 {
 	msgTokens	tokens;
@@ -44,3 +66,6 @@ typedef struct MessageOut
     char    msg[512];
     void    fillMsgOut();
 }   MessageOut;
+
+
+bool	isNUMBER(const std::string &param);
