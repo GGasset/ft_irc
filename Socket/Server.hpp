@@ -10,7 +10,7 @@ class Server
 {
 private:
 	bool				stop_server = 0;
-	int					sock_fd = 0;
+	int					sockfd = 0;
 
 	// Pool of users loaded from disk, used for authentication
 	std::vector<User>	loaded_users;
@@ -21,6 +21,10 @@ private:
 	std::vector<int>	client_fds;
 	std::vector<User>	clients;
 	std::vector<Channel> servers;
+
+	void handle_read_event(int fd);
+	void handle_write_event(int fd);
+
 
 	void write_user(User user, std::ofstream stream);
 	User read_user();

@@ -6,7 +6,7 @@ O_FILES=$(patsubst %.c,%.o,${C_FILES})
 NAME=ircserv
 
 SUBJECT_FLAGS=--std=98 -Wall -Wextra -Werror
-SHARED_FLAGS=${SUBJECT_FLAGS} -fsanitize=address,undefined
+SHARED_FLAGS=${SUBJECT_FLAGS} -lc -fsanitize=address,undefined
 
 COMPILING_FLAGS=${SHARED_FLAGS} ${INCLUDE} -g3
 LINKING_FLAGS=${SHARED_FLAGS}
