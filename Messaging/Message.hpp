@@ -16,11 +16,12 @@ enum msg_token_type
 {
 	PREFIX,
 	SPACE,
-	COLON,
 	WORD,
 	NUMBER,
+	PARAM,
 	COMMA_LIST,
-	TRAIL
+	TRAIL,
+	CRLF
 };
 
 typedef struct msg_token
@@ -35,7 +36,7 @@ enum msgState
 {
 	PRIX = 0,
 	CMD,
-	PARAM
+	PAR
 };
 
 enum COMMAND {
@@ -73,6 +74,9 @@ enum ParseStatus {
 	PERR_PREFIX_MISSING_NICK,
 	PERR_PREFIX_MISSING_USER,
 	PERR_PREFIX_MISSING_HOST,
+	PERR_PREFIX_INVALID_NICK,
+	PERR_PREFIX_INVALID_USER,
+	PERR_PREFIX_INVALID_HOST,
 	PERR_PREFIX_INVALID_SERVERNAME,
 	PERR_INVALID_COMMAND,
 	PERR_NUMERIC_COMMAND_TOO_LONG,
@@ -82,6 +86,9 @@ enum ParseStatus {
 	PERR_NONE // must always be the last one
 };
 
+extern const std::string g_parseErrors[PERR_NONE];
+
+
 // Please, make message a POD type 😵🤙
 typedef struct MessageOut
 {
@@ -89,8 +96,14 @@ typedef struct MessageOut
     void    fillMsgOut();
 }   MessageOut;
 
-
-bool		isNUMBER(const std::string &param);
+msgs getMsgs(std::string packet);
+std::string getSPACE(std::string &packet, size_t &beginSpace);
+std::string getTRAIL(std::string &packet, size_t &beginWord);
+std::string getWORD(std::string &packet, size_t &beginWord);
+bool isNUMBER(const std::string &param);
+char iterStr(const std::string& str);
+msgTokens msgTokenizer(std::string msg);
+void newSPACE(msgTokens &ret, std::string &msg, size_t &begin);
 MessageIn   parseMessage(msgTokens tokens, ParseStatus &status);
 
 #endif

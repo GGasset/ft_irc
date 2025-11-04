@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parseroMessage.cpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: alvaro <alvaro@student.42.fr>              +#+  +:+       +#+        */
+/*   By: alvmoral <alvmoral@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/03 19:24:23 by alvmoral          #+#    #+#             */
-/*   Updated: 2025/11/04 00:55:40 by alvaro           ###   ########.fr       */
+/*   Updated: 2025/11/04 12:31:33 by alvmoral         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,9 @@ const std::string g_parseErrors[PERR_NONE] = {
 	"Missing nickname in prefix",
 	"Missing user in prefix",
 	"Missing host in prefix",
+	"Invalid nick name in prefix",
+	"Invalid user name in prefix",
+	"Invalid host name in prefix",
 	"Invalid server name in prefix",
 	"Invalid command",
 	"Numeric command has more than three digits",
@@ -103,19 +106,67 @@ bool isValidServerName(const std::string& name)
     return true;
 }
 
+bool	isSpecialChar(char c) {
+	static const std::string specials = "[]\\`^{}_";
+    return specials.find(c) != std::string::npos;
+}
+
+bool	isReservedChar(char c) {
+	static const std::string specials = "\r\n\0 @";
+    return specials.find(c) != std::string::npos;
+}
+
+bool	isValidNickName(const std::string &nickname) {
+	if (nickname.length() > 9)
+		return (false);
+	if (!isalpha(nickname[0])
+		|| !isSpecialChar(nickname[0]))
+		return (false);
+	for (size_t i = 0; i < nickname.length(); i++) {
+		if (!isalnum(nickname[i])
+		|| !isSpecialChar(nickname[i])
+		|| nickname[i] != '-')
+		return (false);
+	}
+	return (true);
+}
+
+bool	isValidUserName(const std::string &username) {
+	for (size_t i = 0; i < username.length(); i++) {
+		if (isReservedChar(username[i]))
+			return (false);
+	}
+	return (true);
+}
+
+bool	isValidHostName(const std::string &hostaname) {
+	return (isValidServerName(hostaname));
+}
 
 ParseStatus	checkPrefix(const msgTokens &tokens, size_t &i) {
-	std::string prefix = tokens[i++].str;
 	if (i == tokens.size() || tokens[i].type != PREFIX)
 		return (VALID_MSG);
+	std::string prefix = tokens[i++].str;
 	if (prefix.length() > 510)
 		return (PERR_PREFIX_LENGTH);
 	
 	size_t	delUser = prefix.find("!");
 	size_t	delHost = prefix.find("@");
+
 	
 	if (delUser != NPOS || delHost != NPOS)
 	{
+		std::string nickname = prefix.substr(0, delUser);
+		std::string username = prefix.substr(delUser, delHost - delUser);
+		std::string	hostname = prefix.substr(delHost + 1);
+
+		if (!isValidNickName(nickname))
+			return (PERR_PREFIX_INVALID_NICK);
+		else if (!isValidUserName(username))
+			return (PERR_PREFIX_INVALID_USER);
+		else if (!isValidHostName(hostname))
+			return (PERR_PREFIX_INVALID_HOST);
+		
 		if (!delUser)
 			return (PERR_PREFIX_MISSING_NICK);
 		if (delHost == NPOS || delHost == prefix.size() - 1)
@@ -168,7 +219,6 @@ ParseStatus	checkParams(const msgTokens &tokens, size_t &i) {
 		if (!isInNospcrlfcl(tokens[i].str))
 			return (PERR_INVALID_CHARACTERS);
 		param_c++;
-		i++;
 	}
 	if (tokens[i++].type == SPACE)
 		return (PERR_EMPTY_SPACE);
