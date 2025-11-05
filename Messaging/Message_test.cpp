@@ -379,13 +379,13 @@ int main(void)
 	test_validity(idx++, packet, testT, VALID_MSG, JOIN);
 
 	/* Test 29 — Prefijo largo límite (50 chars) */
-	packet = ":aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa PRIVMSG #a :msg\r\n";
+	packet = ":aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa PRIVMSG #a :msg\r\n";
 	testT = {
-		{PREFIX, ":aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},
+		{PREFIX, ":aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},
 		{SPACE, " "}, {WORD, "PRIVMSG"}, {SPACE, " "}, {PARAM, "#a"}, {SPACE, " "},
 		{TRAIL, "msg"}, {CRLF, "\r\n"}
 	};
-	test_validity(idx++, packet, testT, VALID_MSG, PRIVMSG);
+	test_validity(idx++, packet, testT, PERR_PREFIX_LENGTH, COMMAND0);
 
 	/* Test 30 — Nickname con caracteres válidos */
 	packet = ":A[]\\`^{}_- PRIVMSG #canal :chars válidos\r\n";

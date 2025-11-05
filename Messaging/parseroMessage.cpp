@@ -6,7 +6,7 @@
 /*   By: alvaro <alvaro@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/03 19:24:23 by alvmoral          #+#    #+#             */
-/*   Updated: 2025/11/05 13:44:55 by alvaro           ###   ########.fr       */
+/*   Updated: 2025/11/05 17:50:35 by alvaro           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -180,7 +180,7 @@ ParseStatus	checkPrefix(const msgTokens &tokens, size_t &i) {
 		return (VALID_MSG);
 	std::string prefix = tokens[i++].str;
 	prefix.erase(0, 1);
-	if (prefix.length() > 510)
+	if (prefix.length() > 50)
 		return (PERR_PREFIX_LENGTH);
 	
 	size_t	delUser = prefix.find("!");

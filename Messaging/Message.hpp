@@ -58,6 +58,17 @@ enum COMMAND {
 	COMMAND0
 };
 
+class fnHandlers
+{
+	MessageOut (*fun[COMMAND0])(MessageIn);
+
+	public:
+		fnHandlers();
+		fnHandlers(const fnHandlers &fn);
+		fnHandlers	&operator=(const fnHandlers &fn);
+		~fnHandlers();
+		MessageOut	operator()(COMMAND cmd, MessageIn msg);
+};
 
 typedef struct  MessageIn
 {

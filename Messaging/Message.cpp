@@ -6,7 +6,7 @@
 /*   By: alvaro <alvaro@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/03 19:24:29 by alvmoral          #+#    #+#             */
-/*   Updated: 2025/11/05 13:39:15 by alvaro           ###   ########.fr       */
+/*   Updated: 2025/11/05 18:19:18 by alvaro           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -160,4 +160,9 @@ msgTokens	msgTokenizer(std::string msg)
 		}
 	}
 	return (ret);
+}
+
+MessageOut fnHandlers::operator()(COMMAND cmd, MessageIn msg)
+{
+	return fun[cmd](msg);
 }
