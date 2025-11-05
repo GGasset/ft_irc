@@ -1,7 +1,8 @@
 #include <cstddef>
 #include <string>
-#include <vector>
 #include <tuple>
+#include <vector>
+#include <queue>
 
 #include "User.hpp"
 #include "Channel.hpp"
@@ -16,10 +17,11 @@ private:
 	std::vector<User>	loaded_users;
 
 	size_t 				max_client_id = 0;
-	size_t				max_server_id = 0;
+	size_t				max_channel_id = 0;
 
 	std::vector<int>	client_fds;
 	std::vector<User>	clients;
+	std::vector<std::queue<std::tuple<void *, bool>>> messages;
 	std::vector<Channel> servers;
 
 	void handle_read_event(int fd);
@@ -32,7 +34,9 @@ private:
 	void route_message(std::string msg, User sender);
 
 public:
-	void set_stop(bool value);
+	void add_msg(void *msg, bool is_heap, User receiver);
+
+	void stop();
 
 	// 	Returns true on errors
 	int write_data_to_file(std::string path);
