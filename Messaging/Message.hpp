@@ -6,6 +6,7 @@
 # include <vector>
 # include <cassert>
 # include <iostream>
+# include "../Socket/Server.hpp"
 # include <assert.h>
 
 typedef std::vector<std::string> msgs;
@@ -60,12 +61,12 @@ enum COMMAND {
 
 class fnHandlers
 {
-	MessageOut (*fun[COMMAND0])(MessageIn);
+	MessageOut (*fun[COMMAND0])(size_t, MessageIn, Server*);
 
 	public:
 		fnHandlers();
-		fnHandlers(const fnHandlers &fn);
-		fnHandlers	&operator=(const fnHandlers &fn);
+		// fnHandlers(const fnHandlers &fn);
+		// fnHandlers	&operator=(const fnHandlers &fn);
 		~fnHandlers();
 		MessageOut	operator()(COMMAND cmd, MessageIn msg);
 };
@@ -115,6 +116,19 @@ bool isNUMBER(const std::string &param);
 char iterStr(const std::string& str);
 msgTokens msgTokenizer(std::string msg);
 void newSPACE(msgTokens &ret, std::string &msg, size_t &begin);
+
+COMMAND getCMD(const std::string &cmd);
+inline bool isCharInSet(char c, const std::string& set);
+inline bool isInNospcrlfcl(const std::string& str);
+inline bool isInNospcrlfclTRAIL(const std::string& str);
+inline bool isReservedChar(char c);
+inline bool isSpecialChar(char c);
+bool isValidHostName(const std::string &hostaname);
+bool isValidNickName(const std::string &nickname); 
+bool isValidServerName(const std::string& name);
+bool isValidUserName(const std::string &username);
+
+
 MessageIn   parseMessage(msgTokens tokens, ParseStatus &status);
 
 #endif
