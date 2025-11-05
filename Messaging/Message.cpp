@@ -6,7 +6,7 @@
 /*   By: alvaro <alvaro@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/03 19:24:29 by alvmoral          #+#    #+#             */
-/*   Updated: 2025/11/05 13:20:59 by alvaro           ###   ########.fr       */
+/*   Updated: 2025/11/05 13:39:15 by alvaro           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -106,6 +106,14 @@ bool	isNUMBER(const std::string &param) {
 	return (true);
 }
 
+std::string	capitalize(const std::string &input) {
+    std::string result = input;
+    for (char& c : result) {
+        c = static_cast<unsigned char>(std::toupper(c));
+    }
+    return result;
+}
+
 msgTokens	msgTokenizer(std::string msg)
 {
 	msgState	state = PRIX;
@@ -147,7 +155,7 @@ msgTokens	msgTokenizer(std::string msg)
 		else if (state == CMD)
 		{
 			param = getWORD(msg, begin);
-			ret.push_back((msg_token) {isNUMBER(param) ? NUMBER: WORD, param});
+			ret.push_back((msg_token) {isNUMBER(param) ? NUMBER: WORD, capitalize(param)});
 			state = PAR;
 		}
 	}

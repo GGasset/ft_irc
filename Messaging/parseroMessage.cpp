@@ -6,7 +6,7 @@
 /*   By: alvaro <alvaro@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/03 19:24:23 by alvmoral          #+#    #+#             */
-/*   Updated: 2025/11/05 12:58:27 by alvaro           ###   ########.fr       */
+/*   Updated: 2025/11/05 13:44:55 by alvaro           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -251,11 +251,19 @@ ParseStatus	checkParams(const msgTokens &tokens, size_t &i) {
 	return (VALID_MSG);
 }
 
+ParseStatus	checkLenMsg(const msgTokens &tokens) {
+	size_t	len = 0;
+
+	for (size_t i = 0; i < tokens.size(); i++)
+		len += tokens[i].str.length();
+	return (len >= 512 ? PERR_MSG_LENGTH : VALID_MSG);
+}
+
 MessageIn   parseMessage(msgTokens tokens, ParseStatus &status) {
     MessageIn   ret = {.tokens = tokens, .cmd = COMMAND0};
 	size_t		i = 0;
 
-	// status = checkLenMsg(tokens, status);
+	status = checkLenMsg(tokens);
 	if (status != VALID_MSG) return (ret);
 	status = checkPrefix(tokens, i);
 	if (status != VALID_MSG) return (ret);

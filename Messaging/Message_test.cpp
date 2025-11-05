@@ -238,7 +238,7 @@ int main(void)
 	testT = {
 		(msg_token) {PREFIX, ":Nick!us"},
 		(msg_token) {SPACE, " "},
-		(msg_token) {WORD, "er@host"},
+		(msg_token) {WORD, "ER@HOST"},
 		(msg_token) {SPACE, " "},
 		(msg_token) {PARAM, "PRIVMSG"},
 		(msg_token) {SPACE, " "},
@@ -254,7 +254,7 @@ int main(void)
 	testT = {
 		(msg_token) {PREFIX, ":Nick@us"},
 		(msg_token) {SPACE, " "},
-		(msg_token) {WORD, "er@host"},
+		(msg_token) {WORD, "ER@HOST"},
 		(msg_token) {SPACE, " "},
 		(msg_token) {PARAM, "PRIVMSG"},
 		(msg_token) {SPACE, " "},
@@ -355,4 +355,45 @@ int main(void)
 	};
 	test_validity(idx++, packet, testT, VALID_MSG, COMMAND0);
 
+		/* Test 26 — Prefijo vacío con solo ':' */
+	packet = ": PRIVMSG #canal :mensaje\r\n";
+	testT = {
+		{PREFIX, ":"}, {SPACE, " "}, {WORD, "PRIVMSG"}, {SPACE, " "},
+		{PARAM, "#canal"}, {SPACE, " "}, {TRAIL, "mensaje"}, {CRLF, "\r\n"}
+	};
+	test_validity(idx++, packet, testT, PERR_PREFIX_INVALID_SERVERNAME, COMMAND0);
+
+	/* Test 27 — Comando numérico */
+	packet = ":irc.local 376 Alvaro :End of MOTD\r\n";
+	testT = {
+		{PREFIX, ":irc.local"}, {SPACE, " "}, {NUMBER, "376"}, {SPACE, " "},
+		{PARAM, "Alvaro"}, {SPACE, " "}, {TRAIL, "End of MOTD"}, {CRLF, "\r\n"}
+	};
+	test_validity(idx++, packet, testT, VALID_MSG, COMMAND0);
+
+	/* Test 28 — Comando en minúsculas */
+	packet = "join #literatura\r\n";
+	testT = {
+		{WORD, "JOIN"}, {SPACE, " "}, {PARAM, "#literatura"}, {CRLF, "\r\n"}
+	};
+	test_validity(idx++, packet, testT, VALID_MSG, JOIN);
+
+	/* Test 29 — Prefijo largo límite (50 chars) */
+	packet = ":aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa PRIVMSG #a :msg\r\n";
+	testT = {
+		{PREFIX, ":aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},
+		{SPACE, " "}, {WORD, "PRIVMSG"}, {SPACE, " "}, {PARAM, "#a"}, {SPACE, " "},
+		{TRAIL, "msg"}, {CRLF, "\r\n"}
+	};
+	test_validity(idx++, packet, testT, VALID_MSG, PRIVMSG);
+
+	/* Test 30 — Nickname con caracteres válidos */
+	packet = ":A[]\\`^{}_- PRIVMSG #canal :chars válidos\r\n";
+	testT = {
+		{PREFIX, ":A[]\\`^{}_-"}, {SPACE, " "}, {WORD, "PRIVMSG"}, {SPACE, " "},
+		{PARAM, "#canal"}, {SPACE, " "}, {TRAIL, "chars válidos"}, {CRLF, "\r\n"}
+	};
+	test_validity(idx++, packet, testT, VALID_MSG, PRIVMSG);
+	
+	/* Test 31 */
 }
