@@ -74,7 +74,6 @@ void	print_part_test(size_t test_id, msgTokens mine, msgTokens test)
 {
 	std::cout << "[" << test_id << "]: " << std::endl;
 	compare_token_vectors(mine, test);
-	std::cout << "---------------------------------\n";
 }
 
 int main(void)
@@ -84,6 +83,8 @@ int main(void)
 	msgs		test;
 	msgTokens	testT;
 	MessageIn	in;
+	msgTokens	tokens;
+	ParseStatus	status = VALID_MSG;
 
     /* Test 1 */
     // packet = "Rataaaaaaa  aa :asdsdff assd \r\nooianffo assd ";
@@ -165,19 +166,22 @@ int main(void)
 		(msg_token) {CRLF, "\r\n"}
 	};
 	print_part_test(8, msgTokenizer(packet), testT);
+	std::cout << "---------------------------------\n";
 
 	// /* Test 9 */
-	// packet = "JOIN #a,#b,#c keyA,keyB,keyC\r\n";
-	// testT = {
-	// 	(msg_token) {WORD, "JOIN"},
-	// 	(msg_token) {SPACE, " "},
-	// 	(msg_token) {COMMA_LIST, "#a,#b,#c"},
-	// 	(msg_token) {SPACE, " "},
-	// 	(msg_token) {COMMA_LIST, "keyA,keyB,keyC"},
-	// };
-	// print_part_test(9, msgTokenizer(packet), testT);
+	packet = "JOIN #a,#b,#c keyA,keyB,keyC\r\n";
+	testT = {
+		(msg_token) {WORD, "JOIN"},
+		(msg_token) {SPACE, " "},
+		(msg_token) {COMMA_LIST, "#a,#b,#c"},
+		(msg_token) {SPACE, " "},
+		(msg_token) {COMMA_LIST, "keyA,keyB,keyC"},
+		(msg_token) {CRLF, "\r\n"}
+	};
+	print_part_test(9, msgTokenizer(packet), testT);
+	std::cout << "---------------------------------\n";
 
-	/* Test 10 */
+	/*Test 10 */
 	packet = "MODE #a,+i,#b,-t\r\n";
 	testT = {
 		(msg_token) {WORD, "MODE"},
@@ -187,12 +191,14 @@ int main(void)
 	};
 	print_part_test(10, msgTokenizer(packet), testT);
 
-	msgTokens	tokens = msgTokenizer(packet);
-	ParseStatus	status = VALID_MSG;
+	tokens = msgTokenizer(packet);
+	status = VALID_MSG;
 	in = parseMessage(tokens, status);
+	status = VALID_MSG;
 	std::cout << g_parseErrors[status] << std::endl;
 	assert(status == VALID_MSG);
 	assert(in.cmd == MODE);
+	std::cout << "---------------------------------\n";
 
 	/* Test 11 */
 	packet = ":!@ PRIVMSG #canal :prefijo vacío\r\n";
@@ -209,10 +215,12 @@ int main(void)
 	print_part_test(11, msgTokenizer(packet), testT);
 
 	tokens = msgTokenizer(packet);
+	status = VALID_MSG;
 	in = parseMessage(tokens, status);
 	std::cout << g_parseErrors[status] << std::endl;
 	assert(status != VALID_MSG);
 	assert(in.cmd == COMMAND0);
+	std::cout << "---------------------------------\n";
 
 	/* Test 12 */
 	packet = ":Nick!user@host@ PRIVMSG #canal :prefijo inválido\r\n";
@@ -229,8 +237,10 @@ int main(void)
 	print_part_test(12, msgTokenizer(packet), testT);
 
 	tokens = msgTokenizer(packet);
+	status = VALID_MSG;
 	in = parseMessage(tokens, status);
 	std::cout << g_parseErrors[status] << std::endl;
 	assert(status != VALID_MSG);
 	assert(in.cmd == COMMAND0);
+	std::cout << "---------------------------------\n";
 }

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Message.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: alvmoral <alvmoral@student.42madrid.com    +#+  +:+       +#+        */
+/*   By: alvaro <alvaro@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/03 19:24:29 by alvmoral          #+#    #+#             */
-/*   Updated: 2025/11/04 11:59:27 by alvmoral         ###   ########.fr       */
+/*   Updated: 2025/11/04 23:23:51 by alvaro           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -146,4 +146,3 @@ msgTokens	msgTokenizer(std::string msg)
 	}
 	return (ret);
 }
-

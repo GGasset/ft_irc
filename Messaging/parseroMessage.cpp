@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parseroMessage.cpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: alvmoral <alvmoral@student.42madrid.com    +#+  +:+       +#+        */
+/*   By: alvaro <alvaro@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/03 19:24:23 by alvmoral          #+#    #+#             */
-/*   Updated: 2025/11/04 12:31:33 by alvmoral         ###   ########.fr       */
+/*   Updated: 2025/11/05 09:37:19 by alvaro           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -120,12 +120,12 @@ bool	isValidNickName(const std::string &nickname) {
 	if (nickname.length() > 9)
 		return (false);
 	if (!isalpha(nickname[0])
-		|| !isSpecialChar(nickname[0]))
+		&& !isSpecialChar(nickname[0]))
 		return (false);
 	for (size_t i = 0; i < nickname.length(); i++) {
 		if (!isalnum(nickname[i])
-		|| !isSpecialChar(nickname[i])
-		|| nickname[i] != '-')
+		&& !isSpecialChar(nickname[i])
+		&& nickname[i] != '-')
 		return (false);
 	}
 	return (true);
@@ -147,6 +147,8 @@ ParseStatus	checkPrefix(const msgTokens &tokens, size_t &i) {
 	if (i == tokens.size() || tokens[i].type != PREFIX)
 		return (VALID_MSG);
 	std::string prefix = tokens[i++].str;
+	prefix.erase(0, 1);
+	std::cerr << "prefix despues del erase: " << prefix << std::endl;
 	if (prefix.length() > 510)
 		return (PERR_PREFIX_LENGTH);
 	
@@ -199,10 +201,12 @@ ParseStatus	checkCommand(MessageIn &ret, const msgTokens &tokens, size_t &i) {
 
 bool isInNospcrlfcl(const std::string& str)
 {
-	for (unsigned char c : str)
+	size_t i = 0;
+	for (; i < str.length() - 1; i++)
 	{
 		// Excluded characters
-		if (c == 0x00 || c == 0x0A || c == 0x0D || c == 0x20 || c == 0x3A)
+		if (str[i] == '\0' || str[i] == '\r' 
+			|| str[i] == '\n' || str[i] == ' ' || str[i] == ':')
 			return false;
 	}
 	return true;
@@ -212,10 +216,12 @@ bool isInNospcrlfcl(const std::string& str)
 ParseStatus	checkParams(const msgTokens &tokens, size_t &i) {
 	size_t	param_c = 0;
 
-	while (i < tokens.size()) {
+	while (i < tokens.size() && tokens[i].type != CRLF) {
 		if (param_c == 15)
 			return (PERR_EXCEED_15_PARAM);
 		i++; //Esto para pasar los SPACE.
+		if (tokens[i].type == CRLF)
+			break ;
 		if (!isInNospcrlfcl(tokens[i].str))
 			return (PERR_INVALID_CHARACTERS);
 		param_c++;
@@ -233,8 +239,8 @@ MessageIn   parseMessage(msgTokens tokens, ParseStatus &status) {
 	if (status != VALID_MSG) return (ret);
 	status = checkPrefix(tokens, i);
 	if (status != VALID_MSG) return (ret);
-	checkCommand(ret, tokens, i);
+	status = checkCommand(ret, tokens, i);
 	if (status != VALID_MSG) return (ret);
-	checkParams(tokens, i);
+	status = checkParams(tokens, i);
 	return (ret);
 }
