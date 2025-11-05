@@ -6,7 +6,7 @@
 /*   By: alvaro <alvaro@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/03 19:24:29 by alvmoral          #+#    #+#             */
-/*   Updated: 2025/11/04 23:23:51 by alvaro           ###   ########.fr       */
+/*   Updated: 2025/11/05 13:20:59 by alvaro           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,10 +71,12 @@ void	newSPACE(msgTokens &ret, std::string &msg, size_t &begin)
 	ret.push_back((msg_token) {SPACE , " "});
 }
 
-char iterStr(const std::string& str) {
+char iterStr(const std::string& str, bool restart) {
     static size_t index = 0;  // Guarda la posición entre llamadas sucesivas
     static const std::string* current = nullptr;
 
+	if (restart)
+		return index = 0, '\0';
     // Si cambia el string de entrada, reiniciamos el índice
     if (&str != current) {
         current = &str;
@@ -87,14 +89,18 @@ char iterStr(const std::string& str) {
         current = nullptr;
         return '\0';
     }
-
     return str[index++];
 }
 
 bool	isNUMBER(const std::string &param) {
 	char c;
-	while ((c = iterStr(param))) {
-		if (!isdigit(c))
+	
+	iterStr(param, 1);
+	while (1) {
+		c = iterStr(param, 0);
+		if (!c)
+			break ;
+		if (c < '0' || c > '9')
 			return (false);
 	}
 	return (true);
@@ -105,6 +111,7 @@ msgTokens	msgTokenizer(std::string msg)
 	msgState	state = PRIX;
 	size_t		begin = 0;
 	msgTokens	ret;
+	std::string param;
 
 	while (1)
 	{
@@ -119,15 +126,14 @@ msgTokens	msgTokenizer(std::string msg)
 			newSPACE(ret, msg, begin);
 			if (msg[begin] == ':')
 			{
-				ret.push_back((msg_token) {TRAIL, getTRAIL(msg, begin)});
+				ret.push_back((msg_token) {TRAIL, getTRAIL(msg, begin).erase(0, 1)});
 				continue ;
 			}
-			std::string param = getWORD(msg, begin);
+			param = getWORD(msg, begin);
 			if (param.find(",") != std::string::npos)
 				ret.push_back((msg_token) {COMMA_LIST, param});
 			else
 				ret.push_back((msg_token) {PARAM, param});
-				// ret.push_back((msg_token) {isNUMBER(param) ? NUMBER: WORD, param});
 		}
 		else if (state == PRIX)
 		{
@@ -140,7 +146,8 @@ msgTokens	msgTokenizer(std::string msg)
 		}
 		else if (state == CMD)
 		{
-			ret.push_back((msg_token) {WORD, getWORD(msg, begin)});
+			param = getWORD(msg, begin);
+			ret.push_back((msg_token) {isNUMBER(param) ? NUMBER: WORD, param});
 			state = PAR;
 		}
 	}

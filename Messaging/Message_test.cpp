@@ -76,15 +76,31 @@ void	print_part_test(size_t test_id, msgTokens mine, msgTokens test)
 	compare_token_vectors(mine, test);
 }
 
+void	test_validity(size_t id, std::string packet, msgTokens testT, ParseStatus testStatus, COMMAND testCommand)
+{
+	msgTokens	tokens;
+	ParseStatus	status = VALID_MSG;
+	MessageIn	in;
+
+	tokens = msgTokenizer(packet);
+	print_part_test(id, tokens, testT);
+	status = VALID_MSG;
+	in = parseMessage(tokens, status);
+	std::cout << g_parseErrors[status] << std::endl;
+	std::cout << "[status]: " << status << " [testStatus]: " << testStatus << std::endl;
+	std::cout << "[cmd]: " << in.cmd << " [testCmd]: " << testCommand << std::endl;
+	assert(status == testStatus);
+	assert(in.cmd == testCommand);
+	std::cout << "---------------------------------\n";
+}
+
+
 int main(void)
 {
 	std::string packet;
 	msgs		packet_msgs;
 	msgs		test;
 	msgTokens	testT;
-	MessageIn	in;
-	msgTokens	tokens;
-	ParseStatus	status = VALID_MSG;
 
     /* Test 1 */
     // packet = "Rataaaaaaa  aa :asdsdff assd \r\nooianffo assd ";
@@ -162,11 +178,10 @@ int main(void)
 		(msg_token) {SPACE, " "},
 		(msg_token) {PARAM, "*"},
 		(msg_token) {SPACE, " "},
-		(msg_token) {TRAIL, ":Álvaro Martínez"},
+		(msg_token) {TRAIL, "Álvaro Martínez"},
 		(msg_token) {CRLF, "\r\n"}
 	};
-	print_part_test(8, msgTokenizer(packet), testT);
-	std::cout << "---------------------------------\n";
+	test_validity(8, packet, testT, VALID_MSG, USER);
 
 	// /* Test 9 */
 	packet = "JOIN #a,#b,#c keyA,keyB,keyC\r\n";
@@ -178,8 +193,7 @@ int main(void)
 		(msg_token) {COMMA_LIST, "keyA,keyB,keyC"},
 		(msg_token) {CRLF, "\r\n"}
 	};
-	print_part_test(9, msgTokenizer(packet), testT);
-	std::cout << "---------------------------------\n";
+	test_validity(9, packet, testT, VALID_MSG, JOIN);
 
 	/*Test 10 */
 	packet = "MODE #a,+i,#b,-t\r\n";
@@ -189,16 +203,7 @@ int main(void)
 		(msg_token) {COMMA_LIST, "#a,+i,#b,-t"},
 		(msg_token) {CRLF, "\r\n"}
 	};
-	print_part_test(10, msgTokenizer(packet), testT);
-
-	tokens = msgTokenizer(packet);
-	status = VALID_MSG;
-	in = parseMessage(tokens, status);
-	status = VALID_MSG;
-	std::cout << g_parseErrors[status] << std::endl;
-	assert(status == VALID_MSG);
-	assert(in.cmd == MODE);
-	std::cout << "---------------------------------\n";
+	test_validity(10, packet, testT, VALID_MSG, MODE);
 
 	/* Test 11 */
 	packet = ":!@ PRIVMSG #canal :prefijo vacío\r\n";
@@ -209,18 +214,10 @@ int main(void)
 		(msg_token) {SPACE, " "},
 		(msg_token) {PARAM, "#canal"},
 		(msg_token) {SPACE, " "},
-		(msg_token) {TRAIL, ":prefijo vacío"},
+		(msg_token) {TRAIL, "prefijo vacío"},
 		(msg_token) {CRLF, "\r\n"}
 	};
-	print_part_test(11, msgTokenizer(packet), testT);
-
-	tokens = msgTokenizer(packet);
-	status = VALID_MSG;
-	in = parseMessage(tokens, status);
-	std::cout << g_parseErrors[status] << std::endl;
-	assert(status != VALID_MSG);
-	assert(in.cmd == COMMAND0);
-	std::cout << "---------------------------------\n";
+	test_validity(11, packet, testT, PERR_PREFIX_MISSING_NICK, COMMAND0);
 
 	/* Test 12 */
 	packet = ":Nick!user@host@ PRIVMSG #canal :prefijo inválido\r\n";
@@ -231,16 +228,131 @@ int main(void)
 		(msg_token) {SPACE, " "},
 		(msg_token) {PARAM, "#canal"},
 		(msg_token) {SPACE, " "},
-		(msg_token) {TRAIL, ":prefijo inválido"},
+		(msg_token) {TRAIL, "prefijo inválido"},
 		(msg_token) {CRLF, "\r\n"}
 	};
-	print_part_test(12, msgTokenizer(packet), testT);
+	test_validity(12, packet, testT, PERR_PREFIX_INVALID_HOST, COMMAND0);
+	
+	/* Test 13 */
+	packet = ":Nick!us er@host PRIVMSG #canal :prefijo inválido\r\n";
+	testT = {
+		(msg_token) {PREFIX, ":Nick!us"},
+		(msg_token) {SPACE, " "},
+		(msg_token) {WORD, "er@host"},
+		(msg_token) {SPACE, " "},
+		(msg_token) {PARAM, "PRIVMSG"},
+		(msg_token) {SPACE, " "},
+		(msg_token) {PARAM, "#canal"},
+		(msg_token) {SPACE, " "},
+		(msg_token) {TRAIL, "prefijo inválido"},
+		(msg_token) {CRLF, "\r\n"}
+	};
+	test_validity(13, packet, testT, PERR_PREFIX_MISSING_HOST, COMMAND0);
 
-	tokens = msgTokenizer(packet);
-	status = VALID_MSG;
-	in = parseMessage(tokens, status);
-	std::cout << g_parseErrors[status] << std::endl;
-	assert(status != VALID_MSG);
-	assert(in.cmd == COMMAND0);
-	std::cout << "---------------------------------\n";
+	/* Test 14 */
+	packet = ":Nick@us er@host PRIVMSG #canal :prefijo inválido\r\n";
+	testT = {
+		(msg_token) {PREFIX, ":Nick@us"},
+		(msg_token) {SPACE, " "},
+		(msg_token) {WORD, "er@host"},
+		(msg_token) {SPACE, " "},
+		(msg_token) {PARAM, "PRIVMSG"},
+		(msg_token) {SPACE, " "},
+		(msg_token) {PARAM, "#canal"},
+		(msg_token) {SPACE, " "},
+		(msg_token) {TRAIL, "prefijo inválido"},
+		(msg_token) {CRLF, "\r\n"}
+	};
+	test_validity(14, packet, testT, PERR_PREFIX_MISSING_USER, COMMAND0);
+
+			/*				Casos Easy				  */	
+
+	/* Test 15 — NICK simple */
+	packet = "NICK Alvaro\r\n";
+	testT = {
+		{WORD, "NICK"}, {SPACE, " "}, {PARAM, "Alvaro"}, {CRLF, "\r\n"}
+	};
+	test_validity(15, packet, testT, VALID_MSG, NICK);
+
+	size_t idx = 16;
+	/* Test 16 — PONG con trailing */
+	packet = "PONG :irc.local\r\n";
+	testT = {
+		{WORD, "PONG"}, {SPACE, " "}, {TRAIL, "irc.local"}, {CRLF, "\r\n"}
+	};
+	test_validity(idx++, packet, testT, VALID_MSG, PONG);
+
+	/* Test 16 — QUIT con mensaje */
+	packet = "QUIT :Hasta luego\r\n";
+	testT = {
+		{WORD, "QUIT"}, {SPACE, " "}, {TRAIL, "Hasta luego"}, {CRLF, "\r\n"}
+	};
+	test_validity(idx++, packet, testT, VALID_MSG, QUIT);
+
+	/* Test 18 — JOIN sin key */
+	packet = "JOIN #literatura\r\n";
+	testT = {
+		{WORD, "JOIN"}, {SPACE, " "}, {PARAM, "#literatura"}, {CRLF, "\r\n"}
+	};
+	test_validity(idx++, packet, testT, VALID_MSG, JOIN);
+
+			/*				Canales y Claves			  */	
+			
+	/* Test 19 */
+	packet = "JOIN #a,#b,#c keyA,keyB\r\n";
+	testT = {
+		{WORD, "JOIN"}, {SPACE, " "}, {COMMA_LIST, "#a,#b,#c"}, {SPACE, " "},
+		{COMMA_LIST, "keyA,keyB"}, {CRLF, "\r\n"}
+	};
+	test_validity(idx++, packet, testT, VALID_MSG, JOIN);
+
+	/* Test 20 — PRIVMSG a múltiples nicks */
+	packet = "PRIVMSG Alvaro,Aleister,Ramon :Saludos\r\n";
+	testT = {
+		{WORD, "PRIVMSG"}, {SPACE, " "}, {COMMA_LIST, "Alvaro,Aleister,Ramon"},
+		{SPACE, " "}, {TRAIL, "Saludos"}, {CRLF, "\r\n"}
+	};
+	test_validity(idx++, packet, testT, VALID_MSG, PRIVMSG);
+
+	/* Test 21 — MODE con argumentos mixtos */
+	packet = "MODE #canal +ov Alvaro,Belen\r\n";
+	testT = {
+		{WORD, "MODE"}, {SPACE, " "}, {PARAM, "#canal"}, {SPACE, " "},
+		{PARAM, "+ov"}, {SPACE, " "}, {COMMA_LIST, "Alvaro,Belen"}, {CRLF, "\r\n"}
+	};
+	test_validity(idx++, packet, testT, VALID_MSG, MODE);
+
+		/* Test 22 — Prefijo con solo nick */
+	packet = ":Ramon PRIVMSG #literatura :Hola\r\n";
+	testT = {
+		{PREFIX, ":Ramon"}, {SPACE, " "}, {WORD, "PRIVMSG"}, {SPACE, " "},
+		{PARAM, "#literatura"}, {SPACE, " "}, {TRAIL, "Hola"}, {CRLF, "\r\n"}
+	};
+	test_validity(idx++, packet, testT, VALID_MSG, PRIVMSG);
+
+	/* Test 23 — Prefijo con nick y user */
+	packet = ":Ramon!lector PRIVMSG #libros :Buenos días\r\n";
+	testT = {
+		{PREFIX, ":Ramon!lector"}, {SPACE, " "}, {WORD, "PRIVMSG"}, {SPACE, " "},
+		{PARAM, "#libros"}, {SPACE, " "}, {TRAIL, "Buenos días"}, {CRLF, "\r\n"}
+	};
+	test_validity(idx++, packet, testT, PERR_PREFIX_MISSING_HOST, COMMAND0);
+
+	/* Test 24 — Prefijo con nick, user, host */
+	packet = ":Ramon!lector@biblioteca PRIVMSG #libros :¡Hola!\r\n";
+	testT = {
+		{PREFIX, ":Ramon!lector@biblioteca"}, {SPACE, " "}, {WORD, "PRIVMSG"},
+		{SPACE, " "}, {PARAM, "#libros"}, {SPACE, " "}, {TRAIL, "¡Hola!"},
+		{CRLF, "\r\n"}
+	};
+	test_validity(idx++, packet, testT, VALID_MSG, PRIVMSG);
+
+	/* Test 25 — Prefijo servidor */
+	packet = ":irc.local 001 Alvaro :Bienvenido\r\n";
+	testT = {
+		{PREFIX, ":irc.local"}, {SPACE, " "}, {NUMBER, "001"}, {SPACE, " "},
+		{PARAM, "Alvaro"}, {SPACE, " "}, {TRAIL, "Bienvenido"}, {CRLF, "\r\n"}
+	};
+	test_validity(idx++, packet, testT, VALID_MSG, COMMAND0);
+
 }

@@ -6,7 +6,7 @@
 /*   By: alvaro <alvaro@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/03 19:24:23 by alvmoral          #+#    #+#             */
-/*   Updated: 2025/11/05 09:37:19 by alvaro           ###   ########.fr       */
+/*   Updated: 2025/11/05 12:58:27 by alvaro           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -106,15 +106,47 @@ bool isValidServerName(const std::string& name)
     return true;
 }
 
-bool	isSpecialChar(char c) {
-	static const std::string specials = "[]\\`^{}_";
-    return specials.find(c) != std::string::npos;
+// Define sets of restricted characters
+#define NOSPCRLFCL      "\r\n\0 :"
+#define NOSPCRLFCL_TRAIL "\r\n\0"
+#define RESERVED_CHARS  "\r\n\0 @"
+#define SPECIAL_CHARS   "[]\\`^{}_"
+
+inline bool isCharInSet(char c, const std::string& set)
+{
+	return set.find(c) != std::string::npos;
 }
 
-bool	isReservedChar(char c) {
-	static const std::string specials = "\r\n\0 @";
-    return specials.find(c) != std::string::npos;
+bool areAllCharsAllowed(const std::string& str, const std::string& disallowedSet)
+{
+	for (char c : str)
+	{
+		if (isCharInSet(c, disallowedSet))
+			return false;
+	}
+	return true;
 }
+
+inline bool isSpecialChar(char c)
+{
+	return isCharInSet(c, SPECIAL_CHARS);
+}
+
+inline bool isReservedChar(char c)
+{
+	return isCharInSet(c, RESERVED_CHARS);
+}
+
+inline bool isInNospcrlfcl(const std::string& str)
+{
+	return areAllCharsAllowed(str, NOSPCRLFCL);
+}
+
+inline bool isInNospcrlfclTRAIL(const std::string& str)
+{
+	return areAllCharsAllowed(str, NOSPCRLFCL_TRAIL);
+}
+
 
 bool	isValidNickName(const std::string &nickname) {
 	if (nickname.length() > 9)
@@ -148,16 +180,23 @@ ParseStatus	checkPrefix(const msgTokens &tokens, size_t &i) {
 		return (VALID_MSG);
 	std::string prefix = tokens[i++].str;
 	prefix.erase(0, 1);
-	std::cerr << "prefix despues del erase: " << prefix << std::endl;
 	if (prefix.length() > 510)
 		return (PERR_PREFIX_LENGTH);
 	
 	size_t	delUser = prefix.find("!");
 	size_t	delHost = prefix.find("@");
 
-	
 	if (delUser != NPOS || delHost != NPOS)
 	{
+		if (!delUser)
+			return (PERR_PREFIX_MISSING_NICK);
+		if (delHost == NPOS || delHost == prefix.size() - 1)
+			return (PERR_PREFIX_MISSING_HOST);
+		if (delUser == NPOS || delHost - delUser == 1)
+			return (PERR_PREFIX_MISSING_USER);
+		if (tokens[i++].type != SPACE)
+			return (PERR_NO_SPACE_AFTER_PREFIX);
+
 		std::string nickname = prefix.substr(0, delUser);
 		std::string username = prefix.substr(delUser, delHost - delUser);
 		std::string	hostname = prefix.substr(delHost + 1);
@@ -168,19 +207,12 @@ ParseStatus	checkPrefix(const msgTokens &tokens, size_t &i) {
 			return (PERR_PREFIX_INVALID_USER);
 		else if (!isValidHostName(hostname))
 			return (PERR_PREFIX_INVALID_HOST);
-		
-		if (!delUser)
-			return (PERR_PREFIX_MISSING_NICK);
-		if (delHost == NPOS || delHost == prefix.size() - 1)
-			return (PERR_PREFIX_MISSING_HOST);
-		if (delUser == NPOS || delHost - delUser == 1)
-			return (PERR_PREFIX_MISSING_USER);
-		if (tokens[i++].type != SPACE)
-			return (PERR_NO_SPACE_AFTER_PREFIX);
+		return (VALID_MSG);
 	}
 	//Comprobar el serverName: longitud <= 63, isAlnum || -, no incluye espacios ni comas.
 	if (!isValidServerName(prefix))
 		return (PERR_PREFIX_INVALID_SERVERNAME);
+	i++;
 	return (VALID_MSG);
 }
 
@@ -199,20 +231,6 @@ ParseStatus	checkCommand(MessageIn &ret, const msgTokens &tokens, size_t &i) {
 	return (VALID_MSG);
 }
 
-bool isInNospcrlfcl(const std::string& str)
-{
-	size_t i = 0;
-	for (; i < str.length() - 1; i++)
-	{
-		// Excluded characters
-		if (str[i] == '\0' || str[i] == '\r' 
-			|| str[i] == '\n' || str[i] == ' ' || str[i] == ':')
-			return false;
-	}
-	return true;
-}
-
-
 ParseStatus	checkParams(const msgTokens &tokens, size_t &i) {
 	size_t	param_c = 0;
 
@@ -222,7 +240,9 @@ ParseStatus	checkParams(const msgTokens &tokens, size_t &i) {
 		i++; //Esto para pasar los SPACE.
 		if (tokens[i].type == CRLF)
 			break ;
-		if (!isInNospcrlfcl(tokens[i].str))
+		if (!isInNospcrlfcl(tokens[i].str)
+			|| (tokens[i].type == TRAIL
+				&& !isInNospcrlfclTRAIL(tokens[i].str)))
 			return (PERR_INVALID_CHARACTERS);
 		param_c++;
 	}
