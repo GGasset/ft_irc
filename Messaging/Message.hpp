@@ -62,7 +62,7 @@ enum COMMAND {
 
 class fnHandlers
 {
-	MessageOut (*fun[COMMAND0])(size_t, MessageIn, Server*);
+	MessageOut (*fun[COMMAND0])(size_t, MessageIn, Server&);
 
 	public:
 		fnHandlers();
@@ -105,8 +105,12 @@ extern const std::string g_parseErrors[PERR_NONE];
 // Please, make message a POD type 😵🤙
 typedef struct MessageOut
 {
+	union {
+		User u;
+		Channel ch;
+	} receiver;
     char    msg[512];
-    void    fillMsgOut();
+    void    fillMsgOut(User u, std::string servername, std::string cmd, std::string params);
 }   MessageOut;
 
 msgs getMsgs(std::string packet);

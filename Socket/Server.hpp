@@ -47,6 +47,7 @@ public:
 	int load_from_file(std::string path);
 
 	void handle_message(size_t client_i, void *msg, size_t msg_len);
+	std::vector<User>	&getUsers(void);
 
 	// Returns true on errors
 	int loop(size_t PORT);
