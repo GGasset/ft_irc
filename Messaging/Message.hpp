@@ -2,6 +2,7 @@
 # define MESSAGE_H 
 
 # include <string>
+# include "string.h"
 # include <string_view>
 # include <vector>
 # include <cassert>

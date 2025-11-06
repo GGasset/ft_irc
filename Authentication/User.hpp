@@ -22,4 +22,6 @@ public:
 	// Called when this user sends a message
 	// This function is part of the socket function collection
 	std::vector<std::string> msg_sent(void *what_he_wants, size_t msg_len);
+	std::string getNick(void) const;
+	void	setNick(std::string nick);
 };

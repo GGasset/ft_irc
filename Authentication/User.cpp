@@ -24,3 +24,11 @@ std::vector<std::string> User::msg_sent(void *what_he_wants, size_t msg_len)
 	}
 	return out;
 }
+
+std::string User::getNick(void) const{
+	return (nick);
+}
+
+void	User::setNick(std::string nick) {
+	this->nick = nick;
+}

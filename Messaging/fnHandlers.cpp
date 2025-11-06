@@ -9,7 +9,6 @@ msgTokens   getPARAMS(msgTokens tokens) {
     return (params);
 }
 
-#include "string.h"
 MessageOut  sendNumeric(const std::string user, size_t num) {
     const char    *raton = user.c_str();
     MessageOut out;
@@ -19,14 +18,20 @@ MessageOut  sendNumeric(const std::string user, size_t num) {
 
 MessageOut handleNick(size_t clientId, MessageIn in, Server* server) {
     msgTokens   params = getPARAMS(in.tokens);
-    msg_token   nickaname = params[0];
+    msg_token   nickname = params[0];
+    std::vector<User> clients; // En realidad deberia de ser el vector del servidor.
 
-    if (nickaname.type == CRLF)
+    if (nickname.type == CRLF)
         return (sendNumeric("Enrique Javier", 431));
-    if (nickaname.type == COMMA_LIST
-        || !isValidNickName(nickaname.str));
+    if (nickname.type == COMMA_LIST
+        || !isValidNickName(nickname.str));
         return (sendNumeric("Enrique Javier", 432));
     
+    for (size_t i = 0; i < clients.size(); i++) {
+        if (clients[i].getNick() == nickname.str)
+            return (sendNumeric("Enrique Javier", 433));
+    }
+    clients[clientId].setNick(nickname.str);
 }
 
 fnHandlers::fnHandlers() {
