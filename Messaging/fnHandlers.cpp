@@ -35,7 +35,8 @@ MessageOut handleNick(size_t clientId, MessageIn in, Server &server) {
     clients[clientId].setNick(nickname.str);
     std::string servername = "irc.local"; // Deberia ser el del servidor, extraido del archivo de configuracion.
     out.fillMsgOut(clients[clientId], servername, "NICK", nickname.str);
-    // sendChanels(out);
+    // out.receiver = Channels(client[ClientId]);
+    return (out);
 }
 
 fnHandlers::fnHandlers() {
