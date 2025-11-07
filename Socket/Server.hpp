@@ -21,7 +21,7 @@ private:
 
 	std::vector<int>	client_fds;
 	std::vector<User>	clients;
-	std::vector<std::queue<std::tuple<void *, bool>>> messages;
+	std::vector<std::queue<std::tuple<void *, size_t, bool>>> messages;
 	std::vector<Channel> servers;
 
 	void handle_read_event(int fd);
@@ -31,10 +31,16 @@ private:
 	void write_user(User user, std::ofstream stream);
 	User read_user();
 
-	void route_message(std::string msg, User sender);
+	void route_message(std::string msg, User &sender);
 
 public:
-	void add_msg(void *msg, bool is_heap, User receiver);
+	void add_msg(void *msg, size_t len, bool is_heap, User &receiver);
+	void add_msg(void *msg, size_t len, bool is_heap, Channel receivers);
+
+
+	User &get_user_by_nick(std::string nick);
+	std::vector<User&> get_channel_users(const Channel channel);
+	Channel &get_by_channel_name(std::string name);
 
 	void stop();
 
