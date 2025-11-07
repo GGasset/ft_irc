@@ -105,7 +105,7 @@ extern const std::string g_parseErrors[PERR_NONE];
 // Please, make message a POD type 😵🤙
 typedef struct MessageOut
 {
-	size_t	id; //Esto sirve para tanto chanels como usuarios.
+	std::vector<size_t>	id; //Esto sirve para tanto chanels como usuarios.
 	bool	to_user; //Esto indica si es para un usuario o para un canal.
     char    msg[512];
     void    fillMsgOut(User u, std::string servername, std::string cmd, std::string params);

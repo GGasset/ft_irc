@@ -10,10 +10,21 @@ msgTokens   getPARAMS(msgTokens tokens) {
 }
 
 MessageOut  sendNumeric(const std::string user, size_t num) {
-    const char    *raton = user.c_str();
-    MessageOut out;
+    const char  *raton = user.c_str();
+    MessageOut  out;
     memcpy(out.msg, raton, strlen(raton));
     return (out);
+}
+
+void    complete_registry(User user) {
+    // if (!user.nickname.empty() {
+        // || !user.username.empty()
+        // || !user.realname.empty()
+    // }
+        sendNumeric("Enrique Javier", 001);
+        sendNumeric("Enrique Javier", 002);
+        sendNumeric("Enrique Javier", 003);
+        sendNumeric("Enrique Javier", 004);
 }
 
 MessageOut handleNick(size_t clientId, MessageIn in, Server &server) {
@@ -35,8 +46,26 @@ MessageOut handleNick(size_t clientId, MessageIn in, Server &server) {
     clients[clientId].setNick(nickname.str);
     std::string servername = "irc.local"; // Deberia ser el del servidor, extraido del archivo de configuracion.
     out.fillMsgOut(clients[clientId], servername, "NICK", nickname.str);
-    // out.receiver = Channels(client[ClientId]);
+    // out.id = Channels(client[ClientId]);
+    complete_registry(clients[clientId]);
     return (out);
+}
+
+MessageOut  handleUser(size_t clientId, MessageIn in, Server &server) {
+    msgTokens   params = getPARAMS(in.tokens);
+    std::vector<User> clients = server.getUsers(); // En realidad deberia de ser el vector del servidor.
+
+    if (params.size() != 5) // 5 contando con CRLF, en realidad 4.
+        return (sendNumeric("Enrique Javier", 461));
+    // if (clients[clientId].id == -1)
+    //     return (sendNumeric("Enrique Javier", 462));
+    // clients[clientId].setUserName(params[0]);
+    // clients[clientId].setRealName(params[0]);
+    complete_registry(clients[clientId]);
+}
+
+MessageOut	handleQuit(size_t clientId, MessageIn in, Server &server) {
+
 }
 
 fnHandlers::fnHandlers() {
