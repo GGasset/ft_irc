@@ -30,29 +30,6 @@ static int setup_sockfd(size_t PORT)
 	return sockfd;
 }
 
-void Server::handle_event(const epoll_event event, int sockfd)
-{
-	if (event.data.fd == sockfd) // Socket fd is redeable (someone is trying to connect)
-	{
-		int new_client_fd = accept(sockfd, 0, 0);
-		if (new_client_fd == -1
-			|| fcntl(sockfd, F_SETFL/*Set flags*/, fcntl(sockfd, F_GETFL/*Get flags*/, 0) | O_NONBLOCK) == -1 // Set non block
-		) return;
-
-		// Add client
-		client_fds.push_back(new_client_fd);
-		clients.push_back(User());
-		messages.push_back(std::queue<std::tuple<void *, bool>>());
-	}
-	else
-	{
-		if (event.events & EPOLLIN)
-			handle_read_event(event.data.fd);
-		if (event.events & EPOLLOUT)
-			handle_write_event(event.data.fd);
-	}
-}
-
 int Server::loop(size_t PORT)
 {
 	sockfd = setup_sockfd(PORT);
@@ -74,7 +51,19 @@ int Server::loop(size_t PORT)
 		if (event_n == -1) {err = true; continue;}
 
 		for (size_t i = 0; i < event_n; i++)
-			handle_event(events[i], sockfd);
+			if (events[i].data.fd == sockfd) // Socket fd is redeable (someone is trying to connect)
+			{
+				int new_client_fd = accept(sockfd, 0, 0);
+
+				// Add client
+			}
+			else
+			{
+				if (events[i].events & EPOLLIN)
+					handle_read_event(events[i].data.fd);
+				if (events[i].events & EPOLLOUT)
+					handle_write_event(events[i].data.fd);
+			}		
 	}
 	
 	close(sockfd);

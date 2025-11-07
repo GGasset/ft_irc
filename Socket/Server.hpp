@@ -26,14 +26,12 @@ private:
 
 	void handle_read_event(int fd);
 	void handle_write_event(int fd);
-	void handle_event(const epoll_event event, int sockfd);
 
 
 	void write_user(User user, std::ofstream stream);
 	User read_user();
 
 	void route_message(std::string msg, User sender);
-
 
 public:
 	void add_msg(void *msg, bool is_heap, User receiver);

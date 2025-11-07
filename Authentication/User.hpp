@@ -10,6 +10,7 @@ class User
 private:
 	// id set to -1 means user not registered
 	ssize_t id = -1;
+	bool is_channel_operator = false;
 	std::string nick = "";
 	std::vector<size_t> joined_channels_ids;
 
