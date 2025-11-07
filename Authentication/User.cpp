@@ -32,3 +32,7 @@ std::string User::getNick(void) const{
 void	User::setNick(std::string nick) {
 	this->nick = nick;
 }
+
+std::vector<size_t>	User::get_joined_channel(size_t id) {
+	return (joined_channels_ids[id]);
+}
