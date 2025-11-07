@@ -2,7 +2,6 @@
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <fcntl.h>
-#include <sys/epoll.h>
 
 #include "Server.hpp"
 
@@ -30,6 +29,31 @@ static int setup_sockfd(size_t PORT)
 	return sockfd;
 }
 
+void Server::handle_read_event(int fd)
+{
+	std::string read_data;
+	char tmp[READ_SIZE + 1] {};
+
+	while (read(fd, &tmp, READ_SIZE)) read_data += tmp;
+	if (!read_data.length()) return;
+	User &sender = get_user_by_fd(fd);
+	std::vector<std::string> msgs = sender.msg_sent(read_data);
+	for (size_t i = 0; i < msgs.size(); i++) route_message(msgs[i], sender);
+}
+
+void Server::handle_write_event(int fd)
+{
+	ssize_t user_i = get_user_index_by_fd(fd);
+	if (user_i == -1) return;
+	if (!messages[user_i].size()) return;
+
+	std::tuple<void*,size_t,bool> next_msg = messages[user_i].front();
+	messages[user_i].pop();
+
+	write(fd, std::get<0>(next_msg), std::get<1>(next_msg));
+	if (std::get<2>(next_msg)) delete[] std::get<0>(next_msg);
+}
+
 void Server::handle_event(const epoll_event event, int sockfd)
 {
 	if (event.data.fd == sockfd) // Socket fd is redeable (someone is trying to connect)
@@ -42,7 +66,7 @@ void Server::handle_event(const epoll_event event, int sockfd)
 		// Add client
 		client_fds.push_back(new_client_fd);
 		clients.push_back(User());
-		messages.push_back(std::queue<std::tuple<void *, bool>>());
+		messages.push_back(std::queue<std::tuple<void *, size_t, bool>>());
 	}
 	else
 	{
@@ -68,7 +92,7 @@ int Server::loop(size_t PORT)
 	// Add sockfd for read watchlist to accept clients
 	if (epoll_ctl(epollfd, EPOLL_CTL_ADD, sockfd, &event)) err = true;
 
-	while (!stop_server || err)
+	while (!stop_server && !err)
 	{
 		size_t event_n = epoll_wait(epollfd, events, MAX_EVENTS, 1000);
 		if (event_n == -1) {err = true; continue;}

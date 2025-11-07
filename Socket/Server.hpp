@@ -1,3 +1,4 @@
+#include <sys/epoll.h>
 #include <cstddef>
 #include <string>
 #include <tuple>
@@ -7,22 +8,27 @@
 #include "User.hpp"
 #include "Channel.hpp"
 
+#define READ_SIZE 1
+
 class Server
 {
 private:
-	bool				stop_server = 0;
-	int					sockfd = 0;
+	bool				stop_server;
+	int					sockfd;
 
 	// Pool of users loaded from disk, used for authentication
 	std::vector<User>	loaded_users;
 
-	size_t 				max_client_id = 0;
-	size_t				max_channel_id = 0;
+	size_t 				max_client_id;
+	size_t				max_channel_id;
 
 	std::vector<int>	client_fds;
 	std::vector<User>	clients;
 	std::vector<std::queue<std::tuple<void *, size_t, bool>>> messages;
 	std::vector<Channel> servers;
+
+	ssize_t get_user_index_by_fd(int fd);
+	User &get_user_by_fd(int fd);
 
 	void handle_read_event(int fd);
 	void handle_write_event(int fd);
