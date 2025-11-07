@@ -14,3 +14,10 @@ El protocolo que inspira a slack y esta en la base del chat de Twitch es el obje
 	* Instead, create, or add to, a variable containing the paths of that folder.
 	* Add to that variable the name of the folder incrementally (outwards) with addprefix
 	* Concatenate C_FILES with that variable
+
+
+## TO DO (luis)
+
+* Create channel class
+* Receive the command for specific channel operators (kick invit topic mode)
+* 
