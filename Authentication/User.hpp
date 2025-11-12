@@ -22,10 +22,14 @@ private:
 	std::string passw;
 
 public:
-	// Called when this user sends a message
-	// This function is part of the socket function collection
-	std::vector<std::string> msg_sent(void *what_he_wants, size_t msg_len);
 	std::string getNick(void) const;
 	std::vector<size_t>	get_joined_channel(size_t id);
 	void	setNick(std::string nick);
+	std::string get_nick();
+	
+	// Called when this user sends a message
+	// This function is part of the socket function collection
+	std::vector<std::string> msg_sent(std::string data);
+	ssize_t get_id();
+	void set_id(ssize_t id);
 };
