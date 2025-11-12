@@ -7,6 +7,14 @@ void Server::stop()
 	stop_server = true;
 }
 
+Server::Server()
+{
+	stop_server = false;
+	sockfd = -1;
+	max_client_id = 0;
+	max_channel_id = 0;
+}
+
 Server::~Server()
 {
 	for (size_t i = 0; i < clients.size(); i++)

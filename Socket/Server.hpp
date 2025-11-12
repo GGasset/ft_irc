@@ -8,7 +8,7 @@
 #include "User.hpp"
 #include "Channel.hpp"
 
-#define READ_SIZE 1
+#define READ_SIZE 696
 
 int signal_server_stop;
 
@@ -43,6 +43,7 @@ private:
 	void route_message(std::string msg, User &sender, size_t user_index);
 
 public:
+	Server();
 	~Server();
 
 	void disconnect_user(size_t user_index);
