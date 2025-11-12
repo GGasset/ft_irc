@@ -1,7 +1,10 @@
 
 INCLUDE=-I Authentication -I Messaging -I Messaging/Channels -I Socket
-C_FILES=
-O_FILES=$(patsubst %.c,%.o,${C_FILES})
+
+SOCKET_CPP_FILES=function_router.cpp server_loop.cpp Server.cpp
+
+CPP_FILES=$(addprefix Socket/,${SOCKET_CPP_FILES})
+O_FILES=$(patsubst %.cpp,%.o,${CPP_FILES})
 
 NAME=ircserv
 
