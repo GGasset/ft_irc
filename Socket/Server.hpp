@@ -10,6 +10,8 @@
 
 #define READ_SIZE 1
 
+int signal_server_stop;
+
 class Server
 {
 private:
@@ -28,7 +30,7 @@ private:
 	std::vector<Channel> servers;
 
 	ssize_t get_user_index_by_fd(int fd);
-	User &get_user_by_fd(int fd);
+	User *get_user_by_fd(int fd);
 
 	void handle_read_event(int fd);
 	void handle_write_event(int fd);
@@ -38,10 +40,13 @@ private:
 	void write_user(User user, std::ofstream stream);
 	User read_user();
 
-	void route_message(std::string msg, User &sender);
+	void route_message(std::string msg, User &sender, size_t user_index);
 
 
 public:
+	~Server();
+
+	void disconnect_user(size_t user_index);
 	void add_msg(void *msg, size_t len, bool is_heap, User &receiver);
 	void add_msg(void *msg, size_t len, bool is_heap, Channel receivers);
 
@@ -57,8 +62,6 @@ public:
 
 	// Returns true on errors
 	int load_from_file(std::string path);
-
-	void handle_message(size_t client_i, void *msg, size_t msg_len);
 
 	// Returns true on errors
 	int loop(size_t PORT);
