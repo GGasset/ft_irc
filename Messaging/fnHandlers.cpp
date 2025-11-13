@@ -1,10 +1,11 @@
 #include "Message.hpp"
 
+
 msgTokens   getPARAMS(msgTokens tokens) {
     msgTokens::iterator iter = tokens.begin();
     msgTokens params = tokens;
     params.erase(iter, iter + 1);
-    if (params[0].type == CMD)
+    if (params[0].type == WORD || params[0].type == NUMBER)
         params.erase(iter, iter + 1);
     return (params);
 }
@@ -36,7 +37,7 @@ MessageOut handleNick(size_t clientId, MessageIn in, Server &server) {
     if (nickname.type == CRLF)
         return (sendNumeric("Enrique Javier", 431));
     if (nickname.type == COMMA_LIST
-        || !isValidNickName(nickname.str));
+        || !isValidNickName(nickname.str))
         return (sendNumeric("Enrique Javier", 432));
     
     for (size_t i = 0; i < clients.size(); i++) {
@@ -48,7 +49,7 @@ MessageOut handleNick(size_t clientId, MessageIn in, Server &server) {
     out.fillMsgOut(clients[clientId], servername, "NICK", nickname.str);
     // out.id = Channels(client[ClientId]);
     complete_registry(clients[clientId]);
-    return (out);
+    return (out);// Se supone que hay que mandarlo por el socket.
 }
 
 MessageOut  handleUser(size_t clientId, MessageIn in, Server &server) {
@@ -62,11 +63,12 @@ MessageOut  handleUser(size_t clientId, MessageIn in, Server &server) {
     // clients[clientId].setUserName(params[0]);
     // clients[clientId].setRealName(params[0]);
     complete_registry(clients[clientId]);
+    return (sendNumeric("Enrique Javier", 555)); // Provisional. EL numero no significa nada.
 }
 
-MessageOut	handleQuit(size_t clientId, MessageIn in, Server &server) {
+// MessageOut	handleQuit(size_t clientId, MessageIn in, Server &server) {
 
-}
+// }
 
 fnHandlers::fnHandlers() {
     fun[NICK] = handleNick;

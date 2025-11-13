@@ -7,7 +7,7 @@
 # include <vector>
 # include <cassert>
 # include <iostream>
-# include "../Socket/Server.hpp"
+# include "Server.hpp"
 # include <assert.h>
 
 typedef std::vector<std::string> msgs;
@@ -60,6 +60,21 @@ enum COMMAND {
 	COMMAND0
 };
 
+// Please, make message a POD type 😵🤙
+typedef struct MessageOut
+{
+	std::vector<size_t>	ids; //Esto sirve para tanto chanels como usuarios.
+	bool	to_user; //Esto indica si es para un usuario o para un canal.
+    char    msg[512];
+    void    fillMsgOut(User u, std::string servername, std::string cmd, std::string params);
+}   MessageOut;
+
+typedef struct  MessageIn
+{
+	msgTokens	tokens;
+	COMMAND		cmd;
+}   MessageIn;
+
 class fnHandlers
 {
 	MessageOut (*fun[COMMAND0])(size_t, MessageIn, Server&);
@@ -69,14 +84,9 @@ class fnHandlers
 		// fnHandlers(const fnHandlers &fn);
 		// fnHandlers	&operator=(const fnHandlers &fn);
 		~fnHandlers();
-		MessageOut	operator()(COMMAND cmd, MessageIn msg);
+		MessageOut	operator()(COMMAND cmd, MessageIn msg, Server& server);
+		
 };
-
-typedef struct  MessageIn
-{
-	msgTokens	tokens;
-	COMMAND		cmd;
-}   MessageIn;
 
 enum ParseStatus {
     VALID_MSG,
@@ -100,16 +110,6 @@ enum ParseStatus {
 };
 
 extern const std::string g_parseErrors[PERR_NONE];
-
-
-// Please, make message a POD type 😵🤙
-typedef struct MessageOut
-{
-	std::vector<size_t>	id; //Esto sirve para tanto chanels como usuarios.
-	bool	to_user; //Esto indica si es para un usuario o para un canal.
-    char    msg[512];
-    void    fillMsgOut(User u, std::string servername, std::string cmd, std::string params);
-}   MessageOut;
 
 msgs getMsgs(std::string packet);
 std::string getSPACE(std::string &packet, size_t &beginSpace);

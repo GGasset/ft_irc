@@ -393,7 +393,38 @@ int main(void)
 		{PREFIX, ":A[]\\`^{}_-"}, {SPACE, " "}, {WORD, "PRIVMSG"}, {SPACE, " "},
 		{PARAM, "#canal"}, {SPACE, " "}, {TRAIL, "chars válidos"}, {CRLF, "\r\n"}
 	};
-	test_validity(idx++, packet, testT, VALID_MSG, PRIVMSG);
+	test_validity(idx++, packet, testT, PERR_PREFIX_INVALID_SERVERNAME, COMMAND0);
 	
 	/* Test 31 */
+	packet = ":A[]!\\^@{}_- PRIVMSG #canal :chars válidos\r\n";
+	testT = {
+		{PREFIX, ":A[]!\\^@{}_-"}, {SPACE, " "}, {WORD, "PRIVMSG"}, {SPACE, " "},
+		{PARAM, "#canal"}, {SPACE, " "}, {TRAIL, "chars válidos"}, {CRLF, "\r\n"}
+	};
+	// test_validity(idx++, packet, testT, VALID_MSG, PRIVMSG);
+
+	/* Test 32 Prefijo doble @addtogroup*/
+	packet = ":Nick!user@host@ PRIVMSG #canal :doble arroba\r\n";
+	testT = {
+		{PREFIX, ":Nick!user@host@"}, {SPACE, " "}, {WORD, "PRIVMSG"}, {SPACE, " "},
+		{PARAM, "#canal"}, {SPACE, " "}, {TRAIL, "doble arroba"}, {CRLF, "\r\n"}
+	};
+	test_validity(32, packet, testT, PERR_PREFIX_INVALID_HOST, COMMAND0);
+
+	/* Test 33 -- Esta la entiende como nick invalido, pero para mi es comando invalido.*/
+	packet = ":Ni ck!user@host PRIVMSG #canal :nick inválido\r\n";
+	testT = {
+		{PREFIX, ":Ni"}, {SPACE, " "}, {WORD, "ck!user@host"}, {SPACE, " "},
+		{PARAM, "PRIVMSG"}, {SPACE, " "}, {PARAM, "#canal"}, {SPACE, " "},
+		{TRAIL, "nick inválido"}, {CRLF, "\r\n"}
+	};
+	test_validity(33, packet, testT, PERR_INVALID_COMMAND, COMMAND0);
+
+	/* Test 34 */
+	packet = "PRIVMSG #canal :hola:adiós\r\n";
+	testT = {
+		{WORD, "PRIVMSG"}, {SPACE, " "}, {PARAM, "#canal"}, {SPACE, " "},
+		{TRAIL, ":hola:adiós"}, {CRLF, "\r\n"}
+	};
+	// test_validity(34, packet, testT, )
 }
