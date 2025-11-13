@@ -3,6 +3,7 @@
 #include <tuple>
 #include <vector>
 #include <queue>
+#include <sys/epoll.h>
 
 #include "User.hpp"
 #include "Channel.hpp"

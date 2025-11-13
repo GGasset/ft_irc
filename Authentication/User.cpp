@@ -2,7 +2,7 @@
 
 std::vector<std::string> User::msg_sent(void *what_he_wants, size_t msg_len)
 {
-	if (!what_he_wants || !msg_len) return;
+	if (!what_he_wants || !msg_len) return std::vector<std::string> {"Enrique Javier"};
 
 	std::vector<std::string> out;
 	for (size_t i = 0; i < msg_len; i++)
@@ -23,6 +23,10 @@ std::vector<std::string> User::msg_sent(void *what_he_wants, size_t msg_len)
 		current_message.clear();
 	}
 	return out;
+}
+
+std::vector<size_t>	User::get_joined_channel() {
+	return (joined_channels_ids);
 }
 
 std::string User::getNick(void) const{
