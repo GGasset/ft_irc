@@ -6,6 +6,7 @@
 # include <string_view>
 # include <vector>
 # include <cassert>
+# include <ctype.h>
 # include <iostream>
 # include "Server.hpp"
 # include <assert.h>
@@ -101,6 +102,7 @@ enum ParseStatus {
 	PERR_PREFIX_INVALID_USER,
 	PERR_PREFIX_INVALID_HOST,
 	PERR_PREFIX_INVALID_SERVERNAME,
+	PERR_MISSING_COMMAND,
 	PERR_INVALID_COMMAND,
 	PERR_NUMERIC_COMMAND_TOO_LONG,
 	PERR_INVALID_CHARACTERS,

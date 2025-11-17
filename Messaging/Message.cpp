@@ -6,7 +6,7 @@
 /*   By: alvmoral <alvmoral@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/03 19:24:29 by alvmoral          #+#    #+#             */
-/*   Updated: 2025/11/13 17:17:08 by alvmoral         ###   ########.fr       */
+/*   Updated: 2025/11/17 17:39:11 by alvmoral         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -154,8 +154,19 @@ msgTokens	msgTokenizer(std::string msg)
 		}
 		else if (state == CMD)
 		{
-			param = getWORD(msg, begin);
-			ret.push_back((msg_token) {isNUMBER(param) ? NUMBER: WORD, capitalize(param)});
+			if (msg[begin] == '\r'
+				&& msg[begin + 1] == '\n')
+			{
+				ret.push_back((msg_token) {CRLF, "\r\n"});
+				break ;
+			}
+			else if (isspace(msg[begin]))
+				newSPACE(ret, msg, begin);
+			else
+			{
+				param = getWORD(msg, begin);
+				ret.push_back((msg_token) {isNUMBER(param) ? NUMBER: WORD, capitalize(param)});
+			}
 			state = PAR;
 		}
 	}

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parseroMessage.cpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: alvaro <alvaro@student.42.fr>              +#+  +:+       +#+        */
+/*   By: alvmoral <alvmoral@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/03 19:24:23 by alvmoral          #+#    #+#             */
-/*   Updated: 2025/11/05 17:50:35 by alvaro           ###   ########.fr       */
+/*   Updated: 2025/11/17 17:42:02 by alvmoral         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -219,14 +219,21 @@ ParseStatus	checkPrefix(const msgTokens &tokens, size_t &i) {
 ParseStatus	checkCommand(MessageIn &ret, const msgTokens &tokens, size_t &i) {
 	msg_token	command = tokens[i++];
 	COMMAND		ret_cmd = getCMD(command.str);
-	
+
+	// std::cout << "comando: " << command.str << "--" << std::endl;
+	// if (command.type == SPACE)
+	// 	return (PERR_INVALID_COMMAND);
 	if (command.type == WORD
 		&& (command.str.length() > 12
 		|| ret_cmd == COMMAND0))
 		return (PERR_INVALID_COMMAND);
-	if (command.type == NUMBER
+	else if (command.type == NUMBER
 		&& command.str.length() > 3)
 		return (PERR_NUMERIC_COMMAND_TOO_LONG);
+	else if (command.type != WORD
+			&& command.type != NUMBER
+			&& command.type != CRLF)
+		return (PERR_MISSING_COMMAND);
 	ret.cmd = ret_cmd;
 	return (VALID_MSG);
 }

@@ -414,17 +414,80 @@ int main(void)
 	/* Test 33 -- Esta la entiende como nick invalido, pero para mi es comando invalido.*/
 	packet = ":Ni ck!user@host PRIVMSG #canal :nick inválido\r\n";
 	testT = {
-		{PREFIX, ":Ni"}, {SPACE, " "}, {WORD, "ck!user@host"}, {SPACE, " "},
+		{PREFIX, ":Ni"}, {SPACE, " "}, {WORD, "CK!USER@HOST"}, {SPACE, " "},
 		{PARAM, "PRIVMSG"}, {SPACE, " "}, {PARAM, "#canal"}, {SPACE, " "},
 		{TRAIL, "nick inválido"}, {CRLF, "\r\n"}
 	};
 	test_validity(33, packet, testT, PERR_INVALID_COMMAND, COMMAND0);
 
-	/* Test 34 */
+	/* Test 34  Válido*/
 	packet = "PRIVMSG #canal :hola:adiós\r\n";
 	testT = {
 		{WORD, "PRIVMSG"}, {SPACE, " "}, {PARAM, "#canal"}, {SPACE, " "},
-		{TRAIL, ":hola:adiós"}, {CRLF, "\r\n"}
+		{TRAIL, "hola:adiós"}, {CRLF, "\r\n"}
 	};
-	// test_validity(34, packet, testT, )
+	test_validity(34, packet, testT, VALID_MSG, PRIVMSG);
+
+	/* Test 35 */
+	packet = "PRIVMSG #canal :\r\n";
+	testT = {
+		{WORD, "PRIVMSG"}, {SPACE, " "}, {PARAM, "#canal"}, {SPACE, " "},
+		{TRAIL, ""}, {CRLF, "\r\n"}
+	};
+	test_validity(35, packet, testT, VALID_MSG, PRIVMSG);
+
+	/* Test 36 */
+	packet = "PRIVMSG    #canal    :hola\r\n";
+	testT = {
+		{WORD, "PRIVMSG"}, {SPACE, " "}, {PARAM, "#canal"}, {SPACE, " "},
+		{TRAIL, "hola"}, {CRLF, "\r\n"}
+	};
+	test_validity(36, packet, testT, VALID_MSG, PRIVMSG);
+
+	/* Test 37 */
+	packet = "TOPIC #a :literatura gótica \r\n";
+	testT = {
+		{WORD, "TOPIC"}, {SPACE, " "}, {PARAM, "#a"}, {SPACE, " "},
+		{TRAIL, "literatura gótica "}, {CRLF, "\r\n"}
+	};
+	test_validity(37, packet, testT, VALID_MSG, TOPIC);
+
+	/* Test 38 */
+	packet = "PRIVMSG #canal :hola\x07\r\n";
+	testT = {
+		{WORD, "PRIVMSG"}, {SPACE, " "}, {PARAM, "#canal"}, {SPACE, " "},
+		{TRAIL, "hola\x07"}, {CRLF, "\r\n"}
+	};
+	test_validity(38, packet, testT, VALID_MSG, PRIVMSG);
+
+	/* Test 39 */
+	packet = "PRIVMSG #canal :mañana ☀️\r\n";
+	testT = {
+		{WORD, "PRIVMSG"}, {SPACE, " "}, {PARAM, "#canal"}, {SPACE, " "},
+		{TRAIL, "mañana ☀️"}, {CRLF, "\r\n"}
+	};
+	test_validity(39, packet, testT, VALID_MSG, PRIVMSG);
+
+	/* Test 40 */
+	packet = "RATON #canal :buenos dias\r\n";
+	testT = {
+		{WORD, "RATON"}, {SPACE, " "}, {PARAM, "#canal"},{SPACE, " "},
+		{TRAIL, "buenos dias"}, {CRLF, "\r\n"}
+	};
+	test_validity(40, packet, testT, PERR_INVALID_COMMAND, COMMAND0);
+
+	/* Test 41 */
+	packet = "\r\n";
+	testT = {
+		{CRLF, "\r\n"}
+	};
+	test_validity(41, packet, testT, VALID_MSG, COMMAND0);
+
+	/* Test 42 */
+	packet = " \r\n";
+	testT = {
+		{SPACE, " "}, {CRLF, "\r\n"}
+	};
+	test_validity(42, packet, testT, PERR_MISSING_COMMAND, COMMAND0);
 }
+
