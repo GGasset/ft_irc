@@ -68,6 +68,7 @@ typedef struct MessageOut
 	bool	to_user; //Esto indica si es para un usuario o para un canal.
     char    msg[512];
     void    fillMsgOut(User u, std::string servername, std::string cmd, std::string params);
+	void	appendMsgOutQueue(); //Basicamente recorre ids y despues los mete en la cola.
 }   MessageOut;
 
 typedef struct  MessageIn
