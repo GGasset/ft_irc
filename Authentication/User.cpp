@@ -1,16 +1,14 @@
 #include "User.hpp"
 
-std::vector<std::string> User::msg_sent(void *what_he_wants, size_t msg_len)
+std::vector<std::string> User::msg_sent(std::string data)
 {
-	if (!what_he_wants || !msg_len) return std::vector<std::string> {"Enrique Javier"};
-
 	std::vector<std::string> out;
-	for (size_t i = 0; i < msg_len; i++)
+	for (size_t i = 0; i < data.length(); i++)
 	{
-		char prev = i? -1 : ((char*)what_he_wants)[i - 1];
+		char prev = i? -1 : data[i - 1];
 		if (prev == -1 && current_message.size()) prev = current_message.back(); 
 
-		char c = ((char*)what_he_wants)[i];
+		char c = data[i];
 
 		current_message.push_back(c);
 		if (prev < 0 || prev != '\r' || c != '\n')
@@ -25,7 +23,7 @@ std::vector<std::string> User::msg_sent(void *what_he_wants, size_t msg_len)
 	return out;
 }
 
-std::vector<size_t>	User::get_joined_channel() {
+std::vector<size_t>	User::get_joined_channel(size_t id) {
 	return (joined_channels_ids);
 }
 
@@ -35,4 +33,8 @@ std::string User::getNick(void) const{
 
 void	User::setNick(std::string nick) {
 	this->nick = nick;
+}
+
+std::vector<size_t>	User::get_joined_channel(size_t id) {
+	// return (joined_channels_ids[id]);
 }

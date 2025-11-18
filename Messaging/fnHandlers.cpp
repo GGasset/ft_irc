@@ -47,7 +47,8 @@ MessageOut handleNick(size_t clientId, MessageIn in, Server &server) {
     clients[clientId].setNick(nickname.str);
     std::string servername = "irc.local"; // Deberia ser el del servidor, extraido del archivo de configuracion.
     out.fillMsgOut(clients[clientId], servername, "NICK", nickname.str);
-    // out.id = Channels(client[ClientId]);
+    
+    out.id = clients[clientId].get_joined_channel();
     complete_registry(clients[clientId]);
     return (out);// Se supone que hay que mandarlo por el socket.
 }
