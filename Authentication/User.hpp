@@ -24,7 +24,10 @@ private:
 
 public:
 	std::string getNick(void) const;
-	std::vector<size_t>	get_joined_channel(size_t id);
+	std::string getUsername(void) const;
+	std::string getRealname(void) const;
+	size_t	get_joined_channel(size_t id);
+	std::vector<size_t>	get_joined_channels(void);
 	void	setNick(std::string nick);
 	std::string get_nick();
 	

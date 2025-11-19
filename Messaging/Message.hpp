@@ -83,8 +83,6 @@ class fnHandlers
 
 	public:
 		fnHandlers();
-		// fnHandlers(const fnHandlers &fn);
-		// fnHandlers	&operator=(const fnHandlers &fn);
 		~fnHandlers();
 		MessageOut	operator()(COMMAND cmd, MessageIn msg, Server& server);
 		
@@ -113,6 +111,7 @@ enum ParseStatus {
 };
 
 extern const std::string g_parseErrors[PERR_NONE];
+extern const std::vector<MessageOut> g_Handler_Queue;
 
 msgs getMsgs(std::string packet);
 std::string getSPACE(std::string &packet, size_t &beginSpace);
@@ -136,5 +135,13 @@ bool isValidUserName(const std::string &username);
 
 
 MessageIn   parseMessage(msgTokens tokens, ParseStatus &status);
+
+/* Utilidades de Manejadores */
+void    	complete_registry(User user);
+MessageOut  sendNumeric(const std::string user, size_t num);
+msgTokens   getPARAMS(msgTokens tokens);
+
+/* Manejadores */
+MessageOut handleNick(size_t clientId, MessageIn in, Server &server);
 
 #endif

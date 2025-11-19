@@ -23,7 +23,11 @@ std::vector<std::string> User::msg_sent(std::string data)
 	return out;
 }
 
-std::vector<size_t>	User::get_joined_channel(size_t id) {
+size_t	User::get_joined_channel(size_t id) {
+	return (joined_channels_ids[id]);
+}
+
+std::vector<size_t>	User::get_joined_channels(void) {
 	return (joined_channels_ids);
 }
 
@@ -35,6 +39,11 @@ void	User::setNick(std::string nick) {
 	this->nick = nick;
 }
 
-std::vector<size_t>	User::get_joined_channel(size_t id) {
-	// return (joined_channels_ids[id]);
+
+std::string User::getUsername(void) const {
+	return (username);
+}
+
+std::string User::getRealname(void) const {
+	return (realname);
 }

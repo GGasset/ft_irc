@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Message.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: alvmoral <alvmoral@student.42madrid.com    +#+  +:+       +#+        */
+/*   By: alvaro <alvaro@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/03 19:24:29 by alvmoral          #+#    #+#             */
-/*   Updated: 2025/11/17 17:39:11 by alvmoral         ###   ########.fr       */
+/*   Updated: 2025/11/19 14:02:19 by alvaro           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -171,22 +171,6 @@ msgTokens	msgTokenizer(std::string msg)
 		}
 	}
 	return (ret);
-}
-
-void	MessageOut::fillMsgOut(User u, std::string servername, std::string cmd, std::string params)
-{
-	(void) u;
-	std::string message = "";
-	/* 
-		Por cada id:
-			- Se construye el mensaje con Nick!user@nombre del servidor.
-			- cmd que es un numerito.
-			- Parametros que los mismo.
-	*/
-	for (size_t i = 0; i < ids.size(); i++) {
-		message += servername + cmd + params;
-		// send Algo.
-	}
 }
 
 MessageOut fnHandlers::operator()(COMMAND cmd, MessageIn msg, Server& server)
