@@ -3,8 +3,9 @@
 #include "Message.hpp"
 
 class Param {
-	virtual ~Param() {};
-	// virtual COMMAND command() const = 0
+	public:
+		virtual ~Param() {};
+		// virtual COMMAND command() const = 0
 };
 
 class NickParam: public Param {

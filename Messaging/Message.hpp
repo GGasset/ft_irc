@@ -1,6 +1,7 @@
 #ifndef MESSAGE_H
 # define MESSAGE_H 
 
+# include "Server.hpp"
 # include <iostream>
 # include <string>
 # include <string_view>
@@ -9,8 +10,9 @@
 # include <string.h>
 # include <ctype.h>
 # include <assert.h>
+#include <memory>
 # include "Param.hpp"
-# include "Server.hpp"
+# include "MessageOut.hpp"
 
 typedef std::vector<std::string> msgs;
 
@@ -62,16 +64,6 @@ enum COMMAND {
 	COMMAND0
 };
 
-// Please, make message a POD type 😵🤙
-typedef struct MessageOut
-{
-	std::vector<size_t>	ids; //Esto sirve para tanto chanels como usuarios.
-	bool	to_user; //Esto indica si es para un usuario o para un canal.
-    char    msg[512];
-    void    fillMsgOut(User u, std::string servername, std::string cmd, std::string params);
-	void	appendMsgOutQueue(); //Basicamente recorre ids y despues los mete en la cola.
-}   MessageOut;
-
 /* Clase que guarda la información del mensaje del cliente. */
 class MessageIn {
 	COMMAND cmd;
@@ -83,7 +75,7 @@ class MessageIn {
 		MessageIn& operator=(const MessageIn& other) {
 			if (this != &other) {
 				cmd = other.cmd;
-				client_id = other.client_id;
+				sender_id = other.sender_id;
 				// params = other.params; Estoy hay que verlo.
 			}
 			return (*this);
@@ -92,19 +84,19 @@ class MessageIn {
 		COMMAND	getCommand() {return (cmd);}
 		void	setCommand(COMMAND command) {cmd = command;}
 		msgTokens tokens;
-		size_t	client_id; //id del cliente que envia el mensaje
+		size_t	sender_id; //id del cliente que envia el mensaje
 };
 
-class fnHandlers
-{
-	MessageOut (*fun[COMMAND0])(size_t, MessageIn, Server&);
+// class fnHandlers
+// {
+// 	MessageOut (*fun[COMMAND0])(size_t, MessageIn, Server&);
 
-	public:
-		fnHandlers();
-		~fnHandlers();
-		MessageOut	operator()(COMMAND cmd, MessageIn msg, Server& server);
+// 	public:
+// 		fnHandlers();
+// 		~fnHandlers();
+// 		MessageOut	operator()(COMMAND cmd, MessageIn msg, Server& server);
 		
-};
+// };
 
 enum ParseStatus {
     VALID_MSG,
@@ -157,10 +149,10 @@ MessageIn   parseMessage(msgTokens tokens, ParseStatus &status);
 
 /* Utilidades de Manejadores */
 void    	complete_registry(User user);
-MessageOut  sendNumeric(const std::string user, size_t num);
+// MessageOut  sendNumeric(const std::string user, size_t num);
 msgTokens   getPARAMS(msgTokens tokens);
 
 /* Manejadores */
-MessageOut handleNick(size_t clientId, MessageIn in, Server &server);
+// MessageOut handleNick(size_t clientId, MessageIn in, Server &server);
 
 #endif
