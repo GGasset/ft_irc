@@ -77,7 +77,6 @@ class MessageIn {
 	COMMAND cmd;
 	// unique_ptr<Param>   *params;
 	Param   *params;
-	size_t	client_id; //id del cliente que envia el mensaje
 
 	public:
 		MessageIn(): cmd(COMMAND0) {}
@@ -93,6 +92,7 @@ class MessageIn {
 		COMMAND	getCommand() {return (cmd);}
 		void	setCommand(COMMAND command) {cmd = command;}
 		msgTokens tokens;
+		size_t	client_id; //id del cliente que envia el mensaje
 };
 
 class fnHandlers
