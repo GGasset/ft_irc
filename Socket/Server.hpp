@@ -1,3 +1,5 @@
+#pragma once
+
 #include <sys/epoll.h>
 #include <cstddef>
 #include <string>
@@ -11,7 +13,7 @@
 
 #define READ_SIZE 1
 
-int signal_server_stop;
+extern int signal_server_stop;
 
 class Server
 {

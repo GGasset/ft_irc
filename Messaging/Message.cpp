@@ -6,7 +6,7 @@
 /*   By: alvaro <alvaro@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/03 19:24:29 by alvmoral          #+#    #+#             */
-/*   Updated: 2025/11/19 14:02:19 by alvaro           ###   ########.fr       */
+/*   Updated: 2025/11/19 19:16:48 by alvaro           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -141,7 +141,7 @@ msgTokens	msgTokenizer(std::string msg)
 			if (param.find(",") != std::string::npos)
 				ret.push_back((msg_token) {COMMA_LIST, param});
 			else
-				ret.push_back((msg_token) {PARAM, param});
+				ret.push_back((msg_token) {TOK_PARAM, param});
 		}
 		else if (state == PRIX)
 		{

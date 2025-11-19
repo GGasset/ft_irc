@@ -14,7 +14,7 @@ Server::~Server()
 		close(client_fds[i]);
 		while (messages[i].size())
 		{
-			if (std::get<2>(messages[i].front())) delete[] std::get<0>(messages[i].front());
+			// if (std::get<2>(messages[i].front())) delete[] std::get<0>(messages[i].front());
 			messages[i].pop();
 		}
 	}
@@ -44,6 +44,7 @@ User &Server::get_user_by_nick(std::string nick)
 	for (size_t i = 0; i < clients.size(); i++) 
 		if (clients[i].get_id() != -1 && clients[i].get_nick() == nick)
 			return clients[i];	
+	return (clients[0]);
 }
 
 ssize_t Server::get_user_index_by_fd(int fd)

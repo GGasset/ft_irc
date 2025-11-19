@@ -1,15 +1,16 @@
 #ifndef MESSAGE_H
 # define MESSAGE_H 
 
+# include <iostream>
 # include <string>
-# include "string.h"
 # include <string_view>
 # include <vector>
 # include <cassert>
+# include <string.h>
 # include <ctype.h>
-# include <iostream>
-# include "Server.hpp"
 # include <assert.h>
+# include "Param.hpp"
+# include "Server.hpp"
 
 typedef std::vector<std::string> msgs;
 
@@ -21,7 +22,7 @@ enum msg_token_type
 	SPACE,
 	WORD,
 	NUMBER,
-	PARAM,
+	TOK_PARAM,
 	COMMA_LIST,
 	TRAIL,
 	CRLF
@@ -71,11 +72,28 @@ typedef struct MessageOut
 	void	appendMsgOutQueue(); //Basicamente recorre ids y despues los mete en la cola.
 }   MessageOut;
 
-typedef struct  MessageIn
-{
-	msgTokens	tokens;
-	COMMAND		cmd;
-}   MessageIn;
+/* Clase que guarda la información del mensaje del cliente. */
+class MessageIn {
+	COMMAND cmd;
+	// unique_ptr<Param>   *params;
+	Param   *params;
+	size_t	client_id; //id del cliente que envia el mensaje
+
+	public:
+		MessageIn(): cmd(COMMAND0) {}
+		MessageIn& operator=(const MessageIn& other) {
+			if (this != &other) {
+				cmd = other.cmd;
+				client_id = other.client_id;
+				// params = other.params; Estoy hay que verlo.
+			}
+			return (*this);
+		}
+
+		COMMAND	getCommand() {return (cmd);}
+		void	setCommand(COMMAND command) {cmd = command;}
+		msgTokens tokens;
+};
 
 class fnHandlers
 {
@@ -113,6 +131,7 @@ enum ParseStatus {
 extern const std::string g_parseErrors[PERR_NONE];
 extern const std::vector<MessageOut> g_Handler_Queue;
 
+/* Tokenizador */
 msgs getMsgs(std::string packet);
 std::string getSPACE(std::string &packet, size_t &beginSpace);
 std::string getTRAIL(std::string &packet, size_t &beginWord);
@@ -122,6 +141,7 @@ char iterStr(const std::string& str);
 msgTokens msgTokenizer(std::string msg);
 void newSPACE(msgTokens &ret, std::string &msg, size_t &begin);
 
+/* Parseo */
 COMMAND getCMD(const std::string &cmd);
 inline bool isCharInSet(char c, const std::string& set);
 inline bool isInNospcrlfcl(const std::string& str);
@@ -132,7 +152,6 @@ bool isValidHostName(const std::string &hostaname);
 bool isValidNickName(const std::string &nickname); 
 bool isValidServerName(const std::string& name);
 bool isValidUserName(const std::string &username);
-
 
 MessageIn   parseMessage(msgTokens tokens, ParseStatus &status);
 

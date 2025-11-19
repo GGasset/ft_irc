@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   parseroMessage.cpp                                 :+:      :+:    :+:   */
+/*   parserMessage.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: alvmoral <alvmoral@student.42madrid.com    +#+  +:+       +#+        */
+/*   By: alvaro <alvaro@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/03 19:24:23 by alvmoral          #+#    #+#             */
-/*   Updated: 2025/11/17 17:42:02 by alvmoral         ###   ########.fr       */
+/*   Updated: 2025/11/19 19:31:31 by alvaro           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -234,7 +234,7 @@ ParseStatus	checkCommand(MessageIn &ret, const msgTokens &tokens, size_t &i) {
 			&& command.type != NUMBER
 			&& command.type != CRLF)
 		return (PERR_MISSING_COMMAND);
-	ret.cmd = ret_cmd;
+	ret.setCommand(ret_cmd);
 	return (VALID_MSG);
 }
 
@@ -267,7 +267,9 @@ ParseStatus	checkLenMsg(const msgTokens &tokens) {
 }
 
 MessageIn   parseMessage(msgTokens tokens, ParseStatus &status) {
-    MessageIn   ret = {.tokens = tokens, .cmd = COMMAND0};
+	MessageIn	ret;
+	
+	ret.tokens = tokens;
 	size_t		i = 0;
 
 	status = checkLenMsg(tokens);

@@ -31,7 +31,15 @@ std::vector<size_t>	User::get_joined_channels(void) {
 	return (joined_channels_ids);
 }
 
-std::string User::getNick(void) const{
+ssize_t User::get_id() {
+	return (id);
+}
+
+void User::set_id(ssize_t id) {
+	this->id = id;
+}
+
+std::string User::get_nick(void) const{
 	return (nick);
 }
 
