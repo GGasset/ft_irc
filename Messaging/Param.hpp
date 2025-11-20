@@ -4,6 +4,7 @@
 
 class Param {
 	public:
+		
 		virtual ~Param() {};
 		// virtual COMMAND command() const = 0
 };

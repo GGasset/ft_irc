@@ -23,11 +23,11 @@ class UsersTarget : public MessageTarget {
 				ids = other.ids;
 			return (*this);
 		}
-		void	get_ids_from_users(std::vector<User&> uvec) {
-			ids.clear();
-			for (int i = 0; i < uvec.size(); i++)
-				ids.push_back(uvec[i].get_id());
-		}
+		// void	get_ids_from_users(std::vector<User&> uvec) {
+		// 	ids.clear();
+		// 	for (int i = 0; i < uvec.size(); i++)
+		// 		ids.push_back(uvec[i].get_id());
+		// }
 		void	deliver(void *msg) {
 			if (!msg)
 				return ;
@@ -53,10 +53,10 @@ class ChannelTarget : public MessageTarget {
 				return ;
 			for (int i = 0; i < ids.size(); i++) {
 				// ch = server.get_channel_by_id(ids[i]);
-				std::vector<size_t> channel_users;
-				UsersTarget u(server, channel_users);
-				u.get_ids_from_users(server.get_channel_users(ch));
-				u.deliver(msg);
+				// std::vector<size_t> channel_users;
+				// UsersTarget u(server, channel_users);
+				// u.get_ids_from_users(server.get_channel_users(ch)); Menuedo cipote.
+				// u.deliver(msg);
 			}
 		}
 
@@ -64,37 +64,64 @@ class ChannelTarget : public MessageTarget {
 
 class MessageOut
 {
-	/* 	std::string prefix; //esto sirve tanto para rpl como para forwarding
-		std::string command; //esto sirve para numeric como para forwarding 
-	*/
-	char		msg[512]; //El mensaje que se serializa para mandar a GG.
-	Param		*param; // unique_ptr<Param>   *params;
-	std::unique_ptr<MessageTarget>	*target; //target envía indistintamente para canales como para usuarios.
-	virtual void	serialize() = 0;
-	virtual void	fill_prefix() = 0; //Servername ó n!u@h
+	protected:
+		Server		&server;
+		std::string	prefix;
+		char		msg[512]; //El mensaje que se serializa para mandar a GG.
+		Param		*param;
+		MessageTarget	*target; //target envía indistintamente para canales como para usuarios.
+		virtual void	serialize() = 0;
+		virtual void	fill_prefix() = 0; //Servername ó n!u@h
 
 	public:
-		MessageOut() {}
-		MessageOut(Param *param): param(param) {}
-		MessageOut	operator=(const MessageOut& other);
+		size_t	sender_id; //id del cliente que envia el mensaje
+		MessageOut(Server &server): server(server) {}
+		MessageOut(Server &server, Param *param): server(server), param(param) {}
+		// MessageOut	&operator=(const MessageOut& other);
 		virtual	~MessageOut() = 0;
 		void	*get_msg();
-		void	setTarget(std::unique_ptr<MessageTarget> target);
+		void	setTarget(std::unique_ptr<MessageTarget> *target);
+		void	deliver() {target->deliver(msg);}
 };
 
 class NumericReply: virtual public MessageOut {
-	unsigned int code; //Para no tener que comprobar si es alfanumerico. Solo se comprueba rango 001-552
+	protected:
+		unsigned int code; //Para no tener que comprobar si es alfanumerico. Solo se comprueba rango 001-552
+
+		void	fill_prefix() {
+			// prefix = server.getServerName(); Nombre del archivo de configuración
+		}
 
 	public:
-		NumericReply(unsigned int code, Param *param): MessageOut(param),
-													   code(code) {}
+		NumericReply(Server &server, unsigned int code, Param *param): MessageOut(server, param),
+													   				   code(code) {}
+		~NumericReply() {}
+};
 
+class RplWelcome: public NumericReply {
+	void	serialize() {
+		std::string welcome_msg = "Welcome to the Internet Relay Network ";
+		User u = server.getUsers()[sender_id];
+		std::string user_data = u.get_nick() + "!" + u.getUsername() + "@"; //+ u.getHostname;
+		welcome_msg += user_data;
+		memcpy(msg, welcome_msg.c_str(), welcome_msg.length());
+	}
+
+	public:
+		RplWelcome(Server &server, Param *param): MessageOut(server, param),
+												  NumericReply(server, 1, param) {}
+		~RplWelcome() {}
 };
 
 class ForwardedCommand: virtual public MessageOut {
 	Param	*param;
 
+	void	fill_prefix() {
+		User u = server.getUsers()[sender_id];
+		prefix = u.get_nick() + "!" + u.getUsername() + "@"; //+ u.getHostname;
+	}
+
 	public:
-		ForwardedCommand(Param *param): MessageOut(param) {}
+		ForwardedCommand(Server &server, Param *param): MessageOut(server, param) {}
 
 };
