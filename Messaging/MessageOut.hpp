@@ -99,6 +99,7 @@ class NumericReply: virtual public MessageOut {
 			fill_prefix();
 			assemble_msg();
 			rpl_msg = prefix +  " " + codetoa() + rpl_msg;
+			memcpy(msg, rpl_msg.c_str(), rpl_msg.length());
 		}
 
 	public:
@@ -122,7 +123,7 @@ class ErrErroneusNickname: public NumericReply {
 
 	public:
 		ErrErroneusNickname(Server &server, NickParam *param): MessageOut(server),
-															  NumericReply(server, 1),
+															  NumericReply(server, 432),
 															  np(param) {}
 		~ErrErroneusNickname() {}
 };
@@ -135,20 +136,76 @@ class ErrNoNicknamegiven: public NumericReply {
 	}
 	public:
 		ErrNoNicknamegiven(Server &server, NickParam *param): MessageOut(server),
-															  NumericReply(server, 1),
+															  NumericReply(server, 431),
 															  np(param) {}
 		~ErrNoNicknamegiven() {}
 };
 
-class ForwardedCommand: virtual public MessageOut {
-	Param	*param;
+class ErrNicknameInUse: public NumericReply {
+	NickParam *np;
 
-	void	fill_prefix() {
-		User u = server.getUsers()[sender_id];
-		prefix = u.get_nick() + "!" + u.getUsername() + "@"; //+ u.getHostname;
+	void	assemble_msg() {
+		std::string nickname = np->nickname;
+		rpl_msg = nickname + " :Nickname is already in use";
 	}
-
 	public:
-		ForwardedCommand(Server &server, Param *param): MessageOut(server) {}
-
+		ErrNicknameInUse(Server &server, NickParam *param): MessageOut(server),
+															  NumericReply(server, 433),
+															  np(param) {}
+		~ErrNicknameInUse() {}
 };
+
+class ErrUnavailResource: public NumericReply {
+	NickParam 	*np;
+	std::string	name;
+
+	void	assemble_msg() {
+		rpl_msg = name + " :Nick/channel is temporarily unavailable";
+	}
+	public:
+		ErrUnavailResource(Server &server, NickParam *param): MessageOut(server),
+															  NumericReply(server, 437),
+															  np(param),
+															  name(param->nickname) {}
+		/* ..... Se ha de overridear para todos los Comandos que lo utilizen.  */
+		~ErrUnavailResource() {}
+};
+
+class ErrRestricted: public NumericReply {
+	NickParam *np;
+
+	void	assemble_msg() {
+		std::string nickname = np->nickname;
+		rpl_msg = nickname + " :Nickname is already in use";
+	}
+	public:
+		ErrRestricted(Server &server, NickParam *param): MessageOut(server),
+															  NumericReply(server, 484),
+															  np(param) {}
+		~ErrRestricted() {}
+};
+
+class NumericReplyFactory {
+	Server	&server;
+	public:
+		NumericReplyFactory(Server &server): server(server) {}
+
+		ErrErroneusNickname *makeErrErroneusNickname(NickParam* param) {return new ErrErroneusNickname(server, param);}
+		ErrNoNicknamegiven *makeErrNoNicknamegiven(NickParam* param) {return new ErrNoNicknamegiven(server, param);};
+		ErrNicknameInUse *makeErrNicknameInUse(NickParam* param) {return new ErrNicknameInUse(server, param);};
+		ErrUnavailResource *makeErrUnavailResource(NickParam* param) {return new ErrUnavailResource(server, param);};
+		ErrRestricted *makeErrRestricted(NickParam* param) {return new ErrRestricted(server, param);};
+};
+
+// class ForwardedCommand: virtual public MessageOut {
+// 	Param	*param;
+
+// 	void	fill_prefix() {
+// 		User u = server.getUsers()[sender_id];
+// 		prefix = u.get_nick() + "!" + u.getUsername() + "@"; //+ u.getHostname;
+// 	}
+
+// 	public:
+// 		ForwardedCommand(Server &server, Param *param): MessageOut(server) {}
+
+// };

@@ -19,12 +19,12 @@ void	NickParam::validateParam() {
 
 NumericReply NickParam::mapSyntaxErrorToNumeric(int errCode) {
 	//  switch (errCode) {
-		// case ERR_ERRONEUSNICKNAME:
-		// 	return replyFactory.makeErrBadChannelMask(user, e.detail());
+	// 	case ERR_ERRONEUSNICKNAME:
+	// 		return replyFactory.makeErrNoNicknamegiven(user, e.detail());
 
-		// case ERR_NONICKNAMEGIVEN:
-		// 	return replyFactory.makeErrErroneousNickname(user, e.detail());
-		// default:
-		// 	return replyFactory.makeErrUnknownCommand(user, commandToString(cmd));
+	// 	case ERR_NONICKNAMEGIVEN:
+	// 		return replyFactory.makeErrErroneousNickname(user, e.detail());
+	// 	default:
+	// 		return replyFactory.makeErrUnknownCommand(user, commandToString(cmd));
 	// }
 }

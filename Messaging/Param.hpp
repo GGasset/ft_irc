@@ -46,22 +46,22 @@ class NickParam: public Param {
 		}
 };
 
-// class UserParam: public Param {
-// 	std::string nickname;
-// 	std::string realname;
-// 	std::string username;
-// 	std::string hostname;
-// 	// std::string servername;
+class UserParam: public Param {
+	std::string nickname;
+	std::string realname;
+	std::string username;
+	std::string hostname;
+	// std::string servername;
 
-// 	public:
-// 		UserParam(msgTokens tokens);
-// 		~UserParam() {}
-// 		UserParam& operator=(const UserParam& other) {
-// 			if (this != &other)
-// 				nickname = other.nickname;
-// 				username = other.username;
-// 				realname = other.realname;
-// 				hostname = other.hostname;
-// 			return (*this);
-// 		}
-// };
+	public:
+		UserParam(msgTokens tokens);
+		~UserParam() {}
+		UserParam& operator=(const UserParam& other) {
+			if (this != &other)
+				nickname = other.nickname;
+				username = other.username;
+				realname = other.realname;
+				hostname = other.hostname;
+			return (*this);
+		}
+};

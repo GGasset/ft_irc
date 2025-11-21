@@ -9,13 +9,6 @@ msgTokens   getPARAMS(msgTokens tokens) {
     return (params);
 }
 
-// MessageOut  sendNumeric(const std::string user, size_t num) {
-//     const char  *raton = user.c_str();
-//     MessageOut  out;
-//     memcpy(out.msg, raton, strlen(raton));
-//     return (out);
-// }
-
 void    complete_registry(User user) {
     if (!user.getNick().empty()
     && !user.getUsername().empty()

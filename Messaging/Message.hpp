@@ -41,16 +41,16 @@ class MessageIn {
 		size_t	sender_id; //id del cliente que envia el mensaje
 };
 
-// class fnHandlers
-// {
-// 	MessageOut (*fun[COMMAND0])(size_t, MessageIn, Server&);
+class fnHandlers
+{
+	MessageOut (*fun[COMMAND0])(size_t, MessageIn, Server&);
 
-// 	public:
-// 		fnHandlers();
-// 		~fnHandlers();
-// 		MessageOut	operator()(COMMAND cmd, MessageIn msg, Server& server);
+	public:
+		fnHandlers();
+		~fnHandlers();
+		MessageOut	operator()(COMMAND cmd, MessageIn msg, Server& server);
 		
-// };
+};
 
 enum ParseStatus {
     VALID_MSG,
