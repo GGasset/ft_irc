@@ -1,14 +1,5 @@
 #include "fnHandlers.hpp"
 
-msgTokens   getPARAMS(msgTokens tokens) {
-    msgTokens::iterator iter = tokens.begin();
-    msgTokens params = tokens;
-    params.erase(iter, iter + 1);
-    if (params[0].type == WORD || params[0].type == NUMBER)
-        params.erase(iter, iter + 1);
-    return (params);
-}
-
 void    complete_registry(User user) {
     if (!user.getNick().empty()
     && !user.getUsername().empty()
@@ -20,9 +11,18 @@ void    complete_registry(User user) {
     }
 }
 
+MessageOut *handleNick(MessageIn in, Server &server) {
+
+}
+
+
 fnHandlers::fnHandlers() {
-    // fun[NICK] = handleNick;
+    fun[NICK] = handleNick;
     //Asi con todos ...
+}
+
+MessageOut  *fnHandlers::operator()(COMMAND cmd, MessageIn in, Server& server) {
+    return (fun[cmd](in, server));
 }
 
 fnHandlers::~fnHandlers() {
