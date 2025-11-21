@@ -1,5 +1,7 @@
 #include "Param.hpp"
 
+Param::~Param() {}
+
 NickParam::NickParam(msgTokens tokens): Param(NICK, tokens) {}
 
 void	NickParam::validateParam() {
@@ -18,19 +20,19 @@ void	NickParam::validateParam() {
 		throw BadSyntax(NICK, ERR_ERRONEUSNICKNAME);
 }
 
-NumericReply *NickParam::mapSyntaxErrorToNumeric(int errCode, NumericReplyFactory replyFactory) {
-	 switch (errCode) {
-		case ERR_ERRONEUSNICKNAME:
-			return replyFactory.makeErrNoNicknamegiven(this);
+// NumericReply *NickParam::mapSyntaxErrorToNumeric(int errCode, NumericReplyFactory replyFactory) {
+// 	 switch (errCode) {
+// 		case ERR_ERRONEUSNICKNAME:
+// 			return replyFactory.makeErrNoNicknamegiven(this);
 
-		case ERR_NONICKNAMEGIVEN:
-			return replyFactory.makeErrErroneusNickname(this);
-		case ERR_GENERIC:
-			return replyFactory.makeErrUnknownCommand();
-		default:
-			return (NULL);
-	}
-}
+// 		case ERR_NONICKNAMEGIVEN:
+// 			return replyFactory.makeErrErroneusNickname(this);
+// 		case ERR_GENERIC:
+// 			return replyFactory.makeErrUnknownCommand();
+// 		default:
+// 			return (NULL);
+// 	}
+// }
 
 
 UserParam::UserParam(msgTokens tokens): Param(USER, tokens) {}
@@ -61,16 +63,16 @@ void	UserParam::validateParam() {
 	}
 }
 
-NumericReply *UserParam::mapSyntaxErrorToNumeric(int errCode, NumericReplyFactory replyFactory) {
-	 switch (errCode) {
-		case ERR_NEEDMOREPARAMS:
-			return replyFactory.makeErrNeedMoreParams(this);
-		case ERR_GENERIC:
-			return replyFactory.makeErrUnknownCommand();
-		default:
-			return (NULL);
-	}
-}
+// NumericReply *UserParam::mapSyntaxErrorToNumeric(int errCode, NumericReplyFactory replyFactory) {
+// 	 switch (errCode) {
+// 		case ERR_NEEDMOREPARAMS:
+// 			return replyFactory.makeErrNeedMoreParams(this);
+// 		case ERR_GENERIC:
+// 			return replyFactory.makeErrUnknownCommand();
+// 		default:
+// 			return (NULL);
+// 	}
+// }
 
 PassParam::PassParam(msgTokens tokens): Param(PASS, tokens) {}
 
@@ -89,14 +91,40 @@ void	PassParam::validateParam() {
 		throw BadSyntax(PASS, ERR_NEEDMOREPARAMS);
 }
 
-NumericReply *PassParam::mapSyntaxErrorToNumeric(int errCode, NumericReplyFactory replyFactory) {
-	 switch (errCode) {
-		case ERR_NEEDMOREPARAMS:
-			return replyFactory.makeErrNeedMoreParams(this);
-		case ERR_GENERIC:
-			return replyFactory.makeErrUnknownCommand();
-		default:
-			return (NULL);
+// NumericReply *PassParam::mapSyntaxErrorToNumeric(int errCode, NumericReplyFactory replyFactory) {
+// 	 switch (errCode) {
+// 		case ERR_NEEDMOREPARAMS:
+// 			return replyFactory.makeErrNeedMoreParams(this);
+// 		case ERR_GENERIC:
+// 			return replyFactory.makeErrUnknownCommand();
+// 		default:
+// 			return (NULL);
+// 	}
+// }
+
+PingPongParam::PingPongParam(msgTokens tokens): Param(PING, tokens) {}
+
+void	PingPongParam::validateParam() {
+	int i = 0;
+
+	for (i = 0; i < tokens.size(); i++) {
+		if (tokens[i].type == PREFIX
+			|| tokens[i].type == WORD
+			|| tokens[i].type == NUMBER
+			|| tokens[i].type == SPACE)
+			continue ;	
 	}
+	if (tokens[i].type == CRLF)
+		throw BadSyntax(PING, ERR_NOORIGIN);
 }
 
+// NumericReply	*PingPongParam::mapSyntaxErrorToNumeric(int errCode, NumericReplyFactory replyFactory) {
+// 	 switch (errCode) {
+// 		case ERR_NOORIGIN:
+// 			return replyFactory.makeErrNoOrigin(this);
+// 		case ERR_GENERIC:
+// 			return replyFactory.makeErrUnknownCommand();
+// 		default:
+// 			return (NULL);
+// 	}
+// }

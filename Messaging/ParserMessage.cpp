@@ -1,16 +1,16 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   parserMessage.cpp                                  :+:      :+:    :+:   */
+/*   ParserMessage.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: alvaro <alvaro@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/03 19:24:23 by alvmoral          #+#    #+#             */
-/*   Updated: 2025/11/21 13:14:26 by alvaro           ###   ########.fr       */
+/*   Updated: 2025/11/21 20:37:17 by alvaro           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "Message.hpp"
+#include "ParserMessage.hpp"
 
 const std::string g_parseErrors[PERR_NONE] = {
     "Valid message",
@@ -133,7 +133,7 @@ inline bool isSpecialChar(char c)
 	return isCharInSet(c, SPECIAL_CHARS);
 }
 
-inline bool isUserChar(char c)
+bool isUserChar(char c)
 {
 	return isCharInSet(c, USERCHARS);
 }
