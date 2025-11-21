@@ -1,19 +1,43 @@
 #pragma once
 
+#include "LexerMessage.hpp"
 #include "Message.hpp"
 
+class NumericReply;  // ← FORWARD DECLARATION
+
 class Param {
+	protected:
+		COMMAND		cmd;
+		msgTokens	tokens;
+
 	public:
 		
-		virtual ~Param() {};
-		// virtual COMMAND command() const = 0
+		Param(COMMAND cmd, msgTokens tokens): cmd(cmd), tokens(tokens) {}
+		virtual ~Param() = 0;
+		COMMAND command() const {return cmd;}
+
+		class BadSyntax: public std::exception {
+			COMMAND cmd;
+			int		errCode;
+			
+			public:
+				BadSyntax(COMMAND cmd, int errCode): cmd(cmd), errCode(errCode) {}
+				int	getErrCode() {return (errCode);}
+		};
+		virtual NumericReply	mapSyntaxErrorToNumeric(int errorCode) const = 0;
+		virtual void			validateParam() = 0; //Si algun error sintactico, esto lanza excep.
 };
 
 class NickParam: public Param {
-	std::string nickname;
-
+	
 	public:
-		NickParam(std::string nickname): nickname(nickname) {}
+		std::string nickname;
+
+		enum SyntaxError {
+			ERR_ERRONEUSNICKNAME,
+			ERR_NONICKNAMEGIVEN
+		};
+		NickParam(msgTokens tokens);
 		~NickParam() {}
 		NickParam& operator=(const NickParam& other) {
 			if (this != &other)
@@ -22,29 +46,22 @@ class NickParam: public Param {
 		}
 };
 
-class UserParam: public Param {
-	std::string nickname;
-	std::string realname;
-	std::string username;
-	std::string hostname;
-	// std::string servername;
+// class UserParam: public Param {
+// 	std::string nickname;
+// 	std::string realname;
+// 	std::string username;
+// 	std::string hostname;
+// 	// std::string servername;
 
-	public:
-		UserParam(std::string nickname,
-				  std::string username,
-				  std::string realname,
-				  std::string hostname): nickname(nickname),
-										 username(username),
-										 realname(realname),
-										 hostname(hostname) {}
-
-		~UserParam() {}
-		UserParam& operator=(const UserParam& other) {
-			if (this != &other)
-				nickname = other.nickname;
-				username = other.username;
-				realname = other.realname;
-				hostname = other.hostname;
-			return (*this);
-		}
-};
+// 	public:
+// 		UserParam(msgTokens tokens);
+// 		~UserParam() {}
+// 		UserParam& operator=(const UserParam& other) {
+// 			if (this != &other)
+// 				nickname = other.nickname;
+// 				username = other.username;
+// 				realname = other.realname;
+// 				hostname = other.hostname;
+// 			return (*this);
+// 		}
+// };

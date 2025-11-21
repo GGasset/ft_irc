@@ -1,6 +1,8 @@
 #pragma once
 
 #include "Message.hpp"
+#include <sstream>
+#include <iomanip>
 
 class MessageTarget {
 	protected:
@@ -65,22 +67,22 @@ class ChannelTarget : public MessageTarget {
 class MessageOut
 {
 	protected:
-		Server		&server;
-		std::string	prefix;
-		char		msg[512]; //El mensaje que se serializa para mandar a GG.
-		Param		*param;
+		Server			&server;
+		std::string		prefix;
+		char			msg[512]; //El mensaje que se serializa para mandar a GG.
+		std::string		rpl_msg;
 		MessageTarget	*target; //target envía indistintamente para canales como para usuarios.
+		virtual void	assemble_msg() = 0;
 		virtual void	serialize() = 0;
 		virtual void	fill_prefix() = 0; //Servername ó n!u@h
 
 	public:
 		size_t	sender_id; //id del cliente que envia el mensaje
 		MessageOut(Server &server): server(server) {}
-		MessageOut(Server &server, Param *param): server(server), param(param) {}
 		// MessageOut	&operator=(const MessageOut& other);
 		virtual	~MessageOut() = 0;
 		void	*get_msg();
-		void	setTarget(std::unique_ptr<MessageTarget> *target);
+		void	setTarget(MessageTarget *target);
 		void	deliver() {target->deliver(msg);}
 };
 
@@ -90,27 +92,52 @@ class NumericReply: virtual public MessageOut {
 
 		void	fill_prefix() {
 			// prefix = server.getServerName(); Nombre del archivo de configuración
+			prefix = "irc.local";
+		}
+
+		void	serialize() {
+			fill_prefix();
+			assemble_msg();
+			rpl_msg = prefix +  " " + codetoa() + rpl_msg;
 		}
 
 	public:
-		NumericReply(Server &server, unsigned int code, Param *param): MessageOut(server, param),
-													   				   code(code) {}
+		NumericReply(Server &server, unsigned int code): MessageOut(server),
+													   				code(code) {}
 		~NumericReply() {}
+		std::string	codetoa() {
+			std::ostringstream ss;
+			ss << std::setw(3) << std::setfill('0') << code;
+			return ss.str();
+		}
 };
 
-class RplWelcome: public NumericReply {
-	void	serialize() {
-		std::string welcome_msg = "Welcome to the Internet Relay Network ";
-		User u = server.getUsers()[sender_id];
-		std::string user_data = u.get_nick() + "!" + u.getUsername() + "@"; //+ u.getHostname;
-		welcome_msg += user_data;
-		memcpy(msg, welcome_msg.c_str(), welcome_msg.length());
+class ErrErroneusNickname: public NumericReply {
+	NickParam *np;
+
+	void	assemble_msg() {
+		std::string nickname = np->nickname;
+		rpl_msg = nickname + " :Erroneous nickname";
 	}
 
 	public:
-		RplWelcome(Server &server, Param *param): MessageOut(server, param),
-												  NumericReply(server, 1, param) {}
-		~RplWelcome() {}
+		ErrErroneusNickname(Server &server, NickParam *param): MessageOut(server),
+															  NumericReply(server, 1),
+															  np(param) {}
+		~ErrErroneusNickname() {}
+};
+
+class ErrNoNicknamegiven: public NumericReply {
+	NickParam *np;
+
+	void	assemble_msg() {
+		rpl_msg = ":No nickname given";
+	}
+	public:
+		ErrNoNicknamegiven(Server &server, NickParam *param): MessageOut(server),
+															  NumericReply(server, 1),
+															  np(param) {}
+		~ErrNoNicknamegiven() {}
 };
 
 class ForwardedCommand: virtual public MessageOut {
@@ -122,6 +149,6 @@ class ForwardedCommand: virtual public MessageOut {
 	}
 
 	public:
-		ForwardedCommand(Server &server, Param *param): MessageOut(server, param) {}
+		ForwardedCommand(Server &server, Param *param): MessageOut(server) {}
 
 };
