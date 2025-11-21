@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Param.hpp"
-// #include "Message.hpp"
 #include <sstream>
 #include <iomanip>
 
@@ -126,7 +125,7 @@ class ErrErroneousNickname: public NumericReply {
 
 	public:
 		ErrErroneousNickname(Server &server, NickParam *param): MessageOut(server),
-															  NumericReply(server, 432),
+															  NumericReply(server, ERR_ERRONEUSNICKNAME),
 															  np(param) {}
 		~ErrErroneousNickname() {}
 };
@@ -139,7 +138,7 @@ class ErrNoNicknamegiven: public NumericReply {
 	}
 	public:
 		ErrNoNicknamegiven(Server &server, NickParam *param): MessageOut(server),
-															  NumericReply(server, 431),
+															  NumericReply(server, ERR_NONICKNAMEGIVEN),
 															  np(param) {}
 		~ErrNoNicknamegiven() {}
 };
@@ -153,7 +152,7 @@ class ErrNicknameInUse: public NumericReply {
 	}
 	public:
 		ErrNicknameInUse(Server &server, NickParam *param): MessageOut(server),
-															  NumericReply(server, 433),
+															  NumericReply(server, ERR_NICKNAMEINUSE),
 															  np(param) {}
 		~ErrNicknameInUse() {}
 };
@@ -167,7 +166,7 @@ class ErrUnavailResource: public NumericReply {
 	}
 	public:
 		ErrUnavailResource(Server &server, NickParam *param): MessageOut(server),
-															  NumericReply(server, 437),
+															  NumericReply(server, ERR_UNAVAILRESOURCE),
 															  np(param),
 															  name(param->nickname) {}
 		/* ..... Se ha de overridear para todos los Comandos que lo utilizen.  */
@@ -182,14 +181,9 @@ class ErrNeedMoreParams: public NumericReply {
 		rpl_msg = commandname + " :Not enough parameters";
 	}
 	public:
-		ErrNeedMoreParams(Server &server, UserParam *param): MessageOut(server),
-															  NumericReply(server, 461),
-															  p(param),
-															  commandname("USER") {}
-		ErrNeedMoreParams(Server &server, PassParam *param): MessageOut(server),
-															  NumericReply(server, 461),
-															  p(param),
-															  commandname("PASS") {}
+		ErrNeedMoreParams(Server &server, COMMAND commmand): MessageOut(server),
+															  NumericReply(server, ERR_NEEDMOREPARAMS),
+															  commandname(commandname) {}
 		/* ..... Se ha de overridear para todos los Comandos que lo utilizen.  */
 		~ErrNeedMoreParams() {}
 };
@@ -203,7 +197,7 @@ class ErrRestricted: public NumericReply {
 	}
 	public:
 		ErrRestricted(Server &server, NickParam *param): MessageOut(server),
-															  NumericReply(server, 484),
+															  NumericReply(server, ERR_RESTRICTED),
 															  np(param) {}
 		~ErrRestricted() {}
 };
@@ -216,10 +210,10 @@ class ErrAlredyRegistered: public NumericReply {
 	}
 	public:
 		ErrAlredyRegistered(Server &server, UserParam *param): MessageOut(server),
-															  NumericReply(server, 462),
+															  NumericReply(server, ERR_ALREADYREGISTRED),
 															  p(param) {}
 		ErrAlredyRegistered(Server &server, PassParam *param): MessageOut(server),
-															   NumericReply(server, 462),
+															   NumericReply(server, ERR_ALREADYREGISTRED),
 															   p(param) {}
 		~ErrAlredyRegistered() {}
 };
@@ -232,7 +226,7 @@ class ErrNoOrigin: public NumericReply {
 	}
 	public:
 		ErrNoOrigin(Server &server, PingPongParam *param): MessageOut(server),
-													   NumericReply(server, 409),
+													   NumericReply(server, ERR_NOORIGIN),
 													   pip(param) {}
 		~ErrNoOrigin() {}
 };
@@ -245,7 +239,7 @@ class ErrNoSuchServer: public NumericReply {
 	}
 	public:
 		ErrNoSuchServer(Server &server, PingPongParam *param): MessageOut(server),
-													   NumericReply(server, 402),
+													   NumericReply(server, ERR_NOSUCHSERVER),
 													   pip(param) {}
 		~ErrNoSuchServer() {}
 };
@@ -263,6 +257,8 @@ class ErrUnknownCommand: public NumericReply {
 class NumericReplyFactory {
 	Server	&server;
 	public:
+
+		NumericReply *create(ReplyCode code, Param *param);
 		NumericReplyFactory(Server &server): server(server) {}
 
 		ErrErroneousNickname	*makeErrErroneusNickname(NickParam* param) {return new ErrErroneousNickname(server, param);}
@@ -271,8 +267,7 @@ class NumericReplyFactory {
 		ErrUnavailResource		*makeErrUnavailResource(NickParam* param) {return new ErrUnavailResource(server, param);};
 		ErrRestricted			*makeErrRestricted(NickParam* param) {return new ErrRestricted(server, param);};
 		/* NeedMoreParams */
-		ErrNeedMoreParams		*makeErrNeedMoreParams(UserParam *param) {return new ErrNeedMoreParams(server, param);}
-		ErrNeedMoreParams		*makeErrNeedMoreParams(PassParam *param) {return new ErrNeedMoreParams(server, param);}
+		ErrNeedMoreParams		*makeErrNeedMoreParams(Param *param) {return new ErrNeedMoreParams(server, param->command());}
 		/* Fin NeedMoreParams */
 		ErrAlredyRegistered		*makeErrAlredyRegistered(UserParam *param) {return new ErrAlredyRegistered(server, param);}
 		ErrNoOrigin				*makeErrNoOrigin(PingPongParam *param) {return new ErrNoOrigin(server, param);}
@@ -280,15 +275,15 @@ class NumericReplyFactory {
 		ErrUnknownCommand		*makeErrUnknownCommand() {return new ErrUnknownCommand(server);}
 };
 
-// class ForwardedCommand: virtual public MessageOut {
-// 	Param	*param;
+class ForwardedCommand: virtual public MessageOut {
+	Param	*param;
 
-// 	void	fill_prefix() {
-// 		User u = server.getUsers()[sender_id];
-// 		prefix = u.get_nick() + "!" + u.getUsername() + "@"; //+ u.getHostname;
-// 	}
+	void	fill_prefix() {
+		User u = server.getUsers()[sender_id];
+		prefix = u.get_nick() + "!" + u.getUsername() + "@"; //+ u.getHostname;
+	}
 
-// 	public:
-// 		ForwardedCommand(Server &server, Param *param): MessageOut(server) {}
+	public:
+		ForwardedCommand(Server &server, Param *param): MessageOut(server) {}
 
-// };
+};

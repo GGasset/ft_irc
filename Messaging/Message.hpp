@@ -24,6 +24,7 @@ void newSPACE(msgTokens &ret, std::string &msg, size_t &begin);
 
 /* Parser */
 COMMAND getCMD(const std::string &cmd);
+std::string	getCommandname(COMMAND cmd);
 inline bool isCharInSet(char c, const std::string& set);
 inline bool isInNospcrlfcl(const std::string& str);
 inline bool isInNospcrlfclTRAIL(const std::string& str);

@@ -6,7 +6,7 @@
 /*   By: alvaro <alvaro@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/03 19:24:23 by alvmoral          #+#    #+#             */
-/*   Updated: 2025/11/21 20:37:17 by alvaro           ###   ########.fr       */
+/*   Updated: 2025/11/21 22:37:26 by alvaro           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,6 +65,41 @@ COMMAND getCMD(const std::string &cmd) {
         return NAMES;
 	else
 		return COMMAND0;
+}
+
+std::string	getCommandname(COMMAND cmd) {
+	if (cmd == NICK)
+        return "NICK";
+    else if (cmd == USER)
+        return "USER";
+    else if (cmd == PING)
+        return "PING";
+    else if (cmd == PONG)
+        return "PONG";
+    else if (cmd == PASS)
+        return "PASS";
+    else if (cmd == QUIT)
+        return "QUIT";
+    else if (cmd == JOIN)
+        return "JOIN";
+    else if (cmd == PART)
+        return "PART";
+    else if (cmd == PRIVMSG)
+        return "PRIVMSG";
+    else if (cmd == MODE)
+        return "MODE";
+    else if (cmd == TOPIC)
+        return "TOPIC";
+    else if (cmd == INVITE)
+        return "INVITE";
+    else if (cmd == KICK)
+        return "KICK";
+    else if (cmd == NOTICE)
+        return "NOTICE";
+    else if (cmd == NAMES)
+        return "NAMES";
+	else
+		return "";
 }
 
 // RFC 1035: 63 chars per label, 255 total max

@@ -59,7 +59,7 @@ void	UserParam::validateParam() {
 	//usermode y unused me la sudan.
 	for (i = 0; i < username.size(); i++) {
 		if (!isUserChar(username[i]))
-			throw BadSyntax(USER, ERR_GENERIC);
+			throw BadSyntax(USER, ERR_UNKNOWNCOMMAND);
 	}
 }
 
@@ -88,7 +88,7 @@ void	PassParam::validateParam() {
 	}
 	password = tokens[i].str;
 	if (password.empty())
-		throw BadSyntax(PASS, ERR_NEEDMOREPARAMS);
+		throw BadSyntax(PASS, ERR_UNKNOWNCOMMAND);
 }
 
 // NumericReply *PassParam::mapSyntaxErrorToNumeric(int errCode, NumericReplyFactory replyFactory) {
