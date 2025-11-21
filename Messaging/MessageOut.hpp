@@ -73,8 +73,8 @@ class MessageOut
 		std::string		rpl_msg;
 		MessageTarget	*target; //target envía indistintamente para canales como para usuarios.
 		virtual void	assemble_msg() = 0;
-		virtual void	serialize() = 0;
 		virtual void	fill_prefix() = 0; //Servername ó n!u@h
+		virtual void	serialize() = 0;
 
 	public:
 		size_t	sender_id; //id del cliente que envia el mensaje
@@ -266,9 +266,7 @@ class NumericReplyFactory {
 		ErrNicknameInUse		*makeErrNicknameInUse(NickParam* param) {return new ErrNicknameInUse(server, param);};
 		ErrUnavailResource		*makeErrUnavailResource(NickParam* param) {return new ErrUnavailResource(server, param);};
 		ErrRestricted			*makeErrRestricted(NickParam* param) {return new ErrRestricted(server, param);};
-		/* NeedMoreParams */
 		ErrNeedMoreParams		*makeErrNeedMoreParams(Param *param) {return new ErrNeedMoreParams(server, param->command());}
-		/* Fin NeedMoreParams */
 		ErrAlredyRegistered		*makeErrAlredyRegistered(UserParam *param) {return new ErrAlredyRegistered(server, param);}
 		ErrNoOrigin				*makeErrNoOrigin(PingPongParam *param) {return new ErrNoOrigin(server, param);}
 		ErrNoSuchServer			*makeErrNoSuchServer(PingPongParam *param) {return new ErrNoSuchServer(server, param);}
@@ -282,8 +280,38 @@ class ForwardedCommand: virtual public MessageOut {
 		User u = server.getUsers()[sender_id];
 		prefix = u.get_nick() + "!" + u.getUsername() + "@"; //+ u.getHostname;
 	}
+	void	serialize() {
+		fill_prefix();
+		assemble_msg();
+		rpl_msg = prefix +  " " + getCommandname(param->command()) + rpl_msg + "\r\n";
+		memcpy(msg, rpl_msg.c_str(), rpl_msg.length());
+	}
 
 	public:
-		ForwardedCommand(Server &server, Param *param): MessageOut(server) {}
+		ForwardedCommand(Server &server, Param *param): MessageOut(server), param(param) {}
+		~ForwardedCommand() {}
+};
 
+class NickForwardedCommand: public ForwardedCommand {
+	NickParam	*np;
+
+	public:
+		NickForwardedCommand(Server &server, NickParam *param): MessageOut(server),
+																ForwardedCommand(server, param),
+																np(param) {}
+		void	assemble_msg() {
+			rpl_msg = "NICK " + np->nickname;
+		}
+};
+
+class NickForwardedCommand: public ForwardedCommand {
+	NickParam	*np;
+
+	public:
+		NickForwardedCommand(Server &server, NickParam *param): MessageOut(server),
+																ForwardedCommand(server, param),
+																np(param) {}
+		void	assemble_msg() {
+			rpl_msg = "NICK " + np->nickname;
+		}
 };
