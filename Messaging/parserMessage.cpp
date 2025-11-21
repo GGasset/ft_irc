@@ -6,7 +6,7 @@
 /*   By: alvaro <alvaro@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/03 19:24:23 by alvmoral          #+#    #+#             */
-/*   Updated: 2025/11/19 19:31:31 by alvaro           ###   ########.fr       */
+/*   Updated: 2025/11/21 13:14:26 by alvaro           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -108,6 +108,7 @@ bool isValidServerName(const std::string& name)
 
 // Define sets of restricted characters
 #define NOSPCRLFCL      "\r\n\0 :"
+#define USERCHARS      "\r\n\0 @"
 #define NOSPCRLFCL_TRAIL "\r\n\0"
 #define RESERVED_CHARS  "\r\n\0 @"
 #define SPECIAL_CHARS   "[]\\`^{}_"
@@ -130,6 +131,11 @@ bool areAllCharsAllowed(const std::string& str, const std::string& disallowedSet
 inline bool isSpecialChar(char c)
 {
 	return isCharInSet(c, SPECIAL_CHARS);
+}
+
+inline bool isUserChar(char c)
+{
+	return isCharInSet(c, USERCHARS);
 }
 
 inline bool isReservedChar(char c)

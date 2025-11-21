@@ -35,7 +35,8 @@ class NickParam: public Param {
 
 		enum SyntaxError {
 			ERR_ERRONEUSNICKNAME,
-			ERR_NONICKNAMEGIVEN
+			ERR_NONICKNAMEGIVEN,
+			ERR_GENERIC
 		};
 		NickParam(msgTokens tokens);
 		~NickParam() {}
@@ -47,21 +48,55 @@ class NickParam: public Param {
 };
 
 class UserParam: public Param {
-	std::string nickname;
-	std::string realname;
 	std::string username;
-	std::string hostname;
-	// std::string servername;
+	std::string usermode;
+	std::string unused;
+	std::string realname;
+
+	enum SyntaxError {
+		ERR_NEEDMOREPARAMS,
+		ERR_GENERIC
+	};
 
 	public:
 		UserParam(msgTokens tokens);
 		~UserParam() {}
 		UserParam& operator=(const UserParam& other) {
 			if (this != &other)
-				nickname = other.nickname;
 				username = other.username;
 				realname = other.realname;
-				hostname = other.hostname;
+			return (*this);
+		}
+};
+
+class PassParam: public Param {
+	std::string password; //La contraseña tiene que ser == server.pwI
+
+	enum SyntaxError {
+		ERR_NEEDMOREPARAMS,
+		ERR_GENERIC
+	};
+
+	public:
+		PassParam(msgTokens tokens);
+		~PassParam() {}
+		PassParam& operator=(const PassParam& other) {
+			return (*this);
+		}
+};
+
+class PingParam: public Param {
+	std::string password; //La contraseña tiene que ser == server.pwI
+
+	enum SyntaxError {
+		ERR_NOORIGIN,
+		ERR_GENERIC
+	};
+
+	public:
+		PingParam(msgTokens tokens);
+		~PingParam() {}
+		PingParam& operator=(const PingParam& other) {
 			return (*this);
 		}
 };

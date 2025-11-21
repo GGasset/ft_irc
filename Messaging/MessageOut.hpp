@@ -111,9 +111,10 @@ class NumericReply: virtual public MessageOut {
 			ss << std::setw(3) << std::setfill('0') << code;
 			return ss.str();
 		}
+		unsigned int getCode() {return code;}
 };
 
-class ErrErroneusNickname: public NumericReply {
+class ErrErroneousNickname: public NumericReply {
 	NickParam *np;
 
 	void	assemble_msg() {
@@ -122,10 +123,10 @@ class ErrErroneusNickname: public NumericReply {
 	}
 
 	public:
-		ErrErroneusNickname(Server &server, NickParam *param): MessageOut(server),
+		ErrErroneousNickname(Server &server, NickParam *param): MessageOut(server),
 															  NumericReply(server, 432),
 															  np(param) {}
-		~ErrErroneusNickname() {}
+		~ErrErroneousNickname() {}
 };
 
 class ErrNoNicknamegiven: public NumericReply {
@@ -171,6 +172,26 @@ class ErrUnavailResource: public NumericReply {
 		~ErrUnavailResource() {}
 };
 
+class ErrNeedMoreParams: public NumericReply {
+	Param 	*p;
+	std::string	commandname;
+
+	void	assemble_msg() {
+		rpl_msg = commandname + " :Not enough parameters";
+	}
+	public:
+		ErrNeedMoreParams(Server &server, UserParam *param): MessageOut(server),
+															  NumericReply(server, 461),
+															  p(param),
+															  commandname("USER") {}
+		ErrNeedMoreParams(Server &server, PassParam *param): MessageOut(server),
+															  NumericReply(server, 461),
+															  p(param),
+															  commandname("PASS") {}
+		/* ..... Se ha de overridear para todos los Comandos que lo utilizen.  */
+		~ErrNeedMoreParams() {}
+};
+
 class ErrRestricted: public NumericReply {
 	NickParam *np;
 
@@ -185,16 +206,47 @@ class ErrRestricted: public NumericReply {
 		~ErrRestricted() {}
 };
 
+class ErrAlredyRegistered: public NumericReply {
+	UserParam	*up;
+
+		void	assemble_msg() {
+		rpl_msg = ":Unauthorized command (already registered)";
+	}
+	public:
+		ErrAlredyRegistered(Server &server, UserParam *param): MessageOut(server),
+															  NumericReply(server, 484),
+															  up(param) {}
+		~ErrAlredyRegistered() {}
+};
+
+
+
+class ErrUnknownCommand: public NumericReply {
+	void	assemble_msg() {
+		rpl_msg = "";
+	}
+	public:
+		ErrUnknownCommand(Server &server): MessageOut(server),
+										   NumericReply(server, 0) {}
+		~ErrUnknownCommand() {}
+};
+
 class NumericReplyFactory {
 	Server	&server;
 	public:
 		NumericReplyFactory(Server &server): server(server) {}
 
-		ErrErroneusNickname *makeErrErroneusNickname(NickParam* param) {return new ErrErroneusNickname(server, param);}
-		ErrNoNicknamegiven *makeErrNoNicknamegiven(NickParam* param) {return new ErrNoNicknamegiven(server, param);};
-		ErrNicknameInUse *makeErrNicknameInUse(NickParam* param) {return new ErrNicknameInUse(server, param);};
-		ErrUnavailResource *makeErrUnavailResource(NickParam* param) {return new ErrUnavailResource(server, param);};
-		ErrRestricted *makeErrRestricted(NickParam* param) {return new ErrRestricted(server, param);};
+		ErrErroneousNickname	*makeErrErroneusNickname(NickParam* param) {return new ErrErroneousNickname(server, param);}
+		ErrNoNicknamegiven		*makeErrNoNicknamegiven(NickParam* param) {return new ErrNoNicknamegiven(server, param);};
+		ErrNicknameInUse		*makeErrNicknameInUse(NickParam* param) {return new ErrNicknameInUse(server, param);};
+		ErrUnavailResource		*makeErrUnavailResource(NickParam* param) {return new ErrUnavailResource(server, param);};
+		ErrRestricted			*makeErrRestricted(NickParam* param) {return new ErrRestricted(server, param);};
+		/* NeedMoreParams */
+		ErrNeedMoreParams		*makeErrNeedMoreParams(UserParam *param) {return new ErrNeedMoreParams(server, param);}
+		ErrNeedMoreParams		*makeErrNeedMoreParams(PassParam *param) {return new ErrNeedMoreParams(server, param);}
+		/* Fin NeedMoreParams */
+		ErrAlredyRegistered		*makeErrAlredyRegistered(UserParam *param) {return new ErrAlredyRegistered(server, param);}
+		ErrUnknownCommand		*makeErrUnknownCommand() {return new ErrUnknownCommand(server);}
 };
 
 // class ForwardedCommand: virtual public MessageOut {

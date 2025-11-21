@@ -94,6 +94,7 @@ inline bool isInNospcrlfcl(const std::string& str);
 inline bool isInNospcrlfclTRAIL(const std::string& str);
 inline bool isReservedChar(char c);
 inline bool isSpecialChar(char c);
+inline bool isUserChar(char c);
 bool isValidHostName(const std::string &hostaname);
 bool isValidNickName(const std::string &nickname); 
 bool isValidServerName(const std::string& name);
