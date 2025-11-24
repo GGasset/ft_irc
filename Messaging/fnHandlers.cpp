@@ -1,7 +1,7 @@
 #include "fnHandlers.hpp"
 
 void    complete_registry(User user, Server &server, UserParam *param) {
-    if (!user.getNick().empty()
+    if (!user.get_nick().empty()
     && !user.getUsername().empty()
     && !user.getRealname().empty()) {
         MessageTarget   *target; MessageTargetFactory::create(server, 
@@ -30,7 +30,7 @@ MessageOut *handleNick(MessageIn in, Server &server) {
     // NumericReplyFactory replyFactory(server);
 
     for (size_t i = 0; i < clients.size(); i++) {
-        if (clients[i].getNick() == np->nickname) {
+        if (clients[i].get_nick() == np->nickname) {
             MessageOut *ret = NumericReplyFactory::create(ERR_NICKNAMEINUSE, server, np);
             ret->setTarget(
                 MessageTargetFactory::create(server, 

@@ -12,7 +12,7 @@ class MessageTarget {
 
 	public:
 		MessageTarget(Server& server, std::vector<size_t> ids): server(server), ids(ids) {}
-		virtual ~MessageTarget() = 0;
+		virtual ~MessageTarget() {}
 		virtual	void deliver(void *msg) = 0;
 };
 
@@ -49,11 +49,13 @@ class ChannelTarget : public MessageTarget {
 
 			if (!msg)
 				return ;
-			for (int i = 0; i < ids.size(); i++) {
-				ch = server.get_by_channel_id(ids[i]);
-				std::vector<size_t> channel_users;
-				server.add_msg(msg, 512, false, server.get_by_channel_id(ids[i]));
-			}
+			// for (int i = 0; i < ids.size(); i++) {
+			// 	ch = server.get_by_channel_id(ids[i]);
+			// 	server.add_msg(msg, 512, false, ch);
+			// }
+			ch = server.get_by_channel_id(ids[0]);
+			/* Esto esta fatal, es para que no toque los huevos. */
+			server.add_msg(msg, 512, false, server.get_user_by_id(ch.get_members()[0]));
 		}
 
 };

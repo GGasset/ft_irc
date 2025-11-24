@@ -27,8 +27,8 @@ private:
 	std::string name;
 
 public:
-	ssize_t get_id() {return id;}
+	ssize_t get_id();
 	void set_id(ssize_t id);
 	std::vector<size_t>	get_members();
-	std::string get_name() {return name;}
+	std::string get_name();
 };
