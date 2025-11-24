@@ -20,21 +20,6 @@ void	NickParam::validateParam() {
 		throw BadSyntax(NICK, ERR_ERRONEUSNICKNAME);
 }
 
-// NumericReply *NickParam::mapSyntaxErrorToNumeric(int errCode, NumericReplyFactory replyFactory) {
-// 	 switch (errCode) {
-// 		case ERR_ERRONEUSNICKNAME:
-// 			return replyFactory.makeErrNoNicknamegiven(this);
-
-// 		case ERR_NONICKNAMEGIVEN:
-// 			return replyFactory.makeErrErroneusNickname(this);
-// 		case ERR_GENERIC:
-// 			return replyFactory.makeErrUnknownCommand();
-// 		default:
-// 			return (NULL);
-// 	}
-// }
-
-
 UserParam::UserParam(msgTokens tokens): Param(USER, tokens) {}
 
 void	UserParam::validateParam() {
@@ -63,17 +48,6 @@ void	UserParam::validateParam() {
 	}
 }
 
-// NumericReply *UserParam::mapSyntaxErrorToNumeric(int errCode, NumericReplyFactory replyFactory) {
-// 	 switch (errCode) {
-// 		case ERR_NEEDMOREPARAMS:
-// 			return replyFactory.makeErrNeedMoreParams(this);
-// 		case ERR_GENERIC:
-// 			return replyFactory.makeErrUnknownCommand();
-// 		default:
-// 			return (NULL);
-// 	}
-// }
-
 PassParam::PassParam(msgTokens tokens): Param(PASS, tokens) {}
 
 void	PassParam::validateParam() {
@@ -91,17 +65,6 @@ void	PassParam::validateParam() {
 		throw BadSyntax(PASS, ERR_UNKNOWNCOMMAND);
 }
 
-// NumericReply *PassParam::mapSyntaxErrorToNumeric(int errCode, NumericReplyFactory replyFactory) {
-// 	 switch (errCode) {
-// 		case ERR_NEEDMOREPARAMS:
-// 			return replyFactory.makeErrNeedMoreParams(this);
-// 		case ERR_GENERIC:
-// 			return replyFactory.makeErrUnknownCommand();
-// 		default:
-// 			return (NULL);
-// 	}
-// }
-
 PingPongParam::PingPongParam(msgTokens tokens): Param(PING, tokens) {}
 
 void	PingPongParam::validateParam() {
@@ -117,14 +80,3 @@ void	PingPongParam::validateParam() {
 	if (tokens[i].type == CRLF)
 		throw BadSyntax(PING, ERR_NOORIGIN);
 }
-
-// NumericReply	*PingPongParam::mapSyntaxErrorToNumeric(int errCode, NumericReplyFactory replyFactory) {
-// 	 switch (errCode) {
-// 		case ERR_NOORIGIN:
-// 			return replyFactory.makeErrNoOrigin(this);
-// 		case ERR_GENERIC:
-// 			return replyFactory.makeErrUnknownCommand();
-// 		default:
-// 			return (NULL);
-// 	}
-// }

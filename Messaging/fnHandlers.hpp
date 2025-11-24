@@ -2,6 +2,7 @@
 
 #include "MessageOut.hpp"
 #include "MessageIn.hpp"
+#include <deque>
 
 class fnHandlers
 {
@@ -14,7 +15,7 @@ class fnHandlers
 		
 };
 
-// extern const std::vector<MessageOut> g_Handler_Queue;
+extern const std::deque<MessageOut*> g_Handler_Queue;
 
 /* Manejadores */
 MessageOut *handleNick(MessageIn in, Server &server);

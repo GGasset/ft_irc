@@ -47,6 +47,22 @@ User &Server::get_user_by_nick(std::string nick)
 	return (clients[0]);
 }
 
+User &Server::get_user_by_id(size_t id)
+{
+	return (clients[id]);
+}
+
+Channel &Server::get_by_channel_name(std::string name) {
+	for (size_t i = 0; i < servers.size(); i++) 
+		if (servers[i].get_id() != -1 && servers[i].get_name() == name)
+			return servers[i];	
+	return (servers[0]);
+}
+
+Channel &Server::get_by_channel_id(size_t id) {
+	return (servers[id]);
+}
+
 ssize_t Server::get_user_index_by_fd(int fd)
 {
 	for (ssize_t i = 0; i < client_fds.size(); i++)

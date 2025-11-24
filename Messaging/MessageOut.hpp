@@ -26,16 +26,11 @@ class UsersTarget : public MessageTarget {
 				ids = other.ids;
 			return (*this);
 		}
-		// void	get_ids_from_users(std::vector<User&> uvec) {
-		// 	ids.clear();
-		// 	for (int i = 0; i < uvec.size(); i++)
-		// 		ids.push_back(uvec[i].get_id());
-		// }
 		void	deliver(void *msg) {
 			if (!msg)
 				return ;
 			for (int i = 0; i < ids.size(); i++)
-				server.add_msg(msg, 512, false, server.getUsers()[ids[i]]);
+				server.add_msg(msg, 512, false, server.get_user_by_id(ids[i]));
 		}
 };
 
@@ -55,11 +50,9 @@ class ChannelTarget : public MessageTarget {
 			if (!msg)
 				return ;
 			for (int i = 0; i < ids.size(); i++) {
-				// ch = server.get_channel_by_id(ids[i]);
-				// std::vector<size_t> channel_users;
-				// UsersTarget u(server, channel_users);
-				// u.get_ids_from_users(server.get_channel_users(ch)); Menuedo cipote.
-				// u.deliver(msg);
+				ch = server.get_by_channel_id(ids[i]);
+				std::vector<size_t> channel_users;
+				server.add_msg(msg, 512, false, server.get_by_channel_id(ids[i]));
 			}
 		}
 
@@ -98,6 +91,7 @@ class MessageOut
 		void	*get_msg();
 		void	setTarget(MessageTarget *target);
 		void	deliver() {target->deliver(msg);}
+		std::string getRpl(void) {return rpl_msg;}//Esto solo de testeo
 };
 
 class NumericReply: virtual public MessageOut {

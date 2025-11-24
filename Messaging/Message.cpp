@@ -6,7 +6,7 @@
 /*   By: alvaro <alvaro@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/03 19:24:29 by alvmoral          #+#    #+#             */
-/*   Updated: 2025/11/19 21:14:45 by alvaro           ###   ########.fr       */
+/*   Updated: 2025/11/24 13:25:36 by alvaro           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -173,7 +173,3 @@ msgTokens	msgTokenizer(std::string msg)
 	return (ret);
 }
 
-// MessageOut fnHandlers::operator()(COMMAND cmd, MessageIn msg, Server& server)
-// {
-// 	return fun[cmd](cmd, msg, server);
-// }
