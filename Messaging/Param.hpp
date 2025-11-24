@@ -84,12 +84,13 @@ class Param {
 		COMMAND command() const {return cmd;}
 
 		class BadSyntax: public std::exception {
-			COMMAND cmd;
-			int		errCode;
+			COMMAND 	cmd;
+			ReplyCode	errCode;
 			
 			public:
-				BadSyntax(COMMAND cmd, int errCode): cmd(cmd), errCode(errCode) {}
-				int	getErrCode() {return (errCode);}
+				BadSyntax(COMMAND cmd, ReplyCode errCode): cmd(cmd), errCode(errCode) {}
+				ReplyCode	getErrCode() {return (errCode);}
+				COMMAND		getCmd() {return (cmd);}
 		};
 		// virtual NumericReply	mapSyntaxErrorToNumeric(int errorCode) const = 0;
 		virtual void			validateParam() = 0; //Si algun error sintactico, esto lanza excep.

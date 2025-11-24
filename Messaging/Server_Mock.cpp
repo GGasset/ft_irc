@@ -53,9 +53,16 @@ Channel &Server::get_by_channel_id(size_t id) {
 
 void	Server::addUser(User u) {
 	clients.push_back(u);
-	std::cout << "Cual es la longitud actual de clients: " << clients.size() << std::endl;
 }
 
 void	Server::addChannel(Channel ch) {
 	servers.push_back(ch);
+}
+
+void	Server::addNickHistory(std::string nick) {
+	nick_history.push_back(nick);
+}
+
+std::vector<std::string> Server::get_nick_history() {
+	return nick_history;
 }

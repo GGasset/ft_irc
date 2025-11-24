@@ -59,3 +59,11 @@ std::string User::getUsername(void) const {
 std::string User::getRealname(void) const {
 	return (realname);
 }
+
+bool	User::is_registered() {
+    if (!get_nick().empty()
+    && !getUsername().empty()
+    && !getRealname().empty())
+		return (true);
+	return (false);
+}

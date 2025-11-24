@@ -37,5 +37,6 @@ public:
 	// This function is part of the socket function collection
 	std::vector<std::string> msg_sent(std::string data);
 	ssize_t get_id();
-	void set_id(ssize_t id);
+	void 	set_id(ssize_t id);
+	bool	is_registered();
 };

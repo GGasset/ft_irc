@@ -23,6 +23,8 @@ private:
 	std::vector<User>	clients;
 	std::vector<Channel> servers;
 
+	std::vector<std::string> nick_history;
+
 public:
 	Server();
 	~Server();
@@ -38,6 +40,9 @@ public:
 
 	void	addUser(User u);
 	void	addChannel(Channel ch);
+	void	addNickHistory(std::string nick);
+	std::vector<std::string> get_nick_history();
+	
 
 	void stop();
 

@@ -5,14 +5,9 @@ Param::~Param() {}
 NickParam::NickParam(msgTokens tokens): Param(NICK, tokens) {}
 
 void	NickParam::validateParam() {
-	int i;
-	for (i = 0; i < tokens.size(); i++) {
-		if (tokens[i].type == PREFIX
-			|| tokens[i].type == WORD
-			|| tokens[i].type == NUMBER
-			|| tokens[i].type == SPACE)
-			continue ;	
-	}
+	int i = 0;
+	while (tokens[i].type != TOK_PARAM)
+		i++;
 	if (tokens[i].type == CRLF)
 		throw BadSyntax(NICK, ERR_NONICKNAMEGIVEN);
 	nickname = tokens[i].str;
@@ -25,15 +20,10 @@ UserParam::UserParam(msgTokens tokens): Param(USER, tokens) {}
 void	UserParam::validateParam() {
 	// Lo que he extraído del RFC es que se traga lo que sea.
 	// Solo se gestiona el caso cuando username es incorrecto.
-	int i;
-
-	for (i = 0; i < tokens.size(); i++) {
-		if (tokens[i].type == PREFIX
-			|| tokens[i].type == WORD
-			|| tokens[i].type == NUMBER
-			|| tokens[i].type == SPACE)
-			continue ;	
-	}
+	int i = 0;
+	
+	while (tokens[i].type != TOK_PARAM)
+		i++;
 	tokens[i].type != CRLF ? username = tokens[i++].str : throw BadSyntax(USER, ERR_NEEDMOREPARAMS);
 	i++;
 	tokens[i].type != CRLF ? usermode = tokens[i++].str : throw BadSyntax(USER, ERR_NEEDMOREPARAMS);
@@ -53,13 +43,8 @@ PassParam::PassParam(msgTokens tokens): Param(PASS, tokens) {}
 void	PassParam::validateParam() {
 	int i = 0;
 
-	for (i = 0; i < tokens.size(); i++) {
-		if (tokens[i].type == PREFIX
-			|| tokens[i].type == WORD
-			|| tokens[i].type == NUMBER
-			|| tokens[i].type == SPACE)
-			continue ;	
-	}
+	while (tokens[i].type != TOK_PARAM)
+		i++;
 	password = tokens[i].str;
 	if (password.empty())
 		throw BadSyntax(PASS, ERR_UNKNOWNCOMMAND);
@@ -70,13 +55,8 @@ PingPongParam::PingPongParam(msgTokens tokens): Param(PING, tokens) {}
 void	PingPongParam::validateParam() {
 	int i = 0;
 
-	for (i = 0; i < tokens.size(); i++) {
-		if (tokens[i].type == PREFIX
-			|| tokens[i].type == WORD
-			|| tokens[i].type == NUMBER
-			|| tokens[i].type == SPACE)
-			continue ;	
-	}
+	while (tokens[i].type != TOK_PARAM)
+		i++;
 	if (tokens[i].type == CRLF)
 		throw BadSyntax(PING, ERR_NOORIGIN);
 }
