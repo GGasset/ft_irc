@@ -60,6 +60,14 @@ std::string User::getRealname(void) const {
 	return (realname);
 }
 
+void	User::set_username(std::string username) {
+	username = username;
+}
+
+void	User::set_realname(std::string realname) {
+	realname = realname;
+}
+
 bool	User::is_registered() {
     if (!get_nick().empty()
     && !getUsername().empty()

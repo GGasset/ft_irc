@@ -36,8 +36,4 @@ bool isValidNickName(const std::string &nickname);
 bool isValidServerName(const std::string& name);
 bool isValidUserName(const std::string &username);
 
-/* Utilidades de Manejadores */
-void    	complete_registry(User user);
-
-
 #endif

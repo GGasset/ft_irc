@@ -32,6 +32,8 @@ public:
 	size_t	get_joined_channel(size_t id);
 	std::vector<size_t>	get_joined_channels(void);
 	void	setNick(std::string nick);
+	void	set_username(std::string username);
+	void	set_realname(std::string realname);
 	
 	// Called when this user sends a message
 	// This function is part of the socket function collection

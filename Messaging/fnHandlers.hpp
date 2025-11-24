@@ -18,4 +18,7 @@ class fnHandlers
 extern const std::deque<MessageOut*> g_Handler_Queue;
 
 /* Manejadores */
-MessageOut *handleNick(MessageIn in, Server &server);
+MessageOut	*handleNick(MessageIn in, Server &server);
+
+/* Utilidades de Manejadores */;
+void    	complete_registry(User user, Server &server, UserParam *param);

@@ -9,19 +9,23 @@ void    complete_registry(User user, Server &server, UserParam *param) {
         );
         NumericReply    *reg;
         reg = NumericReplyFactory::create(RPL_WELCOME, server, param);
-        reg->setTarget(target), reg->deliver();
+        reg->setTarget(target);//, reg->deliver();
+        std::cout << "reg: " << reg->getRpl();
 
         reg = NumericReplyFactory::create(RPL_YOURHOST, server, param);
-        reg->setTarget(target), reg->deliver();
+        reg->setTarget(target);//, reg->deliver();
+        std::cout << "reg: " << reg->getRpl();
 
         reg = NumericReplyFactory::create(RPL_CREATED, server, param);
-        reg->setTarget(target), reg->deliver();
-        
+        reg->setTarget(target);//, reg->deliver();
+        std::cout << "reg: " << reg->getRpl();
+
         // reg = NumericReplyFactory::create(RPL_MYINFO, server, param);
         // reg->setTarget(target), reg->deliver();
     }
 }
 
+/* Falta gestionar el caso cuando va primero USER  y después NICK. */
 MessageOut *handleNick(MessageIn in, Server &server) {
     NickParam           *np = dynamic_cast<NickParam*>(in.getParams());
     std::vector<User>   clients = server.getUsers(); // En realidad deberia de ser el vector del servidor.
@@ -29,14 +33,12 @@ MessageOut *handleNick(MessageIn in, Server &server) {
     
     senderU = clients[in.sender_id];
 
-    MessageTarget   *client_target = MessageTargetFactory::create(server, (std::vector<size_t>){in.sender_id}, 'u');
-
     for (size_t i = 0; i < clients.size(); i++) {
         std::string nickClient;
         nickClient = clients[i].get_nick();
         if (nickClient == np->nickname) {
-            MessageOut *ret = NumericReplyFactory::create(ERR_NICKNAMEINUSE, server, np);
-            ret->setTarget(client_target);
+            MessageOut *ret = NumericReplyFactory::create_and_target(ERR_NICKNAMEINUSE, server, np,
+                                                                     (std::vector<size_t>){in.sender_id}, 'u');
             return ret;
         }
     }
@@ -45,8 +47,8 @@ MessageOut *handleNick(MessageIn in, Server &server) {
     std::vector<std::string> nick_h = server.get_nick_history();
     for (size_t i = 0; i < nick_h.size(); i++) {
         if (clients[i].get_nick() == nick_h[0]) {
-            MessageOut  *ret = NumericReplyFactory::create(ERR_UNAVAILRESOURCE, server, np);
-            ret->setTarget(client_target);
+            MessageOut  *ret = NumericReplyFactory::create_and_target(ERR_UNAVAILRESOURCE, server, np,
+                                                                     (std::vector<size_t>){in.sender_id}, 'u');
             return ret;
         }
     }
@@ -54,6 +56,7 @@ MessageOut *handleNick(MessageIn in, Server &server) {
     senderU.setNick(np->nickname);
     if (!server.get_user_by_id(in.sender_id).is_registered())
         return NULL;
+    server.addNickHistory(np->nickname);
     MessageOut *nickBroadcast = ForwardedCommandFactory::create(NICK, server, np);
     nickBroadcast->setTarget(
         MessageTargetFactory::create(server, senderU.get_joined_channels(), 'c')
@@ -61,9 +64,21 @@ MessageOut *handleNick(MessageIn in, Server &server) {
     return (nickBroadcast);
 }
 
-// MessageOut  *handleUser(MessageIn in, Server &server) {
+MessageOut  *handleUser(MessageIn in, Server &server) {
+    UserParam   *p = dynamic_cast<UserParam*>(in.getParams());
+    User        senderU = server.get_user_by_id(in.sender_id);
 
-// }
+    if (senderU.is_registered()) {
+        MessageOut  *ret = NumericReplyFactory::create_and_target(ERR_ALREADYREGISTRED, server, p,
+                                                                  std::vector<size_t> {in.sender_id}, 'c');
+        return (ret);
+    }
+    senderU.set_username(p->username);
+    senderU.set_realname(p->realname);
+
+    complete_registry(senderU, server, p);
+    return (NULL);
+}
 
 fnHandlers::fnHandlers() {
     fun[NICK] = handleNick;

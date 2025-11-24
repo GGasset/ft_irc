@@ -334,6 +334,7 @@ class NumericReplyFactory {
 	public:
 
 		static NumericReply *create(ReplyCode code, Server &serv, Param *param);
+		static NumericReply *create_and_target(ReplyCode code, Server &serv, Param *param, std::vector<size_t> ids, char t);
 		NumericReplyFactory(Server &server): server(server) {}
 
 		/* Rpl al registrarse un nuevo usuario */
