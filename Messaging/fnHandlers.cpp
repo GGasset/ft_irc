@@ -26,11 +26,14 @@ void    complete_registry(User user, Server &server, UserParam *param) {
 MessageOut *handleNick(MessageIn in, Server &server) {
     NickParam           *np = dynamic_cast<NickParam*>(in.getParams());
     std::vector<User>   clients = server.getUsers(); // En realidad deberia de ser el vector del servidor.
-    User                senderU = clients[in.sender_id];
-    // NumericReplyFactory replyFactory(server);
+    User                senderU;
+    
+    senderU = clients[in.sender_id];
 
     for (size_t i = 0; i < clients.size(); i++) {
-        if (clients[i].get_nick() == np->nickname) {
+        std::string nickClient;
+        nickClient = clients[i].get_nick();
+        if (nickClient == np->nickname) {
             MessageOut *ret = NumericReplyFactory::create(ERR_NICKNAMEINUSE, server, np);
             ret->setTarget(
                 MessageTargetFactory::create(server, 
@@ -49,8 +52,6 @@ MessageOut *handleNick(MessageIn in, Server &server) {
     );
     return (nickBroadcast);
 }
-
-
 
 fnHandlers::fnHandlers() {
     fun[NICK] = handleNick;

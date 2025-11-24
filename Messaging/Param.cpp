@@ -80,3 +80,22 @@ void	PingPongParam::validateParam() {
 	if (tokens[i].type == CRLF)
 		throw BadSyntax(PING, ERR_NOORIGIN);
 }
+
+Param	*ParamsFactory(COMMAND cmd, msgTokens tokens) {
+	switch (cmd)
+	{
+		case NICK :
+			return new NickParam(tokens);
+		case USER:
+			return new UserParam(tokens);
+		case PASS:
+			return new PassParam(tokens);
+		case PING:
+			return new PingPongParam(tokens);
+		case PONG:
+			return new PingPongParam(tokens);
+		default:
+			NULL;
+	}
+	return NULL;
+}

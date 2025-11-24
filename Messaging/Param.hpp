@@ -166,3 +166,5 @@ class PingPongParam: public Param {
 		}
 		virtual void	validateParam();
 };
+
+Param	*ParamsFactory(COMMAND cmd, msgTokens tokens);

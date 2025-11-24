@@ -13,6 +13,11 @@ class MessageIn {
 		MessageIn(): cmd(COMMAND0) {}
 		MessageIn(COMMAND cmd): cmd(cmd) {}
 								// prefix(prefix) {}
+		MessageIn(const MessageIn& other) {
+			cmd = other.cmd;
+			sender_id = other.sender_id;
+			params = other.params;
+		}
 		MessageIn& operator=(const MessageIn& other) {
 			if (this != &other) {
 				cmd = other.cmd;

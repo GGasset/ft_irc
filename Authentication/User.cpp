@@ -1,5 +1,9 @@
 #include "User.hpp"
 
+User::User() {}
+
+User::User(std::string nick, size_t id): nick(nick), id(id)  {}
+
 std::vector<std::string> User::msg_sent(std::string data)
 {
 	std::vector<std::string> out;

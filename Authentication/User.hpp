@@ -23,13 +23,15 @@ private:
 	std::string passw;
 
 public:
-	std::string getNick(void) const;
+	User();
+	User(std::string nick, size_t id);
+
+	std::string get_nick() const;
 	std::string getUsername(void) const;
 	std::string getRealname(void) const;
 	size_t	get_joined_channel(size_t id);
 	std::vector<size_t>	get_joined_channels(void);
 	void	setNick(std::string nick);
-	std::string get_nick() const;
 	
 	// Called when this user sends a message
 	// This function is part of the socket function collection

@@ -93,7 +93,12 @@ class MessageOut
 		void	*get_msg();
 		void	setTarget(MessageTarget *target);
 		void	deliver() {target->deliver(msg);}
-		std::string getRpl(void) {return rpl_msg;}//Esto solo de testeo
+
+		//Esto es solo de testeo
+		std::string getRpl(void) {
+			serialize();
+			return rpl_msg;
+		}//Esto solo de testeo
 };
 
 class NumericReply: virtual public MessageOut {
@@ -249,10 +254,11 @@ class ErrNeedMoreParams: public NumericReply {
 	void	assemble_msg() {
 		rpl_msg = commandname + " :Not enough parameters";
 	}
+
 	public:
-		ErrNeedMoreParams(Server &server, COMMAND commmand): MessageOut(server),
+		ErrNeedMoreParams(Server &server, COMMAND command): MessageOut(server),
 															  NumericReply(server, ERR_NEEDMOREPARAMS),
-															  commandname(commandname) {}
+															  commandname(getCommandname(command)) {}
 		/* ..... Se ha de overridear para todos los Comandos que lo utilizen.  */
 		~ErrNeedMoreParams() {}
 };
