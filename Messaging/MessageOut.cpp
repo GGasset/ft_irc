@@ -10,28 +10,44 @@ void	MessageOut::setTarget(MessageTarget *target) {
 	this->target = target;
 }
 
-NumericReply	*NumericReplyFactory::create(ReplyCode code, Param *param) {
+NumericReply	*NumericReplyFactory::create(ReplyCode code, Server &serv, Param *param) {
 	switch (code)
 	{
+		case RPL_WELCOME:
+			return makeRplWelcome(serv, dynamic_cast<UserParam*>(param));
+		case RPL_YOURHOST:
+			return makeRplYourHost(serv, dynamic_cast<UserParam*>(param));
+		case RPL_CREATED:
+			return makeRplYourHost(serv, dynamic_cast<UserParam*>(param));
 		case ERR_ERRONEUSNICKNAME:
-			return makeErrErroneusNickname(dynamic_cast<NickParam*>(param));
+			return makeErrErroneusNickname(serv, dynamic_cast<NickParam*>(param));
 		case ERR_NONICKNAMEGIVEN:
-			return makeErrNoNicknamegiven(dynamic_cast<NickParam*>(param));
+			return makeErrNoNicknamegiven(serv, dynamic_cast<NickParam*>(param));
 		case ERR_NICKNAMEINUSE:
-			return makeErrNicknameInUse(dynamic_cast<NickParam*>(param));
+			return makeErrNicknameInUse(serv, dynamic_cast<NickParam*>(param));
 		case ERR_UNAVAILRESOURCE:
-			return makeErrUnavailResource(dynamic_cast<NickParam*>(param));
+			return makeErrUnavailResource(serv, dynamic_cast<NickParam*>(param));
 		case ERR_RESTRICTED:
-			return makeErrRestricted(dynamic_cast<NickParam*>(param));
+			return makeErrRestricted(serv, dynamic_cast<NickParam*>(param));
 		case ERR_NEEDMOREPARAMS: //A revisar
-			return makeErrNeedMoreParams(param);
+			return makeErrNeedMoreParams(serv, param);
 		case ERR_ALREADYREGISTRED:
-			return makeErrAlredyRegistered(dynamic_cast<UserParam*>(param));
+			return makeErrAlredyRegistered(serv, dynamic_cast<UserParam*>(param));
 		case ERR_NOORIGIN:
-			return makeErrNoOrigin(dynamic_cast<PingPongParam*>(param));
+			return makeErrNoOrigin(serv, dynamic_cast<PingPongParam*>(param));
 		case ERR_NOSUCHSERVER:
-			return makeErrNoSuchServer(dynamic_cast<PingPongParam*>(param));
+			return makeErrNoSuchServer(serv, dynamic_cast<PingPongParam*>(param));
 		default:
-			return makeErrUnknownCommand();
+			return makeErrUnknownCommand(serv);
+	}
+}
+
+ForwardedCommand *ForwardedCommandFactory::create(COMMAND cmd, Server &serv, Param *param) {
+	switch (cmd)
+	{
+		case NICK:
+			return makeNickForward(serv, dynamic_cast<NickParam*>(param));
+		default:
+			return NULL;
 	}
 }

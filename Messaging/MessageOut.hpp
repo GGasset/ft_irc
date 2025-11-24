@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Param.hpp"
+#include <ctime>
 #include <sstream>
 #include <iomanip>
 
@@ -64,6 +65,19 @@ class ChannelTarget : public MessageTarget {
 
 };
 
+class MessageTargetFactory {
+	public:
+		MessageTargetFactory() {}
+		static MessageTarget	*create(Server &server, std::vector<size_t> ids, char t) {
+			if (t == 'u')
+				return new UsersTarget(server, ids);
+			else if (t == 'c')
+				return new ChannelTarget(server, ids);
+			else
+				return NULL;
+		}
+};
+
 class MessageOut
 {
 	protected:
@@ -115,6 +129,65 @@ class NumericReply: virtual public MessageOut {
 };
 
 class NickParam;
+
+class RplWelcome: public NumericReply {
+	UserParam	*up;
+
+	void	assemble_msg() {
+		User u = server.getUsers()[sender_id];
+		std::string	sender_info = u.get_nick() + "!" + u.getUsername() + "@";
+		rpl_msg = "Welcome to the Internet Relay Network " + sender_info;
+	}
+
+	public:
+		RplWelcome(Server &server, UserParam *param): MessageOut(server),
+													  NumericReply(server, RPL_WELCOME),
+													  up(param) {}
+		~RplWelcome() {}
+};
+
+class RplYourHost: public NumericReply {
+	UserParam	*up;
+
+	void	assemble_msg() {
+		User u = server.getUsers()[sender_id];
+		std::string	servername = "irc.local"; //Esto deberia estar dentro de Server, que viene de la configuracion.
+		std::string ver = "1.1"; //Me lo invento. Tambien deberia estar dentro de la configuración.
+		rpl_msg = "Your host is " + servername + ", running version " + ver;
+	}
+
+	public:
+		RplYourHost(Server &server, UserParam *param): MessageOut(server),
+													  NumericReply(server, RPL_YOURHOST),
+													  up(param) {}
+		~RplYourHost() {}
+};
+
+class RplCreated: public NumericReply {
+	UserParam	*up;
+
+	void	assemble_msg() {
+		std::time_t now = std::time(nullptr);
+		std::tm *ltm = std::localtime(&now);
+
+		std::ostringstream oss;
+		oss << (1900 + ltm->tm_year) << "-"
+			<< std::setw(2) << std::setfill('0') << (1 + ltm->tm_mon) << "-"
+			<< std::setw(2) << std::setfill('0') << ltm->tm_mday;
+		rpl_msg = "This server was created " + oss.str();
+	}
+
+	public:
+		RplCreated(Server &server, UserParam *param): MessageOut(server),
+													  NumericReply(server, RPL_CREATED),
+													  up(param) {}
+		~RplCreated() {}
+};
+
+// class RplMyInfo: public NumericReply {
+
+// };
+
 class ErrErroneousNickname: public NumericReply {
 	NickParam *np;
 
@@ -258,19 +331,26 @@ class NumericReplyFactory {
 	Server	&server;
 	public:
 
-		NumericReply *create(ReplyCode code, Param *param);
+		static NumericReply *create(ReplyCode code, Server &serv, Param *param);
 		NumericReplyFactory(Server &server): server(server) {}
 
-		ErrErroneousNickname	*makeErrErroneusNickname(NickParam* param) {return new ErrErroneousNickname(server, param);}
-		ErrNoNicknamegiven		*makeErrNoNicknamegiven(NickParam* param) {return new ErrNoNicknamegiven(server, param);};
-		ErrNicknameInUse		*makeErrNicknameInUse(NickParam* param) {return new ErrNicknameInUse(server, param);};
-		ErrUnavailResource		*makeErrUnavailResource(NickParam* param) {return new ErrUnavailResource(server, param);};
-		ErrRestricted			*makeErrRestricted(NickParam* param) {return new ErrRestricted(server, param);};
-		ErrNeedMoreParams		*makeErrNeedMoreParams(Param *param) {return new ErrNeedMoreParams(server, param->command());}
-		ErrAlredyRegistered		*makeErrAlredyRegistered(UserParam *param) {return new ErrAlredyRegistered(server, param);}
-		ErrNoOrigin				*makeErrNoOrigin(PingPongParam *param) {return new ErrNoOrigin(server, param);}
-		ErrNoSuchServer			*makeErrNoSuchServer(PingPongParam *param) {return new ErrNoSuchServer(server, param);}
-		ErrUnknownCommand		*makeErrUnknownCommand() {return new ErrUnknownCommand(server);}
+		/* Rpl al registrarse un nuevo usuario */
+		static RplWelcome				*makeRplWelcome(Server &serv, UserParam* param) {return new RplWelcome(serv, param);}
+		static RplYourHost				*makeRplYourHost(Server &serv, UserParam* param) {return new RplYourHost(serv, param);}
+		static RplCreated				*makeRplCreated(Server &serv, UserParam* param) {return new RplCreated(serv, param);}
+		// static RplMyInfo				*makeRplMyInfo(Server &serv, UserParam* param) {return new RplMyInfo(serv, param);} Esta falta porque mucha info.
+
+
+		static ErrErroneousNickname		*makeErrErroneusNickname(Server &serv, NickParam* param) {return new ErrErroneousNickname(serv, param);}
+		static ErrNoNicknamegiven		*makeErrNoNicknamegiven(Server &serv, NickParam* param) {return new ErrNoNicknamegiven(serv, param);};
+		static ErrNicknameInUse			*makeErrNicknameInUse(Server &serv, NickParam* param) {return new ErrNicknameInUse(serv, param);};
+		static ErrUnavailResource		*makeErrUnavailResource(Server &serv, NickParam* param) {return new ErrUnavailResource(serv, param);};
+		static ErrRestricted			*makeErrRestricted(Server &serv, NickParam* param) {return new ErrRestricted(serv, param);};
+		static ErrNeedMoreParams		*makeErrNeedMoreParams(Server &serv, Param *param) {return new ErrNeedMoreParams(serv, param->command());}
+		static ErrAlredyRegistered		*makeErrAlredyRegistered(Server &serv, UserParam *param) {return new ErrAlredyRegistered(serv, param);}
+		static ErrNoOrigin				*makeErrNoOrigin(Server &serv, PingPongParam *param) {return new ErrNoOrigin(serv, param);}
+		static ErrNoSuchServer			*makeErrNoSuchServer(Server &serv, PingPongParam *param) {return new ErrNoSuchServer(serv, param);}
+		static ErrUnknownCommand		*makeErrUnknownCommand(Server &serv) {return new ErrUnknownCommand(serv);}
 };
 
 class ForwardedCommand: virtual public MessageOut {
@@ -304,14 +384,11 @@ class NickForwardedCommand: public ForwardedCommand {
 		}
 };
 
-class NickForwardedCommand: public ForwardedCommand {
-	NickParam	*np;
-
+class ForwardedCommandFactory {
+	Server	&server;
+	
 	public:
-		NickForwardedCommand(Server &server, NickParam *param): MessageOut(server),
-																ForwardedCommand(server, param),
-																np(param) {}
-		void	assemble_msg() {
-			rpl_msg = "NICK " + np->nickname;
-		}
+	ForwardedCommandFactory(Server &server): server(server) {}
+	static ForwardedCommand	*makeNickForward(Server &serv, NickParam *param) {return new NickForwardedCommand(serv, param);}
+	static ForwardedCommand	*create(COMMAND cmd, Server &serv, Param *param);
 };
