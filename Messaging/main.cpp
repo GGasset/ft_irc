@@ -52,22 +52,23 @@ void handle_message(MessageIn &in, Server &server, const std::string &packet) {
 
 int main(void) {
     Server server;
-    MessageIn in;
+    MessageIn in_nick;
+    MessageIn in_user;
 
     init_server(server);
 
     std::string packet = "NICK rata\r\n";
 
-    if (!prepare_message(packet, server, in))
+    if (!prepare_message(packet, server, in_nick))
         return 0;
 
-    handle_message(in, server, packet);
+    handle_message(in_nick, server, packet);
 
 
     packet = "USER Rata 0 * :ratata\r\n";
 
-    if (!prepare_message(packet, server, in))
+    if (!prepare_message(packet, server, in_nick))
         return 0;
 
-    handle_message(in, server, packet);
+    handle_message(in_nick, server, packet);
 }

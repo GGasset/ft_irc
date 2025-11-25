@@ -1,9 +1,6 @@
 #include "fnHandlers.hpp"
 
 void    complete_registry(User user, Server &server, UserParam *param) {
-	std::cout << "nick: " << user.get_nick();
-	std::cout << " username: " << user.getUsername();
-	std::cout << " realname: " << user.getRealname();
     if (user.is_registered()) {
 
         MessageTarget   *target; MessageTargetFactory::create(server, 
@@ -57,9 +54,13 @@ MessageOut *handleNick(MessageIn in, Server &server) {
     }
 
     senderU.setNick(np->nickname);
-    if (!server.get_user_by_id(in.sender_id).is_registered())
-        return NULL;
     server.addNickHistory(np->nickname);
+    // if (!senderU.is_registered() && senderU.are_names_registered()) {
+    //     senderU.register_user();
+    //     complete_registry(senderU, server, np);
+    // }
+    if (!senderU.is_registered())
+        return NULL;
     MessageOut *nickBroadcast = ForwardedCommandFactory::create(NICK, server, np);
     nickBroadcast->setTarget(
         MessageTargetFactory::create(server, senderU.get_joined_channels(), 'c')
@@ -79,6 +80,7 @@ MessageOut  *handleUser(MessageIn in, Server &server) {
     senderU.set_username(p->username);
     senderU.set_realname(p->realname);
 
+    senderU.register_user();
     complete_registry(senderU, server, p);
     return (NULL);
 }

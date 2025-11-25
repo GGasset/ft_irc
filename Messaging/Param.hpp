@@ -117,6 +117,8 @@ class UserParam: public Param {
 		std::string usermode;
 		std::string unused;
 		std::string realname;
+		std::string	nickname;
+		std::string	hostname;
 
 		UserParam(msgTokens tokens);
 		~UserParam() {}

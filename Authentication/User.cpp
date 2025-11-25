@@ -68,10 +68,18 @@ void	User::set_realname(std::string real) {
 	this->realname = real;
 }
 
-bool	User::is_registered() {
+bool	User::are_names_registered() {
     if (!get_nick().empty()
     && !getUsername().empty()
     && !getRealname().empty())
 		return (true);
 	return (false);
+}
+
+bool	User::is_registered() {
+	return (registered);
+}
+
+void	User::register_user() {
+	registered = true;
 }
