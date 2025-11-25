@@ -6,7 +6,7 @@
 /*   By: alvmoral <alvmoral@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/03 19:24:23 by alvmoral          #+#    #+#             */
-/*   Updated: 2025/11/24 18:18:42 by alvmoral         ###   ########.fr       */
+/*   Updated: 2025/11/25 11:16:06 by alvmoral         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -170,7 +170,7 @@ inline bool isSpecialChar(char c)
 
 bool isUserChar(char c)
 {
-	return isCharInSet(c, USERCHARS);
+	return !isCharInSet(c, USERCHARS);
 }
 
 inline bool isReservedChar(char c)

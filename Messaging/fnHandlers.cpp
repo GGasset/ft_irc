@@ -1,6 +1,9 @@
 #include "fnHandlers.hpp"
 
 void    complete_registry(User user, Server &server, UserParam *param) {
+	std::cout << "nick: " << user.get_nick();
+	std::cout << " username: " << user.getUsername();
+	std::cout << " realname: " << user.getRealname();
     if (user.is_registered()) {
 
         MessageTarget   *target; MessageTargetFactory::create(server, 
@@ -66,7 +69,7 @@ MessageOut *handleNick(MessageIn in, Server &server) {
 
 MessageOut  *handleUser(MessageIn in, Server &server) {
     UserParam   *p = dynamic_cast<UserParam*>(in.getParams());
-    User        senderU = server.get_user_by_id(in.sender_id);
+    User        &senderU = server.get_user_by_id(in.sender_id);
 
     if (senderU.is_registered()) {
         MessageOut  *ret = NumericReplyFactory::create_and_target(ERR_ALREADYREGISTRED, server, p,
@@ -82,6 +85,7 @@ MessageOut  *handleUser(MessageIn in, Server &server) {
 
 fnHandlers::fnHandlers() {
     fun[NICK] = handleNick;
+    fun[USER] = handleUser;
     //Asi con todos ...
 }
 

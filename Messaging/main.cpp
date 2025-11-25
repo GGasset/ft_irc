@@ -39,6 +39,7 @@ bool prepare_message(const std::string &packet, Server &server, MessageIn &in) {
     return true;
 }
 
+#include <unistd.h>
 /* ---------- 3. HANDLE MESSAGE ----------- */
 void handle_message(MessageIn &in, Server &server, const std::string &packet) {
     MessageOut *ret = fnHandlers()(in.getCommand(), in, server);
@@ -62,10 +63,11 @@ int main(void) {
 
     handle_message(in, server, packet);
 
-		// packet = "USER Rata 0 *\r\n";
 
-		// if (!prepare_message(packet, server, in))
-		//     return 0;
+    packet = "USER Rata 0 * :ratata\r\n";
 
-		// handle_message(in, server, packet);
+    if (!prepare_message(packet, server, in))
+        return 0;
+
+    handle_message(in, server, packet);
 }

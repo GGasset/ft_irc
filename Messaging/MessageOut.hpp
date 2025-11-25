@@ -113,7 +113,7 @@ class NumericReply: virtual public MessageOut {
 		void	serialize() {
 			fill_prefix();
 			assemble_msg();
-			rpl_msg = prefix +  " " + codetoa() + rpl_msg + "\r\n";
+			rpl_msg = prefix +  " " + codetoa() + " " + rpl_msg + "\r\n";
 			memcpy(msg, rpl_msg.c_str(), rpl_msg.length());
 		}
 
@@ -321,7 +321,7 @@ class ErrNoSuchServer: public NumericReply {
 
 class ErrUnknownCommand: public NumericReply {
 	void	assemble_msg() {
-		rpl_msg = "";
+		rpl_msg = "UnknownCommand";
 	}
 	public:
 		ErrUnknownCommand(Server &server): MessageOut(server),

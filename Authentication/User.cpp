@@ -60,12 +60,12 @@ std::string User::getRealname(void) const {
 	return (realname);
 }
 
-void	User::set_username(std::string username) {
-	username = username;
+void	User::set_username(std::string user) {
+	this->username = user;
 }
 
-void	User::set_realname(std::string realname) {
-	realname = realname;
+void	User::set_realname(std::string real) {
+	this->realname = real;
 }
 
 bool	User::is_registered() {

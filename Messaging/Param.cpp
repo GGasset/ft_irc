@@ -30,7 +30,7 @@ void	UserParam::validateParam() {
 	i++;
 	tokens[i].type != CRLF ? unused = tokens[i++].str : throw BadSyntax(USER, ERR_NEEDMOREPARAMS);
 	i++;
-	tokens[i].type != CRLF ? unused = tokens[i++].str : throw BadSyntax(USER, ERR_NEEDMOREPARAMS);
+	tokens[i].type != CRLF ? realname = tokens[i++].str : throw BadSyntax(USER, ERR_NEEDMOREPARAMS);
 	//usermode y unused me la sudan.
 	for (i = 0; i < username.size(); i++) {
 		if (!isUserChar(username[i]))

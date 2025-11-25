@@ -18,7 +18,7 @@ NumericReply	*NumericReplyFactory::create(ReplyCode code, Server &serv, Param *p
 		case RPL_YOURHOST:
 			return makeRplYourHost(serv, dynamic_cast<UserParam*>(param));
 		case RPL_CREATED:
-			return makeRplYourHost(serv, dynamic_cast<UserParam*>(param));
+			return makeRplCreated(serv, dynamic_cast<UserParam*>(param));
 		case ERR_ERRONEUSNICKNAME:
 			return makeErrErroneusNickname(serv, dynamic_cast<NickParam*>(param));
 		case ERR_NONICKNAMEGIVEN:
