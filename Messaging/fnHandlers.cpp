@@ -1,6 +1,6 @@
 #include "fnHandlers.hpp"
 
-void    complete_registry(User user, Server &server, UserParam *param) {
+void    complete_registry(User user, Server &server) {
     if (user.is_registered()) {
 
         MessageTarget   *target; MessageTargetFactory::create(server, 
@@ -8,17 +8,22 @@ void    complete_registry(User user, Server &server, UserParam *param) {
                                     'u'
         );
         NumericReply    *reg;
-        reg = NumericReplyFactory::create(RPL_WELCOME, server, param);
-        reg->setTarget(target);//, reg->deliver();
-        std::cout << "reg: " << reg->getRpl();
+        std::string     pa_meterse_un_tiro;
 
-        reg = NumericReplyFactory::create(RPL_YOURHOST, server, param);
-        reg->setTarget(target);//, reg->deliver();
-        std::cout << "reg: " << reg->getRpl();
 
-        reg = NumericReplyFactory::create(RPL_CREATED, server, param);
-        reg->setTarget(target);//, reg->deliver();
-        std::cout << "reg: " << reg->getRpl();
+        // reg = NumericReplyFactory::create(RPL_WELCOME, server, param);
+        // reg->setTarget(target);//, reg->deliver();
+
+        pa_meterse_un_tiro = ;
+        // std::cout << "reg: " << reg->getRpl();
+
+        // reg = NumericReplyFactory::create(RPL_YOURHOST, server, param);
+        // reg->setTarget(target);//, reg->deliver();
+        // std::cout << "reg: " << reg->getRpl();
+
+        // reg = NumericReplyFactory::create(RPL_CREATED, server, param);
+        // reg->setTarget(target);//, reg->deliver();
+        // std::cout << "reg: " << reg->getRpl();
 
         // reg = NumericReplyFactory::create(RPL_MYINFO, server, param);
         // reg->setTarget(target), reg->deliver();
@@ -55,11 +60,9 @@ MessageOut *handleNick(MessageIn in, Server &server) {
 
     senderU.setNick(np->nickname);
     server.addNickHistory(np->nickname);
-    // if (!senderU.is_registered() && senderU.are_names_registered()) {
-    //     senderU.register_user();
-    //     complete_registry(senderU, server, np);
-    // }
-    if (!senderU.is_registered())
+    if (!senderU.is_registered() && senderU.are_names_registered())
+        senderU.register_user();
+    else if (!senderU.is_registered())
         return NULL;
     MessageOut *nickBroadcast = ForwardedCommandFactory::create(NICK, server, np);
     nickBroadcast->setTarget(
@@ -80,9 +83,15 @@ MessageOut  *handleUser(MessageIn in, Server &server) {
     senderU.set_username(p->username);
     senderU.set_realname(p->realname);
 
-    senderU.register_user();
-    complete_registry(senderU, server, p);
+    if (!senderU.is_registered() && senderU.are_names_registered()) {
+        senderU.register_user();
+        complete_registry(senderU, server, p);
+    }
     return (NULL);
+}
+
+MessageOut  *handlePass(MessageIn in, Server &server) {
+
 }
 
 fnHandlers::fnHandlers() {

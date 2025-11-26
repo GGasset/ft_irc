@@ -125,7 +125,7 @@ int main(void)
     // packet = "JOIN #cthullu\r\nTOPIC #cthullu :literatura de terror\r\n";
     // packet_msgs = getMsgs(packet);
     // test = {"JOIN #cthullu\r\n", "TOPIC #cthullu :literatura de terror\r\n"};
-	// // print_msg_test(4, packet_msgs, test);
+	// print_msg_test(4, packet_msgs, test);
 
 	// testT = {
 	// 	(msg_token) {WORD, "JOIN"},

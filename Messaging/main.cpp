@@ -44,6 +44,8 @@ bool prepare_message(const std::string &packet, Server &server, MessageIn &in) {
 void handle_message(MessageIn &in, Server &server, const std::string &packet) {
     MessageOut *ret = fnHandlers()(in.getCommand(), in, server);
 
+    if (in.getCommand() == NICK || in.getCommand() == USER)
+        complete_registry();
     if (ret != NULL) {
         std::cout << "Respuesta que se enviaría por el socket ante [packet]: "
                   << packet << " --> " << ret->getRpl() << std::endl;
@@ -54,6 +56,7 @@ int main(void) {
     Server server;
     MessageIn in_nick;
     MessageIn in_user;
+    User      senderU;
 
     init_server(server);
 
@@ -63,7 +66,6 @@ int main(void) {
         return 0;
 
     handle_message(in_nick, server, packet);
-
 
     packet = "USER Rata 0 * :ratata\r\n";
 
