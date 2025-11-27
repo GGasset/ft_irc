@@ -2,7 +2,7 @@
 #include "ParserMessage.hpp"
 
 /* Comandito para compilar.*/
-//c++ -g main.cpp Message.cpp ParserMessage.cpp Param.cpp MessageOut.cpp fnHandlers.cpp ../Authentication/User.cpp ../Socket/Server.cpp ../Socket/function_router.cpp Channels/Channel.cpp -I../Socket/ -I../Authentication/ -IChannels/
+//c++ -g main.cpp Message.cpp ParserMessage.cpp Param.cpp MessageOut.cpp fnHandlers.cpp Server_Mock.cpp  ../Authentication/User.cpp  Channels/Channel.cpp -I../Authentication/ -IChannels/
 
 /* ---------- 1. INIT SERVER ----------- */
 void init_server(Server &server) {
@@ -43,9 +43,6 @@ bool prepare_message(const std::string &packet, Server &server, MessageIn &in) {
 /* ---------- 3. HANDLE MESSAGE ----------- */
 void handle_message(MessageIn &in, Server &server, const std::string &packet) {
     MessageOut *ret = fnHandlers()(in.getCommand(), in, server);
-
-    if (in.getCommand() == NICK || in.getCommand() == USER)
-        complete_registry();
     if (ret != NULL) {
         std::cout << "Respuesta que se enviaría por el socket ante [packet]: "
                   << packet << " --> " << ret->getRpl() << std::endl;

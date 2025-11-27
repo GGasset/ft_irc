@@ -79,6 +79,7 @@ class Param {
 
 	public:
 		
+		Param(COMMAND cmd): cmd(cmd) {}
 		Param(COMMAND cmd, msgTokens tokens): cmd(cmd), tokens(tokens) {}
 		virtual ~Param() = 0;
 		COMMAND command() const {return cmd;}
@@ -120,6 +121,7 @@ class UserParam: public Param {
 		std::string	nickname;
 		std::string	hostname;
 
+		UserParam();
 		UserParam(msgTokens tokens);
 		~UserParam() {}
 		UserParam& operator=(const UserParam& other) {
@@ -128,6 +130,7 @@ class UserParam: public Param {
 				realname = other.realname;
 			return (*this);
 		}
+		UserParam		*operator()(const User &u);
 		virtual void	validateParam();
 };
 

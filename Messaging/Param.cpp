@@ -15,7 +15,18 @@ void	NickParam::validateParam() {
 		throw BadSyntax(NICK, ERR_ERRONEUSNICKNAME);
 }
 
+
+UserParam::UserParam(): Param(USER) {}
+
 UserParam::UserParam(msgTokens tokens): Param(USER, tokens) {}
+
+UserParam	*UserParam::operator()(const User &u) {
+	nickname = u.get_nick();
+	username = u.getUsername();
+	realname = u.getRealname();
+	hostname = u.getHostname();
+	return (this);
+}
 
 void	UserParam::validateParam() {
 	// Lo que he extraído del RFC es que se traga lo que sea.
@@ -37,6 +48,7 @@ void	UserParam::validateParam() {
 			throw BadSyntax(USER, ERR_UNKNOWNCOMMAND);
 	}
 }
+
 
 PassParam::PassParam(msgTokens tokens): Param(PASS, tokens) {}
 

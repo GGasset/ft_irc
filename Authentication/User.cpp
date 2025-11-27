@@ -4,6 +4,17 @@ User::User() {}
 
 User::User(std::string nick, size_t id): nick(nick), id(id)  {}
 
+User &User::operator=(const User &other) {
+	id = other.id;
+	is_channel_operator = other.is_channel_operator;
+	registered = other.registered;
+	realname = other.realname;
+	username = other.username;
+	hostname = other.hostname;
+	joined_channels_ids = other.joined_channels_ids;
+	return (*this);
+}
+
 std::vector<std::string> User::msg_sent(std::string data)
 {
 	std::vector<std::string> out;
@@ -58,6 +69,10 @@ std::string User::getUsername(void) const {
 
 std::string User::getRealname(void) const {
 	return (realname);
+}
+
+std::string User::getHostname(void) const {
+	return (hostname);
 }
 
 void	User::set_username(std::string user) {
