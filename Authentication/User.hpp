@@ -14,6 +14,7 @@ private:
 	ssize_t id = -1;
 	bool is_channel_operator = false;
 	bool registered = false;
+	bool passwd_match = false;
 	std::string nick = "";
 	std::string realname;
 	std::string username;
@@ -39,6 +40,7 @@ public:
 	void	setNick(std::string nick);
 	void	set_username(std::string username);
 	void	set_realname(std::string realname);
+	bool	passwd_match_pop(bool cond);
 	
 	// Called when this user sends a message
 	// This function is part of the socket function collection

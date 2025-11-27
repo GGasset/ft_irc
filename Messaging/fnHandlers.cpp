@@ -90,9 +90,9 @@ MessageOut  *handleUser(MessageIn in, Server &server) {
     return (NULL);
 }
 
-// MessageOut  *handlePass(MessageIn in, Server &server) {
-
-// }
+MessageOut  *handlePass(MessageIn in, Server &server) {
+    
+}
 
 fnHandlers::fnHandlers() {
     fun[NICK] = handleNick;
