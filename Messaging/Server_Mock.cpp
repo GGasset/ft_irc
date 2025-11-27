@@ -51,6 +51,10 @@ Channel &Server::get_by_channel_id(size_t id) {
 	return (servers[id]);
 }
 
+// std::string	Server::get_server_password() {
+// 	return (passw);
+// }
+
 void	Server::addUser(User u) {
 	clients.push_back(u);
 }

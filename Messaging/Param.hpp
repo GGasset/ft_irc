@@ -9,6 +9,8 @@ enum ReplyCode {
     RPL_CREATED               = 003,
     RPL_MYINFO                = 004,
 
+	ERR_GENERIC				  = 0,
+
     // PASS / USER / NICK
     ERR_NEEDMOREPARAMS        = 461,  // <nick> <cmd> :Not enough parameters
     ERR_ALREADYREGISTRED       = 462,  // <nick> :Unauthorized command (already registered)

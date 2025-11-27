@@ -45,7 +45,7 @@ void	UserParam::validateParam() {
 	//usermode y unused me la sudan.
 	for (i = 0; i < username.size(); i++) {
 		if (!isUserChar(username[i]))
-			throw BadSyntax(USER, ERR_UNKNOWNCOMMAND);
+			throw BadSyntax(USER, ERR_GENERIC);
 	}
 }
 
@@ -59,7 +59,7 @@ void	PassParam::validateParam() {
 		i++;
 	password = tokens[i].str;
 	if (password.empty())
-		throw BadSyntax(PASS, ERR_UNKNOWNCOMMAND);
+		throw BadSyntax(PASS, ERR_NEEDMOREPARAMS);
 }
 
 PingPongParam::PingPongParam(msgTokens tokens): Param(PING, tokens) {}

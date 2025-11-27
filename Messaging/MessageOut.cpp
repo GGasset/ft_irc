@@ -49,6 +49,15 @@ NumericReply *NumericReplyFactory::create_and_target(ReplyCode code, Server &ser
 	return (ret);
 }
 
+NumericReply *NumericReplyFactory::create_and_target(ReplyCode code, Server &serv, Param *param, size_t id, char t) {
+	std::vector<size_t> ids = {id};
+	NumericReply	*ret = create(code, serv, param);
+	MessageTarget	*target = MessageTargetFactory::create(serv, ids, t);
+	ret->setTarget(target);
+	return (ret);
+}
+
+
 ForwardedCommand *ForwardedCommandFactory::create(COMMAND cmd, Server &serv, Param *param) {
 	switch (cmd)
 	{

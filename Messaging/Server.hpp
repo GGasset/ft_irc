@@ -37,6 +37,8 @@ public:
 	std::vector<User&> get_channel_users(const Channel channel);
 	Channel &get_by_channel_name(std::string name);
 	Channel &get_by_channel_id(size_t id);
+	std::string passw;
+	// std::string	get_server_password();
 
 	void	addUser(User u);
 	void	addChannel(Channel ch);

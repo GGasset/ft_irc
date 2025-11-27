@@ -84,7 +84,7 @@ void	User::set_realname(std::string real) {
 }
 
 bool	User::passwd_match_pop(bool cond) {
-	bool	ret = this->paswd_match;
+	bool	ret = this->passwd_match;
 	passwd_match = cond;
 	return (ret);
 }

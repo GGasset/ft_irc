@@ -5,8 +5,9 @@
 //c++ -g main.cpp Message.cpp ParserMessage.cpp Param.cpp MessageOut.cpp fnHandlers.cpp Server_Mock.cpp  ../Authentication/User.cpp  Channels/Channel.cpp -I../Authentication/ -IChannels/
 
 /* ---------- 1. INIT SERVER ----------- */
-void init_server(Server &server) {
+void init_server(Server &server, std::string passw) {
     server.addUser(User("ratata", 0));
+    server.passw = passw;
 }
 
 /* ---------- 2. LEXING + PARSING ----------- */
@@ -51,23 +52,29 @@ void handle_message(MessageIn &in, Server &server, const std::string &packet) {
 
 int main(void) {
     Server server;
-    MessageIn in_nick;
-    MessageIn in_user;
+    MessageIn in;
     User      senderU;
 
-    init_server(server);
+    init_server(server, "1234");
+    
+    std::string packet = "PASS 1234\r\n";
 
-    std::string packet = "NICK rata\r\n";
-
-    if (!prepare_message(packet, server, in_nick))
+    if (!prepare_message(packet, server, in))
         return 0;
 
-    handle_message(in_nick, server, packet);
+    handle_message(in, server, packet);
+
+    packet = "NICK rata\r\n";
+
+    if (!prepare_message(packet, server, in))
+        return 0;
+
+    handle_message(in, server, packet);
 
     packet = "USER Rata 0 * :ratata\r\n";
 
-    if (!prepare_message(packet, server, in_nick))
+    if (!prepare_message(packet, server, in))
         return 0;
 
-    handle_message(in_nick, server, packet);
+    handle_message(in, server, packet);
 }

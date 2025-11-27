@@ -1,7 +1,10 @@
 #include "fnHandlers.hpp"
 
 void    complete_registry(User user, Server &server, UserParam *param) {
-    if (user.is_registered()) {
+    bool    passwd_match = user.passwd_match_pop(false);
+    user.passwd_match_pop(passwd_match);
+
+    if (user.is_registered() && passwd_match) {
 
         MessageTarget   *target; MessageTargetFactory::create(server, 
                                     (std::vector<size_t>){(unsigned long) user.get_id()},
@@ -50,8 +53,7 @@ MessageOut *handleNick(MessageIn in, Server &server) {
     std::vector<std::string> nick_h = server.get_nick_history();
     for (size_t i = 0; i < nick_h.size(); i++) {
         if (clients[i].get_nick() == nick_h[0]) {
-            MessageOut  *ret = NumericReplyFactory::create_and_target(ERR_UNAVAILRESOURCE, server, np,
-                                                                     (std::vector<size_t>){in.sender_id}, 'u');
+            MessageOut  *ret = NumericReplyFactory::create_and_target(ERR_UNAVAILRESOURCE, server, np, in.sender_id, 'u');
             return ret;
         }
     }
@@ -76,8 +78,7 @@ MessageOut  *handleUser(MessageIn in, Server &server) {
     User        &senderU = server.get_user_by_id(in.sender_id);
 
     if (senderU.is_registered()) {
-        MessageOut  *ret = NumericReplyFactory::create_and_target(ERR_ALREADYREGISTRED, server, p,
-                                                                  std::vector<size_t> {in.sender_id}, 'c');
+        MessageOut  *ret = NumericReplyFactory::create_and_target(ERR_ALREADYREGISTRED, server, p, in.sender_id, 'c');
         return (ret);
     }
     senderU.set_username(p->username);
@@ -91,12 +92,20 @@ MessageOut  *handleUser(MessageIn in, Server &server) {
 }
 
 MessageOut  *handlePass(MessageIn in, Server &server) {
-    
+    User        &senderU = server.get_user_by_id(in.sender_id);
+    PassParam   *p = dynamic_cast<PassParam*>(in.getParams());
+    if (p->password != server.passw) {
+        return (NumericReplyFactory::create_and_target(ERR_GENERIC, server, p, in.sender_id, 'u'));
+    }
+    else
+        senderU.passwd_match_pop(true);
+    return (NULL);
 }
 
 fnHandlers::fnHandlers() {
     fun[NICK] = handleNick;
     fun[USER] = handleUser;
+    fun[PASS] = handlePass;
     //Asi con todos ...
 }
 

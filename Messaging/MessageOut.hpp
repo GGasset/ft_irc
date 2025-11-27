@@ -189,6 +189,16 @@ class RplCreated: public NumericReply {
 
 // };
 
+class ErrGeneric: public NumericReply {
+	void	assemble_msg() {
+		rpl_msg = "Generic";
+	}
+	public:
+		ErrGeneric(Server &server): MessageOut(server),
+									NumericReply(server, 0) {}
+		~ErrGeneric() {}
+};
+
 class ErrErroneousNickname: public NumericReply {
 	NickParam *np;
 
@@ -325,7 +335,7 @@ class ErrUnknownCommand: public NumericReply {
 	}
 	public:
 		ErrUnknownCommand(Server &server): MessageOut(server),
-										   NumericReply(server, 0) {}
+										   NumericReply(server, 421) {}
 		~ErrUnknownCommand() {}
 };
 
@@ -335,6 +345,7 @@ class NumericReplyFactory {
 
 		static NumericReply *create(ReplyCode code, Server &serv, Param *param);
 		static NumericReply *create_and_target(ReplyCode code, Server &serv, Param *param, std::vector<size_t> ids, char t);
+		static NumericReply *create_and_target(ReplyCode code, Server &serv, Param *param, size_t id, char t);
 		NumericReplyFactory(Server &server): server(server) {}
 
 		/* Rpl al registrarse un nuevo usuario */
