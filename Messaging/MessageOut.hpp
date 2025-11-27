@@ -135,7 +135,7 @@ class RplWelcome: public NumericReply {
 	UserParam	*up;
 
 	void	assemble_msg() {
-		User u = server.getUsers()[sender_id];
+		User u = server.get_by_channel_id(sender_id);
 		std::string	sender_info = u.get_nick() + "!" + u.getUsername() + "@";
 		rpl_msg = "Welcome to the Internet Relay Network " + sender_info;
 	}
@@ -398,11 +398,25 @@ class NickForwardedCommand: public ForwardedCommand {
 		}
 };
 
+class PongForwardedCommand: public ForwardedCommand {
+	PingPongParam	*p;
+
+	public:
+		PongForwardedCommand(Server &server, PingPongParam *param): MessageOut(server),
+																	ForwardedCommand(server, param),
+																	p(param) {}
+
+		void	assemble_msg() {
+			rpl_msg = "PONG " + p->server1 + " " + p->server2;
+		}
+};
+
 class ForwardedCommandFactory {
 	Server	&server;
 	
 	public:
 	ForwardedCommandFactory(Server &server): server(server) {}
 	static ForwardedCommand	*makeNickForward(Server &serv, NickParam *param) {return new NickForwardedCommand(serv, param);}
+	static ForwardedCommand	*makePingPongForward(Server &serv, PingPongParam *param) {return new PongForwardedCommand(serv, param);}
 	static ForwardedCommand	*create(COMMAND cmd, Server &serv, Param *param);
 };

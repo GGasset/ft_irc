@@ -77,4 +77,11 @@ int main(void) {
         return 0;
 
     handle_message(in, server, packet);
+
+    packet = "PING rata\r\n";
+    
+    if (!prepare_message(packet, server, in))
+        return 0;
+
+    handle_message(in, server, packet);
 }

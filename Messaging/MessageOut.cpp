@@ -63,6 +63,8 @@ ForwardedCommand *ForwardedCommandFactory::create(COMMAND cmd, Server &serv, Par
 	{
 		case NICK:
 			return makeNickForward(serv, dynamic_cast<NickParam*>(param));
+		case PONG:
+			return makePingPongForward(serv, dynamic_cast<PingPongParam*>(param));
 		default:
 			return NULL;
 	}

@@ -40,6 +40,10 @@ User &Server::get_user_by_id(size_t id)
 	return (clients[id]);
 }
 
+size_t	Server::n_users() {
+	return clients.size();
+}
+
 Channel &Server::get_by_channel_name(std::string name) {
 	for (size_t i = 0; i < servers.size(); i++) 
 		if (servers[i].get_id() != -1 && servers[i].get_name() == name)

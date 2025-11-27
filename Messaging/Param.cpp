@@ -71,6 +71,9 @@ void	PingPongParam::validateParam() {
 		i++;
 	if (tokens[i].type == CRLF)
 		throw BadSyntax(PING, ERR_NOORIGIN);
+	server1 = tokens[i++].str;
+	if (tokens[i].type == TOK_PARAM)
+		server2 = tokens[i].str;
 }
 
 Param	*ParamsFactory(COMMAND cmd, msgTokens tokens) {
@@ -91,3 +94,5 @@ Param	*ParamsFactory(COMMAND cmd, msgTokens tokens) {
 	}
 	return NULL;
 }
+
+

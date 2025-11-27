@@ -102,10 +102,29 @@ MessageOut  *handlePass(MessageIn in, Server &server) {
     return (NULL);
 }
 
+MessageOut  *handlePINGPONG(MessageIn in, Server &server) {
+    PingPongParam   *p = dynamic_cast<PingPongParam*>(in.getParams());
+    
+    // Asumimos que un PONG no está mal formado para clientes correctos.
+    if (p->command() == PONG)
+        return NULL;
+    if (p->server2.empty())
+        return (ForwardedCommandFactory::create(PONG, server, p));
+    else {
+        for (size_t i = 0; i < server.n_users(); i++) {
+            if (server.get_user_by_id(i).getHostname() == p->server2)
+                return (ForwardedCommandFactory::create(PONG, server, p));
+        }
+    }
+    return (NumericReplyFactory::create_and_target(ERR_NOSUCHSERVER, server, p, in.sender_id, 'u'));
+}
+
 fnHandlers::fnHandlers() {
     fun[NICK] = handleNick;
     fun[USER] = handleUser;
     fun[PASS] = handlePass;
+    fun[PING] = handlePINGPONG;
+    fun[PONG] = handlePINGPONG;
     //Asi con todos ...
 }
 

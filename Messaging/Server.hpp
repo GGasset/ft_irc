@@ -34,6 +34,7 @@ public:
 
 	User &get_user_by_nick(std::string nick);
 	User &get_user_by_id(size_t id);
+	size_t	n_users();
 	std::vector<User&> get_channel_users(const Channel channel);
 	Channel &get_by_channel_name(std::string name);
 	Channel &get_by_channel_id(size_t id);
