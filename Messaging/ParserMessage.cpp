@@ -1,16 +1,16 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   parseroMessage.cpp                                 :+:      :+:    :+:   */
+/*   ParserMessage.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: alvaro <alvaro@student.42.fr>              +#+  +:+       +#+        */
+/*   By: alvmoral <alvmoral@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/03 19:24:23 by alvmoral          #+#    #+#             */
-/*   Updated: 2025/11/05 17:50:35 by alvaro           ###   ########.fr       */
+/*   Updated: 2025/11/25 11:16:06 by alvmoral         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "Message.hpp"
+#include "ParserMessage.hpp"
 
 const std::string g_parseErrors[PERR_NONE] = {
     "Valid message",
@@ -67,6 +67,41 @@ COMMAND getCMD(const std::string &cmd) {
 		return COMMAND0;
 }
 
+std::string	getCommandname(COMMAND cmd) {
+	if (cmd == NICK)
+        return "NICK";
+    else if (cmd == USER)
+        return "USER";
+    else if (cmd == PING)
+        return "PING";
+    else if (cmd == PONG)
+        return "PONG";
+    else if (cmd == PASS)
+        return "PASS";
+    else if (cmd == QUIT)
+        return "QUIT";
+    else if (cmd == JOIN)
+        return "JOIN";
+    else if (cmd == PART)
+        return "PART";
+    else if (cmd == PRIVMSG)
+        return "PRIVMSG";
+    else if (cmd == MODE)
+        return "MODE";
+    else if (cmd == TOPIC)
+        return "TOPIC";
+    else if (cmd == INVITE)
+        return "INVITE";
+    else if (cmd == KICK)
+        return "KICK";
+    else if (cmd == NOTICE)
+        return "NOTICE";
+    else if (cmd == NAMES)
+        return "NAMES";
+	else
+		return "";
+}
+
 // RFC 1035: 63 chars per label, 255 total max
 bool isValidServerName(const std::string& name)
 {
@@ -108,6 +143,7 @@ bool isValidServerName(const std::string& name)
 
 // Define sets of restricted characters
 #define NOSPCRLFCL      "\r\n\0 :"
+#define USERCHARS      "\r\n\0 @"
 #define NOSPCRLFCL_TRAIL "\r\n\0"
 #define RESERVED_CHARS  "\r\n\0 @"
 #define SPECIAL_CHARS   "[]\\`^{}_"
@@ -130,6 +166,11 @@ bool areAllCharsAllowed(const std::string& str, const std::string& disallowedSet
 inline bool isSpecialChar(char c)
 {
 	return isCharInSet(c, SPECIAL_CHARS);
+}
+
+bool isUserChar(char c)
+{
+	return !isCharInSet(c, USERCHARS);
 }
 
 inline bool isReservedChar(char c)
@@ -219,15 +260,22 @@ ParseStatus	checkPrefix(const msgTokens &tokens, size_t &i) {
 ParseStatus	checkCommand(MessageIn &ret, const msgTokens &tokens, size_t &i) {
 	msg_token	command = tokens[i++];
 	COMMAND		ret_cmd = getCMD(command.str);
-	
+
+	// std::cout << "comando: " << command.str << "--" << std::endl;
+	// if (command.type == SPACE)
+	// 	return (PERR_INVALID_COMMAND);
 	if (command.type == WORD
 		&& (command.str.length() > 12
 		|| ret_cmd == COMMAND0))
 		return (PERR_INVALID_COMMAND);
-	if (command.type == NUMBER
+	else if (command.type == NUMBER
 		&& command.str.length() > 3)
 		return (PERR_NUMERIC_COMMAND_TOO_LONG);
-	ret.cmd = ret_cmd;
+	else if (command.type != WORD
+			&& command.type != NUMBER
+			&& command.type != CRLF)
+		return (PERR_MISSING_COMMAND);
+	ret.setCommand(ret_cmd);
 	return (VALID_MSG);
 }
 
@@ -260,7 +308,9 @@ ParseStatus	checkLenMsg(const msgTokens &tokens) {
 }
 
 MessageIn   parseMessage(msgTokens tokens, ParseStatus &status) {
-    MessageIn   ret = {.tokens = tokens, .cmd = COMMAND0};
+	MessageIn	ret;
+	
+	ret.tokens = tokens;
 	size_t		i = 0;
 
 	status = checkLenMsg(tokens);

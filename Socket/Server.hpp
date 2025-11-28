@@ -1,16 +1,19 @@
+#pragma once
+
 #include <sys/epoll.h>
 #include <cstddef>
 #include <string>
 #include <tuple>
 #include <vector>
 #include <queue>
+#include <sys/epoll.h>
 
 #include "User.hpp"
 #include "Channel.hpp"
 
 #define READ_SIZE 696
 
-int signal_server_stop;
+extern int signal_server_stop;
 
 class Server
 {
@@ -52,9 +55,10 @@ public:
 
 
 	User &get_user_by_nick(std::string nick);
+	User &get_user_by_id(size_t id);
 	std::vector<User&> get_channel_users(const Channel channel);
 	Channel &get_by_channel_name(std::string name);
-	Channel &get_by_channel_(std::string name);
+	Channel &get_by_channel_id(size_t id);
 
 	void stop();
 

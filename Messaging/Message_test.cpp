@@ -1,4 +1,4 @@
-#include "Message.hpp"
+#include "ParserMessage.hpp"
 
 void comparar_vectores(const std::vector<std::string>& a,
                        const std::vector<std::string>& b)
@@ -88,9 +88,9 @@ void	test_validity(size_t id, std::string packet, msgTokens testT, ParseStatus t
 	in = parseMessage(tokens, status);
 	std::cout << g_parseErrors[status] << std::endl;
 	std::cout << "[status]: " << status << " [testStatus]: " << testStatus << std::endl;
-	std::cout << "[cmd]: " << in.cmd << " [testCmd]: " << testCommand << std::endl;
+	std::cout << "[cmd]: " << in.getCommand() << " [testCmd]: " << testCommand << std::endl;
 	assert(status == testStatus);
-	assert(in.cmd == testCommand);
+	assert(in.getCommand() == testCommand);
 	std::cout << "---------------------------------\n";
 }
 
@@ -125,7 +125,7 @@ int main(void)
     // packet = "JOIN #cthullu\r\nTOPIC #cthullu :literatura de terror\r\n";
     // packet_msgs = getMsgs(packet);
     // test = {"JOIN #cthullu\r\n", "TOPIC #cthullu :literatura de terror\r\n"};
-	// // print_msg_test(4, packet_msgs, test);
+	// print_msg_test(4, packet_msgs, test);
 
 	// testT = {
 	// 	(msg_token) {WORD, "JOIN"},
@@ -172,11 +172,11 @@ int main(void)
 	testT = {
 		(msg_token) {WORD, "USER"},
 		(msg_token) {SPACE, " "},
-		(msg_token) {PARAM, "alvaro"},
+		(msg_token) {TOK_PARAM, "alvaro"},
 		(msg_token) {SPACE, " "},
-		(msg_token) {PARAM, "0"},
+		(msg_token) {TOK_PARAM, "0"},
 		(msg_token) {SPACE, " "},
-		(msg_token) {PARAM, "*"},
+		(msg_token) {TOK_PARAM, "*"},
 		(msg_token) {SPACE, " "},
 		(msg_token) {TRAIL, "Álvaro Martínez"},
 		(msg_token) {CRLF, "\r\n"}
@@ -212,7 +212,7 @@ int main(void)
 		(msg_token) {SPACE, " "},
 		(msg_token) {WORD, "PRIVMSG"},
 		(msg_token) {SPACE, " "},
-		(msg_token) {PARAM, "#canal"},
+		(msg_token) {TOK_PARAM, "#canal"},
 		(msg_token) {SPACE, " "},
 		(msg_token) {TRAIL, "prefijo vacío"},
 		(msg_token) {CRLF, "\r\n"}
@@ -226,7 +226,7 @@ int main(void)
 		(msg_token) {SPACE, " "},
 		(msg_token) {WORD, "PRIVMSG"},
 		(msg_token) {SPACE, " "},
-		(msg_token) {PARAM, "#canal"},
+		(msg_token) {TOK_PARAM, "#canal"},
 		(msg_token) {SPACE, " "},
 		(msg_token) {TRAIL, "prefijo inválido"},
 		(msg_token) {CRLF, "\r\n"}
@@ -240,9 +240,9 @@ int main(void)
 		(msg_token) {SPACE, " "},
 		(msg_token) {WORD, "ER@HOST"},
 		(msg_token) {SPACE, " "},
-		(msg_token) {PARAM, "PRIVMSG"},
+		(msg_token) {TOK_PARAM, "PRIVMSG"},
 		(msg_token) {SPACE, " "},
-		(msg_token) {PARAM, "#canal"},
+		(msg_token) {TOK_PARAM, "#canal"},
 		(msg_token) {SPACE, " "},
 		(msg_token) {TRAIL, "prefijo inválido"},
 		(msg_token) {CRLF, "\r\n"}
@@ -256,9 +256,9 @@ int main(void)
 		(msg_token) {SPACE, " "},
 		(msg_token) {WORD, "ER@HOST"},
 		(msg_token) {SPACE, " "},
-		(msg_token) {PARAM, "PRIVMSG"},
+		(msg_token) {TOK_PARAM, "PRIVMSG"},
 		(msg_token) {SPACE, " "},
-		(msg_token) {PARAM, "#canal"},
+		(msg_token) {TOK_PARAM, "#canal"},
 		(msg_token) {SPACE, " "},
 		(msg_token) {TRAIL, "prefijo inválido"},
 		(msg_token) {CRLF, "\r\n"}
@@ -270,7 +270,7 @@ int main(void)
 	/* Test 15 — NICK simple */
 	packet = "NICK Alvaro\r\n";
 	testT = {
-		{WORD, "NICK"}, {SPACE, " "}, {PARAM, "Alvaro"}, {CRLF, "\r\n"}
+		{WORD, "NICK"}, {SPACE, " "}, {TOK_PARAM, "Alvaro"}, {CRLF, "\r\n"}
 	};
 	test_validity(15, packet, testT, VALID_MSG, NICK);
 
@@ -292,7 +292,7 @@ int main(void)
 	/* Test 18 — JOIN sin key */
 	packet = "JOIN #literatura\r\n";
 	testT = {
-		{WORD, "JOIN"}, {SPACE, " "}, {PARAM, "#literatura"}, {CRLF, "\r\n"}
+		{WORD, "JOIN"}, {SPACE, " "}, {TOK_PARAM, "#literatura"}, {CRLF, "\r\n"}
 	};
 	test_validity(idx++, packet, testT, VALID_MSG, JOIN);
 
@@ -317,8 +317,8 @@ int main(void)
 	/* Test 21 — MODE con argumentos mixtos */
 	packet = "MODE #canal +ov Alvaro,Belen\r\n";
 	testT = {
-		{WORD, "MODE"}, {SPACE, " "}, {PARAM, "#canal"}, {SPACE, " "},
-		{PARAM, "+ov"}, {SPACE, " "}, {COMMA_LIST, "Alvaro,Belen"}, {CRLF, "\r\n"}
+		{WORD, "MODE"}, {SPACE, " "}, {TOK_PARAM, "#canal"}, {SPACE, " "},
+		{TOK_PARAM, "+ov"}, {SPACE, " "}, {COMMA_LIST, "Alvaro,Belen"}, {CRLF, "\r\n"}
 	};
 	test_validity(idx++, packet, testT, VALID_MSG, MODE);
 
@@ -326,7 +326,7 @@ int main(void)
 	packet = ":Ramon PRIVMSG #literatura :Hola\r\n";
 	testT = {
 		{PREFIX, ":Ramon"}, {SPACE, " "}, {WORD, "PRIVMSG"}, {SPACE, " "},
-		{PARAM, "#literatura"}, {SPACE, " "}, {TRAIL, "Hola"}, {CRLF, "\r\n"}
+		{TOK_PARAM, "#literatura"}, {SPACE, " "}, {TRAIL, "Hola"}, {CRLF, "\r\n"}
 	};
 	test_validity(idx++, packet, testT, VALID_MSG, PRIVMSG);
 
@@ -334,7 +334,7 @@ int main(void)
 	packet = ":Ramon!lector PRIVMSG #libros :Buenos días\r\n";
 	testT = {
 		{PREFIX, ":Ramon!lector"}, {SPACE, " "}, {WORD, "PRIVMSG"}, {SPACE, " "},
-		{PARAM, "#libros"}, {SPACE, " "}, {TRAIL, "Buenos días"}, {CRLF, "\r\n"}
+		{TOK_PARAM, "#libros"}, {SPACE, " "}, {TRAIL, "Buenos días"}, {CRLF, "\r\n"}
 	};
 	test_validity(idx++, packet, testT, PERR_PREFIX_MISSING_HOST, COMMAND0);
 
@@ -342,7 +342,7 @@ int main(void)
 	packet = ":Ramon!lector@biblioteca PRIVMSG #libros :¡Hola!\r\n";
 	testT = {
 		{PREFIX, ":Ramon!lector@biblioteca"}, {SPACE, " "}, {WORD, "PRIVMSG"},
-		{SPACE, " "}, {PARAM, "#libros"}, {SPACE, " "}, {TRAIL, "¡Hola!"},
+		{SPACE, " "}, {TOK_PARAM, "#libros"}, {SPACE, " "}, {TRAIL, "¡Hola!"},
 		{CRLF, "\r\n"}
 	};
 	test_validity(idx++, packet, testT, VALID_MSG, PRIVMSG);
@@ -351,7 +351,7 @@ int main(void)
 	packet = ":irc.local 001 Alvaro :Bienvenido\r\n";
 	testT = {
 		{PREFIX, ":irc.local"}, {SPACE, " "}, {NUMBER, "001"}, {SPACE, " "},
-		{PARAM, "Alvaro"}, {SPACE, " "}, {TRAIL, "Bienvenido"}, {CRLF, "\r\n"}
+		{TOK_PARAM, "Alvaro"}, {SPACE, " "}, {TRAIL, "Bienvenido"}, {CRLF, "\r\n"}
 	};
 	test_validity(idx++, packet, testT, VALID_MSG, COMMAND0);
 
@@ -359,7 +359,7 @@ int main(void)
 	packet = ": PRIVMSG #canal :mensaje\r\n";
 	testT = {
 		{PREFIX, ":"}, {SPACE, " "}, {WORD, "PRIVMSG"}, {SPACE, " "},
-		{PARAM, "#canal"}, {SPACE, " "}, {TRAIL, "mensaje"}, {CRLF, "\r\n"}
+		{TOK_PARAM, "#canal"}, {SPACE, " "}, {TRAIL, "mensaje"}, {CRLF, "\r\n"}
 	};
 	test_validity(idx++, packet, testT, PERR_PREFIX_INVALID_SERVERNAME, COMMAND0);
 
@@ -367,14 +367,14 @@ int main(void)
 	packet = ":irc.local 376 Alvaro :End of MOTD\r\n";
 	testT = {
 		{PREFIX, ":irc.local"}, {SPACE, " "}, {NUMBER, "376"}, {SPACE, " "},
-		{PARAM, "Alvaro"}, {SPACE, " "}, {TRAIL, "End of MOTD"}, {CRLF, "\r\n"}
+		{TOK_PARAM, "Alvaro"}, {SPACE, " "}, {TRAIL, "End of MOTD"}, {CRLF, "\r\n"}
 	};
 	test_validity(idx++, packet, testT, VALID_MSG, COMMAND0);
 
 	/* Test 28 — Comando en minúsculas */
 	packet = "join #literatura\r\n";
 	testT = {
-		{WORD, "JOIN"}, {SPACE, " "}, {PARAM, "#literatura"}, {CRLF, "\r\n"}
+		{WORD, "JOIN"}, {SPACE, " "}, {TOK_PARAM, "#literatura"}, {CRLF, "\r\n"}
 	};
 	test_validity(idx++, packet, testT, VALID_MSG, JOIN);
 
@@ -382,7 +382,7 @@ int main(void)
 	packet = ":aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa PRIVMSG #a :msg\r\n";
 	testT = {
 		{PREFIX, ":aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},
-		{SPACE, " "}, {WORD, "PRIVMSG"}, {SPACE, " "}, {PARAM, "#a"}, {SPACE, " "},
+		{SPACE, " "}, {WORD, "PRIVMSG"}, {SPACE, " "}, {TOK_PARAM, "#a"}, {SPACE, " "},
 		{TRAIL, "msg"}, {CRLF, "\r\n"}
 	};
 	test_validity(idx++, packet, testT, PERR_PREFIX_LENGTH, COMMAND0);
@@ -391,9 +391,103 @@ int main(void)
 	packet = ":A[]\\`^{}_- PRIVMSG #canal :chars válidos\r\n";
 	testT = {
 		{PREFIX, ":A[]\\`^{}_-"}, {SPACE, " "}, {WORD, "PRIVMSG"}, {SPACE, " "},
-		{PARAM, "#canal"}, {SPACE, " "}, {TRAIL, "chars válidos"}, {CRLF, "\r\n"}
+		{TOK_PARAM, "#canal"}, {SPACE, " "}, {TRAIL, "chars válidos"}, {CRLF, "\r\n"}
 	};
-	test_validity(idx++, packet, testT, VALID_MSG, PRIVMSG);
+	test_validity(idx++, packet, testT, PERR_PREFIX_INVALID_SERVERNAME, COMMAND0);
 	
 	/* Test 31 */
+	packet = ":A[]!\\^@{}_- PRIVMSG #canal :chars válidos\r\n";
+	testT = {
+		{PREFIX, ":A[]!\\^@{}_-"}, {SPACE, " "}, {WORD, "PRIVMSG"}, {SPACE, " "},
+		{TOK_PARAM, "#canal"}, {SPACE, " "}, {TRAIL, "chars válidos"}, {CRLF, "\r\n"}
+	};
+	// test_validity(idx++, packet, testT, VALID_MSG, PRIVMSG);
+
+	/* Test 32 Prefijo doble @addtogroup*/
+	packet = ":Nick!user@host@ PRIVMSG #canal :doble arroba\r\n";
+	testT = {
+		{PREFIX, ":Nick!user@host@"}, {SPACE, " "}, {WORD, "PRIVMSG"}, {SPACE, " "},
+		{TOK_PARAM, "#canal"}, {SPACE, " "}, {TRAIL, "doble arroba"}, {CRLF, "\r\n"}
+	};
+	test_validity(32, packet, testT, PERR_PREFIX_INVALID_HOST, COMMAND0);
+
+	/* Test 33 -- Esta la entiende como nick invalido, pero para mi es comando invalido.*/
+	packet = ":Ni ck!user@host PRIVMSG #canal :nick inválido\r\n";
+	testT = {
+		{PREFIX, ":Ni"}, {SPACE, " "}, {WORD, "CK!USER@HOST"}, {SPACE, " "},
+		{TOK_PARAM, "PRIVMSG"}, {SPACE, " "}, {TOK_PARAM, "#canal"}, {SPACE, " "},
+		{TRAIL, "nick inválido"}, {CRLF, "\r\n"}
+	};
+	test_validity(33, packet, testT, PERR_INVALID_COMMAND, COMMAND0);
+
+	/* Test 34  Válido*/
+	packet = "PRIVMSG #canal :hola:adiós\r\n";
+	testT = {
+		{WORD, "PRIVMSG"}, {SPACE, " "}, {TOK_PARAM, "#canal"}, {SPACE, " "},
+		{TRAIL, "hola:adiós"}, {CRLF, "\r\n"}
+	};
+	test_validity(34, packet, testT, VALID_MSG, PRIVMSG);
+
+	/* Test 35 */
+	packet = "PRIVMSG #canal :\r\n";
+	testT = {
+		{WORD, "PRIVMSG"}, {SPACE, " "}, {TOK_PARAM, "#canal"}, {SPACE, " "},
+		{TRAIL, ""}, {CRLF, "\r\n"}
+	};
+	test_validity(35, packet, testT, VALID_MSG, PRIVMSG);
+
+	/* Test 36 */
+	packet = "PRIVMSG    #canal    :hola\r\n";
+	testT = {
+		{WORD, "PRIVMSG"}, {SPACE, " "}, {TOK_PARAM, "#canal"}, {SPACE, " "},
+		{TRAIL, "hola"}, {CRLF, "\r\n"}
+	};
+	test_validity(36, packet, testT, VALID_MSG, PRIVMSG);
+
+	/* Test 37 */
+	packet = "TOPIC #a :literatura gótica \r\n";
+	testT = {
+		{WORD, "TOPIC"}, {SPACE, " "}, {TOK_PARAM, "#a"}, {SPACE, " "},
+		{TRAIL, "literatura gótica "}, {CRLF, "\r\n"}
+	};
+	test_validity(37, packet, testT, VALID_MSG, TOPIC);
+
+	/* Test 38 */
+	packet = "PRIVMSG #canal :hola\x07\r\n";
+	testT = {
+		{WORD, "PRIVMSG"}, {SPACE, " "}, {TOK_PARAM, "#canal"}, {SPACE, " "},
+		{TRAIL, "hola\x07"}, {CRLF, "\r\n"}
+	};
+	test_validity(38, packet, testT, VALID_MSG, PRIVMSG);
+
+	/* Test 39 */
+	packet = "PRIVMSG #canal :mañana ☀️\r\n";
+	testT = {
+		{WORD, "PRIVMSG"}, {SPACE, " "}, {TOK_PARAM, "#canal"}, {SPACE, " "},
+		{TRAIL, "mañana ☀️"}, {CRLF, "\r\n"}
+	};
+	test_validity(39, packet, testT, VALID_MSG, PRIVMSG);
+
+	/* Test 40 */
+	packet = "RATON #canal :buenos dias\r\n";
+	testT = {
+		{WORD, "RATON"}, {SPACE, " "}, {TOK_PARAM, "#canal"},{SPACE, " "},
+		{TRAIL, "buenos dias"}, {CRLF, "\r\n"}
+	};
+	test_validity(40, packet, testT, PERR_INVALID_COMMAND, COMMAND0);
+
+	/* Test 41 */
+	packet = "\r\n";
+	testT = {
+		{CRLF, "\r\n"}
+	};
+	test_validity(41, packet, testT, VALID_MSG, COMMAND0);
+
+	/* Test 42 */
+	packet = " \r\n";
+	testT = {
+		{SPACE, " "}, {CRLF, "\r\n"}
+	};
+	test_validity(42, packet, testT, PERR_MISSING_COMMAND, COMMAND0);
 }
+

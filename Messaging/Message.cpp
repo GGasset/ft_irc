@@ -6,7 +6,7 @@
 /*   By: alvaro <alvaro@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/03 19:24:29 by alvmoral          #+#    #+#             */
-/*   Updated: 2025/11/05 18:19:18 by alvaro           ###   ########.fr       */
+/*   Updated: 2025/11/24 13:25:36 by alvaro           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -141,7 +141,7 @@ msgTokens	msgTokenizer(std::string msg)
 			if (param.find(",") != std::string::npos)
 				ret.push_back((msg_token) {COMMA_LIST, param});
 			else
-				ret.push_back((msg_token) {PARAM, param});
+				ret.push_back((msg_token) {TOK_PARAM, param});
 		}
 		else if (state == PRIX)
 		{
@@ -154,15 +154,22 @@ msgTokens	msgTokenizer(std::string msg)
 		}
 		else if (state == CMD)
 		{
-			param = getWORD(msg, begin);
-			ret.push_back((msg_token) {isNUMBER(param) ? NUMBER: WORD, capitalize(param)});
+			if (msg[begin] == '\r'
+				&& msg[begin + 1] == '\n')
+			{
+				ret.push_back((msg_token) {CRLF, "\r\n"});
+				break ;
+			}
+			else if (isspace(msg[begin]))
+				newSPACE(ret, msg, begin);
+			else
+			{
+				param = getWORD(msg, begin);
+				ret.push_back((msg_token) {isNUMBER(param) ? NUMBER: WORD, capitalize(param)});
+			}
 			state = PAR;
 		}
 	}
 	return (ret);
 }
 
-MessageOut fnHandlers::operator()(COMMAND cmd, MessageIn msg)
-{
-	return fun[cmd](msg);
-}

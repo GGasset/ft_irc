@@ -1,5 +1,20 @@
 #include "User.hpp"
 
+User::User() {}
+
+User::User(std::string nick, size_t id): nick(nick), id(id)  {}
+
+User &User::operator=(const User &other) {
+	id = other.id;
+	is_channel_operator = other.is_channel_operator;
+	registered = other.registered;
+	realname = other.realname;
+	username = other.username;
+	hostname = other.hostname;
+	joined_channels_ids = other.joined_channels_ids;
+	return (*this);
+}
+
 std::vector<std::string> User::msg_sent(std::string data)
 {
 	std::vector<std::string> out;
@@ -23,7 +38,23 @@ std::vector<std::string> User::msg_sent(std::string data)
 	return out;
 }
 
-std::string User::getNick(void) const{
+size_t	User::get_joined_channel(size_t id) {
+	return (joined_channels_ids[id]);
+}
+
+std::vector<size_t>	User::get_joined_channels(void) {
+	return (joined_channels_ids);
+}
+
+ssize_t User::get_id() {
+	return (id);
+}
+
+void User::set_id(ssize_t id) {
+	this->id = id;
+}
+
+std::string User::get_nick(void) const{
 	return (nick);
 }
 
@@ -31,6 +62,45 @@ void	User::setNick(std::string nick) {
 	this->nick = nick;
 }
 
-std::vector<size_t>	User::get_joined_channel(size_t id) {
-	return (joined_channels_ids[id]);
+
+std::string User::getUsername(void) const {
+	return (username);
+}
+
+std::string User::getRealname(void) const {
+	return (realname);
+}
+
+std::string User::getHostname(void) const {
+	return (hostname);
+}
+
+void	User::set_username(std::string user) {
+	this->username = user;
+}
+
+void	User::set_realname(std::string real) {
+	this->realname = real;
+}
+
+bool	User::passwd_match_pop(bool cond) {
+	bool	ret = this->passwd_match;
+	passwd_match = cond;
+	return (ret);
+}
+
+bool	User::are_names_registered() {
+    if (!get_nick().empty()
+    && !getUsername().empty()
+    && !getRealname().empty())
+		return (true);
+	return (false);
+}
+
+bool	User::is_registered() {
+	return (registered);
+}
+
+void	User::register_user() {
+	registered = true;
 }

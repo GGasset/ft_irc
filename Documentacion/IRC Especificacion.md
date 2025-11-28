@@ -1,3 +1,21 @@
+- [[#Fase de Diseño|Fase de Diseño]]
+	- [[#Fase de Diseño#Diseño de Estructuras Internas (Usuarios, Canales, Estado Global)|Diseño de Estructuras Internas (Usuarios, Canales, Estado Global)]]
+	- [[#Fase de Diseño#Diseño del Parser LL(1) de Mensajes IRC|Diseño del Parser LL(1) de Mensajes IRC]]
+	- [[#Fase de Diseño#Diseño de Manejadores de Comandos IRC|Diseño de Manejadores de Comandos IRC]]
+	- [[#Fase de Diseño#Diseño de Infraestructura de Respuestas IRC|Diseño de Infraestructura de Respuestas IRC]]
+- [[#Fase de Implementación|Fase de Implementación]]
+	- [[#Fase de Implementación#Implementación de Estructuras Internas|Implementación de Estructuras Internas]]
+	- [[#Fase de Implementación#Implementación del Parser LL(1)|Implementación del Parser LL(1)]]
+	- [[#Fase de Implementación#Implementación de Manejadores de Comandos|Implementación de Manejadores de Comandos]]
+	- [[#Fase de Implementación#Implementación de Infraestructura de Respuestas|Implementación de Infraestructura de Respuestas]]
+- [[#Fase de Pruebas|Fase de Pruebas]]
+	- [[#Fase de Pruebas#Pruebas Unitarias del Parser|Pruebas Unitarias del Parser]]
+	- [[#Fase de Pruebas#Pruebas Unitarias de Manejadores de Comandos|Pruebas Unitarias de Manejadores de Comandos]]
+		- [[#Pruebas Unitarias de Manejadores de Comandos#Pruebas de comandos de registro y usuario:|Pruebas de comandos de registro y usuario:]]
+		- [[#Pruebas Unitarias de Manejadores de Comandos#Pruebas de comandos de canal:|Pruebas de comandos de canal:]]
+		- [[#Pruebas Unitarias de Manejadores de Comandos#Pruebas de comandos de tópico, kick, invite, names, privmsg:|Pruebas de comandos de tópico, kick, invite, names, privmsg:]]
+	- [[#Fase de Pruebas#Pruebas de Escenarios Completos (Integración)|Pruebas de Escenarios Completos (Integración)]]
+	- [[#Fase de Pruebas#Pruebas de Validaciones Semánticas (Opcionales)|Pruebas de Validaciones Semánticas (Opcionales)]]
 
 # Guía de implementación de un servidor IRC en C++ (sin sockets)
 

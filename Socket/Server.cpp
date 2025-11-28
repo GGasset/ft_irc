@@ -22,7 +22,7 @@ Server::~Server()
 		close(client_fds[i]);
 		while (messages[i].size())
 		{
-			if (std::get<2>(messages[i].front())) delete[] std::get<0>(messages[i].front());
+			// if (std::get<2>(messages[i].front())) delete[] std::get<0>(messages[i].front());
 			messages[i].pop();
 		}
 	}
@@ -52,6 +52,23 @@ User &Server::get_user_by_nick(std::string nick)
 	for (size_t i = 0; i < clients.size(); i++) 
 		if (clients[i].get_id() != -1 && clients[i].get_nick() == nick)
 			return clients[i];	
+	return (clients[0]);
+}
+
+User &Server::get_user_by_id(size_t id)
+{
+	return (clients[id]);
+}
+
+Channel &Server::get_by_channel_name(std::string name) {
+	for (size_t i = 0; i < servers.size(); i++) 
+		if (servers[i].get_id() != -1 && servers[i].get_name() == name)
+			return servers[i];	
+	return (servers[0]);
+}
+
+Channel &Server::get_by_channel_id(size_t id) {
+	return (servers[id]);
 }
 
 ssize_t Server::get_user_index_by_fd(int fd)
