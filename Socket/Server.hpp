@@ -12,6 +12,7 @@
 #include "Channel.hpp"
 
 #define READ_SIZE 69420
+#define MAX_EVENTS 5
 
 extern int signal_server_stop;
 
@@ -20,9 +21,11 @@ class Server
 private:
 	bool				stop_server;
 	int					sockfd;
+	int					epollfd;
+	struct epoll_event event, events[MAX_EVENTS];
 
 	// Pool of users loaded from disk, used for authentication
-	std::vector<User>	loaded_users;
+	//std::vector<User>	loaded_users;
 
 	size_t 				max_client_id;
 	size_t				max_channel_id;

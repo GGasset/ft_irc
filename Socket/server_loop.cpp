@@ -6,7 +6,6 @@
 
 #include "Server.hpp"
 
-#define MAX_EVENTS 5
 
 void handle_signals(int signal)
 {
@@ -75,6 +74,10 @@ void Server::handle_event(const epoll_event event, int sockfd)
 		client_fds.push_back(new_client_fd);
 		clients.push_back(User());
 		messages.push_back(std::queue<std::tuple<void *, size_t, bool>>());
+
+		this->event.events = EPOLLIN | EPOLLOUT;
+		this->event.data.fd = new_client_fd;
+		if (epoll_ctl(epollfd, EPOLL_CTL_ADD, new_client_fd, &this->event)) stop();
 	}
 	else
 	{
@@ -96,9 +99,7 @@ int Server::loop(size_t PORT)
 
 	sockfd = setup_sockfd(PORT);
 	if (sockfd == -1) return true;
-	int epollfd = epoll_create1(0);
-
-	struct epoll_event event, events[MAX_EVENTS];
+	epollfd = epoll_create1(0);
 
 	event.events = EPOLLIN;
 	event.data.fd = sockfd;
@@ -113,19 +114,7 @@ int Server::loop(size_t PORT)
 		if (event_n == -1) {err = errno != EINTR; continue;}
 
 		for (size_t i = 0; i < event_n; i++)
-			if (events[i].data.fd == sockfd) // Socket fd is redeable (someone is trying to connect)
-			{
-				int new_client_fd = accept(sockfd, 0, 0);
-
-				// Add client
-			}
-			else
-			{
-				if (events[i].events & EPOLLIN)
-					handle_read_event(events[i].data.fd);
-				if (events[i].events & EPOLLOUT)
-					handle_write_event(events[i].data.fd);
-			}		
+			handle_event(events[i], sockfd);
 	}
 	
 	close(sockfd);
