@@ -11,6 +11,7 @@ Server::Server()
 {
 	stop_server = false;
 	sockfd = -1;
+	epollfd = -1;
 	max_client_id = 0;
 	max_channel_id = 0;
 }
@@ -19,10 +20,14 @@ Server::~Server()
 {
 	for (size_t i = 0; i < clients.size(); i++)
 	{
+		event.events = EPOLLIN | EPOLLOUT;
+		event.data.fd = client_fds[i];
+		epoll_ctl(epollfd, EPOLL_CTL_DEL, client_fds[i], &event);
+
 		close(client_fds[i]);
 		while (messages[i].size())
 		{
-			// if (std::get<2>(messages[i].front())) delete[] std::get<0>(messages[i].front());
+			if (std::get<2>(messages[i].front())) delete[] std::get<0>(messages[i].front());
 			messages[i].pop();
 		}
 	}
@@ -30,11 +35,38 @@ Server::~Server()
 	clients.clear();
 	messages.clear();
 	servers.clear();
+
+	event.events = EPOLLIN;
+	event.data.fd = sockfd;
+	epoll_ctl(sockfd, EPOLL_CTL_DEL, sockfd, &event);
+
+	close(sockfd);
+	sockfd = -1;
+	close(epollfd);
+	epollfd = -1;
 }
 
 void Server::disconnect_user(size_t user_index)
 {
 	if (user_index >= clients.size()) throw;
+
+	std::queue<std::tuple<void *, size_t, bool>> user_messages = messages[user_index];
+	while (user_messages.size())
+	{
+		if (std::get<2>(user_messages.front()))
+			delete[] std::get<0>(user_messages.front());
+		user_messages.pop();
+	}
+
+	event.data.fd = client_fds[user_index];
+	event.events = EPOLLIN | EPOLLOUT;
+	if (epoll_ctl(epollfd, EPOLL_CTL_DEL, client_fds[user_index], &event)) stop();
+
+	close(client_fds[user_index]);
+	client_fds.erase(client_fds.begin() + user_index);
+	messages.erase(messages.begin() + user_index);
+	clients.erase(clients.begin() + user_index);
+
 }
 
 void Server::add_msg(void *msg, size_t len, bool is_heap, User &receiver)
