@@ -11,8 +11,8 @@
 #include "User.hpp"
 #include "Channel.hpp"
 
-#define READ_SIZE 69420
-#define MAX_EVENTS 5
+#define READ_SIZE 420
+#define MAX_EVENTS 69
 
 extern int signal_server_stop;
 
