@@ -11,7 +11,7 @@
 #include "User.hpp"
 #include "Channel.hpp"
 
-#define READ_SIZE 696
+#define READ_SIZE 69420
 
 extern int signal_server_stop;
 
@@ -39,10 +39,6 @@ private:
 	void handle_write_event(int fd);
 	void handle_event(const epoll_event event, int sockfd);
 
-
-	void write_user(User user, std::ofstream stream);
-	User read_user();
-
 	void route_message(std::string msg, User &sender, size_t user_index);
 
 public:
@@ -61,12 +57,6 @@ public:
 	Channel &get_by_channel_id(size_t id);
 
 	void stop();
-
-	// 	Returns true on errors
-	int write_data_to_file(std::string path);
-
-	// Returns true on errors
-	int load_from_file(std::string path);
 
 	std::vector<User>	&getUsers(void);
 
