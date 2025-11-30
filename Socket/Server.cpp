@@ -119,3 +119,29 @@ User *Server::get_user_by_fd(int fd)
 	if (user_index) return 0;
 	return &clients[user_index];
 }
+
+size_t	Server::n_users() {
+	return clients.size();
+}
+
+void	Server::addUser(User u) {
+	clients.push_back(u);
+	client_fds.push_back(-1);
+	messages.push_back(std::queue<std::tuple<void *, size_t, bool>>());
+}
+
+void	Server::addChannel(Channel ch) {
+	servers.push_back(ch);
+}
+
+void	Server::addNickHistory(std::string nick) {
+	nick_history.push_back(nick);
+}
+
+std::vector<std::string> Server::get_nick_history() {
+	return nick_history;
+}
+
+std::vector<User>	&Server::getUsers(void) {
+	return (clients);
+}
