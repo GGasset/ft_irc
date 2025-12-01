@@ -69,7 +69,6 @@ public:
 	void	addChannel(Channel ch);
 	void	addNickHistory(std::string nick);
 	std::vector<std::string> get_nick_history();
-	size_t	n_users();
 
 	void stop();
 
