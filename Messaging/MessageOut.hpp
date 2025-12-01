@@ -411,6 +411,23 @@ class PongForwardedCommand: public ForwardedCommand {
 		}
 };
 
+class QuitForwardedCommand: public ForwardedCommand {
+	QuitParam	*p;
+
+	public:
+		QuitForwardedCommand(Server &server, QuitParam *param): MessageOut(server),
+																ForwardedCommand(server, param),
+																p(param) {}
+
+		void	assemble_msg() {
+			rpl_msg = "PASS" + p->quit_msg;
+		}
+};
+
+// class JoinForwardedCommand: public ForwardedCommand {
+
+// };
+
 class ForwardedCommandFactory {
 	Server	&server;
 	

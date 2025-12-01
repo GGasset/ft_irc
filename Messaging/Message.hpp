@@ -21,6 +21,7 @@ bool isNUMBER(const std::string &param);
 char iterStr(const std::string& str);
 msgTokens msgTokenizer(std::string msg);
 void newSPACE(msgTokens &ret, std::string &msg, size_t &begin);
+void splitByComma(const std::string &s, std::vector<std::string> &out);
 
 /* Parser */
 COMMAND getCMD(const std::string &cmd);
@@ -35,5 +36,6 @@ bool isValidHostName(const std::string &hostaname);
 bool isValidNickName(const std::string &nickname); 
 bool isValidServerName(const std::string& name);
 bool isValidUserName(const std::string &username);
+bool isValidChannelName(const std::string &name);
 
 #endif

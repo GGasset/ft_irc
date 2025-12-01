@@ -76,6 +76,12 @@ void	PingPongParam::validateParam() {
 		server2 = tokens[i].str;
 }
 
+QuitParam::QuitParam(msgTokens tokens): Param(QUIT, tokens) {}
+
+void	QuitParam::validateParam() {}
+
+
+
 Param	*ParamsFactory(COMMAND cmd, msgTokens tokens) {
 	switch (cmd)
 	{
@@ -89,6 +95,24 @@ Param	*ParamsFactory(COMMAND cmd, msgTokens tokens) {
 			return new PingPongParam(tokens);
 		case PONG:
 			return new PingPongParam(tokens);
+		case QUIT:
+			return new QuitParam(tokens);
+		case JOIN:
+			return new JoinParam(tokens);
+		case PART:
+			return new PartParam(tokens);
+		case PRIVMSG:
+			return new PrivMsgParam(tokens);
+		case NOTICE:
+			return new NoticeParam(tokens);
+		case TOPIC:
+			return new TopicParam(tokens);
+		case INVITE:
+			return new InviteParam(tokens);
+		case KICK:
+			return new KickParam(tokens);
+		case MODE:
+			return new ModeParam(tokens);
 		default:
 			NULL;
 	}

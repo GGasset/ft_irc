@@ -148,20 +148,6 @@ class PassParam: public Param {
 		virtual void	validateParam();
 };
 
-/* 
-Vale, pero como la comunicación entre servidores
-no hay que implementarla, 
-yo tengo que buscar solo hosts clientes.
-Si se relaciona con el hostname de algun cliente guardado
-en el estado entonces devuelvo PONG server,
-en caso contrario devuelvo el error 402. 
-En caso de que se indique server1 y server2, 
-trabajo como acabo de decir, 
-en caso de que solo este server1,
-como es un mensaje para mi y
-no un mensaje que tenga que pasar a otro servidor/cliente
- respondo con un PONG <a> y tan pancho, verdad?
-*/
 class PingPongParam: public Param {
 	public:
 		std::string server1; //El mensaje si no hay server2, el origen si hay server2
@@ -173,6 +159,228 @@ class PingPongParam: public Param {
 			return (*this);
 		}
 		virtual void	validateParam();
+};
+
+class QuitParam: public Param {
+	public:
+		std::string quit_msg;
+
+		QuitParam(msgTokens tokens);
+		~QuitParam() {}
+		QuitParam&	operator=(const QuitParam& other) {
+			return (*this);
+		}
+		virtual void	validateParam();
+
+};
+
+class JoinParam : public Param {
+public:
+    std::vector<std::string> channels;
+    std::vector<std::string> keys;
+
+    JoinParam(msgTokens tokens): Param(JOIN, tokens) {}
+    ~JoinParam() {}
+
+    virtual void validateParam() {
+        int i = 0;
+        while (tokens[i].type != TOK_PARAM)
+            i++;
+
+        if (tokens[i].type == CRLF)
+            throw BadSyntax(JOIN, ERR_NEEDMOREPARAMS);
+
+        // Channels (may be comma-separated)
+        std::string chanList = tokens[i++].str;
+        splitByComma(chanList, channels);
+
+        for (size_t j=0; j<channels.size(); ++j) {
+            if (!isValidChannelName(channels[j]))
+                throw BadSyntax(JOIN, ERR_BADCHANMASK);
+        }
+
+        // Optional keys
+        if (tokens[i].type == TOK_PARAM) {
+            std::string keyList = tokens[i].str;
+            splitByComma(keyList, keys);
+        }
+    }
+};
+
+class PartParam : public Param {
+public:
+    std::vector<std::string> channels;
+    std::string partMsg;
+
+    PartParam(msgTokens tokens): Param(PART, tokens) {}
+    ~PartParam() {}
+
+    virtual void validateParam() {
+        int i = 0;
+        while (tokens[i].type != TOK_PARAM)
+            i++;
+
+        if (tokens[i].type == CRLF)
+            throw BadSyntax(PART, ERR_NEEDMOREPARAMS);
+
+        std::string chanList = tokens[i++].str;
+        splitByComma(chanList, channels);
+
+        if (tokens[i].type == TOK_PARAM)
+            partMsg = tokens[i].str; // trailing
+    }
+};
+
+class PrivMsgParam : public Param {
+public:
+    std::string target;
+    std::string text;
+
+    PrivMsgParam(msgTokens tokens): Param(PRIVMSG, tokens) {}
+    ~PrivMsgParam() {}
+
+    virtual void validateParam() {
+        int i = 0;
+        while (tokens[i].type != TOK_PARAM)
+            i++;
+
+        if (tokens[i].type == CRLF)
+            throw BadSyntax(PRIVMSG, ERR_NORECIPIENT);
+
+        target = tokens[i++].str;
+
+        if (tokens[i].type != TOK_PARAM)
+            throw BadSyntax(PRIVMSG, ERR_NOTEXTTOSEND);
+
+        text = tokens[i].str;
+    }
+};
+
+class NoticeParam : public Param {
+public:
+    std::string target;
+    std::string text;
+
+    NoticeParam(msgTokens tokens): Param(NOTICE, tokens) {}
+    ~NoticeParam() {}
+
+    virtual void validateParam() {
+        int i = 0;
+        while (tokens[i].type != TOK_PARAM)
+            i++;
+        if (tokens[i].type == CRLF)
+            return;
+
+        target = tokens[i++].str;
+        if (tokens[i].type == TOK_PARAM)
+            text = tokens[i].str;
+    }
+};
+
+class TopicParam : public Param {
+public:
+    std::string channel;
+    std::string topic;
+
+    TopicParam(msgTokens tokens): Param(TOPIC, tokens) {}
+    ~TopicParam() {}
+
+    virtual void validateParam() {
+        int i = 0;
+        while (tokens[i].type != TOK_PARAM)
+            i++;
+
+        if (tokens[i].type == CRLF)
+            throw BadSyntax(TOPIC, ERR_NEEDMOREPARAMS);
+
+        channel = tokens[i++].str;
+
+        if (tokens[i].type == TOK_PARAM)
+            topic = tokens[i].str;
+    }
+};
+
+class InviteParam : public Param {
+public:
+    std::string nick;
+    std::string channel;
+
+    InviteParam(msgTokens tokens): Param(INVITE, tokens) {}
+    ~InviteParam() {}
+
+    virtual void validateParam() {
+        int i = 0;
+        while (tokens[i].type != TOK_PARAM)
+            i++;
+
+        if (tokens[i].type == CRLF)
+            throw BadSyntax(INVITE, ERR_NEEDMOREPARAMS);
+
+        nick = tokens[i++].str;
+
+        if (tokens[i].type != TOK_PARAM)
+            throw BadSyntax(INVITE, ERR_NEEDMOREPARAMS);
+
+        channel = tokens[i].str;
+    }
+};
+
+class KickParam : public Param {
+public:
+    std::string channel;
+    std::string user;
+    std::string comment;
+
+    KickParam(msgTokens tokens): Param(KICK, tokens) {}
+    ~KickParam() {}
+
+    virtual void validateParam() {
+        int i = 0;
+        while (tokens[i].type != TOK_PARAM)
+            i++;
+
+        if (tokens[i].type == CRLF)
+            throw BadSyntax(KICK, ERR_NEEDMOREPARAMS);
+
+        channel = tokens[i++].str;
+
+        if (tokens[i].type != TOK_PARAM)
+            throw BadSyntax(KICK, ERR_NEEDMOREPARAMS);
+
+        user = tokens[i++].str;
+
+        if (tokens[i].type == TOK_PARAM)
+            comment = tokens[i].str;
+    }
+};
+
+class ModeParam : public Param {
+public:
+    std::string channel;
+    std::string modeStr;
+    std::string modeArg;  // opcional, a veces nick o key
+
+    ModeParam(msgTokens tokens): Param(MODE, tokens) {}
+    ~ModeParam() {}
+
+    virtual void validateParam() {
+        int i = 0;
+        while (tokens[i].type != TOK_PARAM)
+            i++;
+
+        if (tokens[i].type == CRLF)
+            throw BadSyntax(MODE, ERR_NEEDMOREPARAMS);
+
+        channel = tokens[i++].str;
+
+        if (tokens[i].type == CRLF)
+            return; // MODE <channel> → listar modos
+
+        modeStr = tokens[i++].str;
+
+        if (tokens[i].type == TOK_PARAM)
+            modeArg = tokens[i].str;
+    }
 };
 
 Param	*ParamsFactory(COMMAND cmd, msgTokens tokens);

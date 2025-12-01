@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Message.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: alvaro <alvaro@student.42.fr>              +#+  +:+       +#+        */
+/*   By: alvmoral <alvmoral@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/03 19:24:29 by alvmoral          #+#    #+#             */
-/*   Updated: 2025/11/24 13:25:36 by alvaro           ###   ########.fr       */
+/*   Updated: 2025/12/01 19:19:09 by alvmoral         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -105,6 +105,27 @@ bool	isNUMBER(const std::string &param) {
 	}
 	return (true);
 }
+
+void splitByComma(const std::string &s, std::vector<std::string> &out)
+{
+    out.clear();
+    std::string temp;
+
+    for (size_t i = 0; i < s.size(); ++i)
+    {
+        if (s[i] == ',')
+        {
+            if (!temp.empty())
+                out.push_back(temp);
+            temp.clear();
+        }
+        else
+            temp.push_back(s[i]);
+    }
+    if (!temp.empty())
+        out.push_back(temp);
+}
+
 
 std::string	capitalize(const std::string &input) {
     std::string result = input;

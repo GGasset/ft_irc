@@ -6,7 +6,7 @@
 /*   By: alvmoral <alvmoral@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/03 19:24:23 by alvmoral          #+#    #+#             */
-/*   Updated: 2025/11/25 11:16:06 by alvmoral         ###   ########.fr       */
+/*   Updated: 2025/12/01 19:20:02 by alvmoral         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -214,6 +214,32 @@ bool	isValidUserName(const std::string &username) {
 
 bool	isValidHostName(const std::string &hostaname) {
 	return (isValidServerName(hostaname));
+}
+
+bool isValidChannelName(const std::string &name)
+{
+    if (name.empty())
+        return false;
+
+    // Prefix check
+    char p = name[0];
+    if (p != '&' && p != '#' && p != '+' && p != '!')
+        return false;
+
+    // Length limit (RFC 2811)
+    if (name.size() > 50)
+        return false;
+
+    for (size_t i = 1; i < name.size(); ++i)
+    {
+        char c = name[i];
+
+        // Forbidden characters
+        if (c == ' ' || c == '\x07' || c == ',' || c == ':')
+            return false;
+    }
+
+    return true;
 }
 
 ParseStatus	checkPrefix(const msgTokens &tokens, size_t &i) {
