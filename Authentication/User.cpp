@@ -20,7 +20,8 @@ std::vector<std::string> User::msg_sent(std::string data)
 	std::vector<std::string> out;
 	for (size_t i = 0; i < data.length(); i++)
 	{
-		char prev = i? -1 : data[i - 1];
+		char prev = i? data[i - 1] : -1;
+
 		if (prev == -1 && current_message.size()) prev = current_message.back(); 
 
 		char c = data[i];

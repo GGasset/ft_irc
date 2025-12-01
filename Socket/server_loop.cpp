@@ -6,6 +6,8 @@
 
 #include "Server.hpp"
 
+int signal_server_stop;
+
 
 void handle_signals(int signal)
 {
@@ -45,6 +47,7 @@ void Server::handle_read_event(int fd)
 	User *sender = get_user_by_fd(fd);
 	if (!sender) return;
 	std::vector<std::string> msgs = sender->msg_sent(read_data);
+	std::cout << "mensajisto tamaño, esto es lo que se envia por route_message\n";
 	for (size_t i = 0; i < msgs.size(); i++) route_message(msgs[i], *sender, sender_index);
 }
 

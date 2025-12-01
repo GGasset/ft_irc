@@ -2,10 +2,6 @@
 #include "fnHandlers.hpp"
 #include "ParserMessage.hpp"
 
-std::vector<User>	&Server::getUsers(void) {
-	return (clients);
-}
-
 /* Comandito para compilar.*/
 //c++ -g main.cpp Message.cpp ParserMessage.cpp Param.cpp MessageOut.cpp fnHandlers.cpp Server_Mock.cpp  ../Authentication/User.cpp  Channels/Channel.cpp -I../Authentication/ -IChannels/
 
@@ -23,6 +19,7 @@ bool prepare_message(const std::string &packet, Server &server, MessageIn &in, s
     in.sender_id = sender_id;
 
     Param *params = ParamsFactory(in.getCommand(), tokens);
+    std::cout << "Boludo generás parámetros?? " << std::endl; //testeo
 
     try {
         params->validateParam();
@@ -43,6 +40,7 @@ bool prepare_message(const std::string &packet, Server &server, MessageIn &in, s
 /* ---------- 3. HANDLE MESSAGE ----------- */
 void handle_message(MessageIn &in, Server &server, const std::string &packet) {
     MessageOut *ret = fnHandlers()(in.getCommand(), in, server);
+    std::cout << "Que paso???? con los handelers" << std::endl; //testeo
     if (ret != NULL)
         ret->deliver();
 }
@@ -50,6 +48,7 @@ void handle_message(MessageIn &in, Server &server, const std::string &packet) {
 void Server::route_message(std::string msg, User &sender, size_t user_index) {
 	MessageIn in;
 
+    std::cout << "Pollon de goma" << std::endl; // testeo
 	prepare_message(msg, *this, in, user_index);
 	handle_message(in, *this, msg);
 }

@@ -2,12 +2,12 @@
 INCLUDE=-I Authentication -I Messaging -I Messaging/Channels -I Socket
 
 SOCKET_CPP_FILES=function_router.cpp server_loop.cpp Server.cpp
-
+AUTHENTICATION_CPP_FILES=User.cpp
 OPERATOR_CPP_FILES=invite.cpp  kick.cpp  mode.cpp  topic.cpp
 CHANNEL_CPP_FILES=Channel.cpp $(addprefix Operators/,${OPERATOR_CPP_FILES})
 MESSAGING_CPP_FILES=$(addprefix Channels/,${CHANNEL_CPP_FILES}) MessageOut.cpp fnHandlers.cpp Message.cpp Param.cpp ParserMessage.cpp
 
-CPP_FILES=$(addprefix Socket/,${SOCKET_CPP_FILES}) $(addprefix Socket/,${MESSAGING_CPP_FILES})
+CPP_FILES= main.cpp $(addprefix Socket/,${SOCKET_CPP_FILES}) $(addprefix Messaging/,${MESSAGING_CPP_FILES}) $(addprefix Authentication/,$(AUTHENTICATION_CPP_FILES))
 O_FILES=$(patsubst %.cpp,%.o,${CPP_FILES})
 
 NAME=ircserv
