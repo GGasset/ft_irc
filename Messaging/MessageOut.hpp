@@ -111,9 +111,12 @@ class NumericReply: virtual public MessageOut {
 		}
 
 		void	serialize() {
+			// std::string nick_sender = server.get_user_by_id(sender_id).get_nick();
+
 			fill_prefix();
 			assemble_msg();
 			rpl_msg = prefix +  " " + codetoa() + " " + rpl_msg + "\r\n";
+			// rpl_msg = prefix +  " " + codetoa() + " " + nick_sender + " " + rpl_msg + "\r\n";
 			memcpy(msg, rpl_msg.c_str(), rpl_msg.length());
 		}
 
@@ -188,6 +191,67 @@ class RplCreated: public NumericReply {
 // class RplMyInfo: public NumericReply {
 
 // };
+
+/* A registrar en create */
+class RplNoTopic : public NumericReply {
+	JoinParam *jp;
+
+	void assemble_msg() {
+		User u = server.get_user_by_id(sender_id);
+		std::string nick = u.get_nick();
+		std::string channel = jp->channels.empty() ? "" : jp->channels[0];
+
+		rpl_msg = nick + " " + channel + " :No topic is set";
+	}
+
+	public:
+		RplNoTopic(Server &server, JoinParam *param)
+			: MessageOut(server),
+			NumericReply(server, RPL_NOTOPIC),
+			jp(param) {}
+};
+
+/* A registrar en create */
+class RplTopic : public NumericReply {
+    JoinParam *jp;
+
+    void assemble_msg() {
+        User u = server.get_user_by_id(sender_id);
+        std::string nick = u.get_nick();
+        std::string channel = jp->channels.empty() ? "" : jp->channels[0];
+
+        std::string topic = server.get_by_channel_name(channel).get_topic(); // adapta si hace falta
+
+        rpl_msg = nick + " " + channel + " :" + topic;
+    }
+
+	public:
+		RplTopic(Server &server, JoinParam *param)
+			: MessageOut(server),
+			NumericReply(server, RPL_TOPIC),
+			jp(param) {}
+};
+
+
+class ErrBadChannelKey : public NumericReply {
+    JoinParam *jp;
+
+    void assemble_msg() {
+        User u = server.get_user_by_id(sender_id);
+        std::string nick = u.get_nick();
+        std::string channel = jp->channels.empty() ? "" : jp->channels[0];
+
+        rpl_msg = nick + " " + channel + " :Cannot join (+k)";
+    }
+
+	public:
+		ErrBadChannelKey(Server &server, JoinParam *param)
+			: MessageOut(server),
+			NumericReply(server, ERR_BADCHANNELKEY),
+			jp(param) {}
+};
+
+
 
 class ErrGeneric: public NumericReply {
 	void	assemble_msg() {
@@ -338,6 +402,160 @@ class ErrUnknownCommand: public NumericReply {
 										   NumericReply(server, 421) {}
 		~ErrUnknownCommand() {}
 };
+
+/* A registrar en create */
+class ErrNoSuchChannel : public NumericReply {
+    JoinParam *jp;
+
+    void assemble_msg() {
+        User u = server.get_user_by_id(sender_id);
+        std::string nick = u.get_nick();
+        std::string channel = jp->channels.empty() ? "" : jp->channels[0];
+
+        rpl_msg = nick + " " + channel + " :No such channel";
+    }
+
+	public:
+		ErrNoSuchChannel(Server &server, JoinParam *param)
+			: MessageOut(server),
+			NumericReply(server, ERR_NOSUCHCHANNEL),
+			jp(param) {}
+};
+
+/* A registrar en create */
+class ErrTooManyChannels : public NumericReply {
+    JoinParam *jp;
+
+    void assemble_msg() {
+        User u = server.get_user_by_id(sender_id);
+        std::string nick = u.get_nick();
+        std::string channel = jp->channels.empty() ? "" : jp->channels[0];
+
+        rpl_msg = nick + " " + channel + " :Too many channels";
+    }
+
+	public:
+		ErrTooManyChannels(Server &server, JoinParam *param)
+			: MessageOut(server),
+			NumericReply(server, ERR_TOOMANYCHANNELS),
+			jp(param) {}
+};
+
+/* A registrar en create */
+class ErrChannelIsFull : public NumericReply {
+    JoinParam *jp;
+
+    void assemble_msg() {
+        User u = server.get_user_by_id(sender_id);
+        std::string nick = u.get_nick();
+        std::string channel = jp->channels.empty() ? "" : jp->channels[0];
+
+        rpl_msg = nick + " " + channel + " :Cannot join (+l)";
+    }
+
+	public:
+		ErrChannelIsFull(Server &server, JoinParam *param)
+			: MessageOut(server),
+			NumericReply(server, ERR_CHANNELISFULL),
+			jp(param) {}
+};
+
+/* A registrar en create */
+class ErrInviteOnlyChan : public NumericReply {
+    JoinParam *jp;
+
+    void assemble_msg() {
+        User u = server.get_user_by_id(sender_id);
+        std::string nick = u.get_nick();
+        std::string channel = jp->channels.empty() ? "" : jp->channels[0];
+
+        rpl_msg = nick + " " + channel + " :Cannot join (+i)";
+    }
+
+	public:
+		ErrInviteOnlyChan(Server &server, JoinParam *param)
+			: MessageOut(server),
+			NumericReply(server, ERR_INVITEONLYCHAN),
+			jp(param) {}
+};
+
+/* A registrar en create */
+class ErrBannedFromChan : public NumericReply {
+    JoinParam *jp;
+
+    void assemble_msg() {
+        User u = server.get_user_by_id(sender_id);
+        std::string nick = u.get_nick();
+        std::string channel = jp->channels.empty() ? "" : jp->channels[0];
+
+        rpl_msg = nick + " " + channel + " :Cannot join (+b)";
+    }
+
+	public:
+		ErrBannedFromChan(Server &server, JoinParam *param)
+			: MessageOut(server),
+			NumericReply(server, ERR_BANNEDFROMCHAN),
+			jp(param) {}
+};
+
+/* A registrar en create */
+class ErrBadChannelKey : public NumericReply {
+    JoinParam *jp;
+
+    void assemble_msg() {
+        User u = server.get_user_by_id(sender_id);
+        std::string nick = u.get_nick();
+        std::string channel = jp->channels.empty() ? "" : jp->channels[0];
+
+        rpl_msg = nick + " " + channel + " :Cannot join (+k)";
+    }
+
+	public:
+		ErrBadChannelKey(Server &server, JoinParam *param)
+			: MessageOut(server),
+			NumericReply(server, ERR_BADCHANNELKEY),
+			jp(param) {}
+};
+
+/* A registrar en create */
+class ErrBadChanMask : public NumericReply {
+    JoinParam *jp;
+
+    void assemble_msg() {
+        User u = server.get_user_by_id(sender_id);
+        std::string nick = u.get_nick();
+        std::string channel = jp->channels.empty() ? "" : jp->channels[0];
+
+        rpl_msg = nick + " " + channel + " :Bad channel mask";
+    }
+
+	public:
+		ErrBadChanMask(Server &server, JoinParam *param)
+			: MessageOut(server),
+			NumericReply(server, ERR_BADCHANMASK),
+			jp(param) {}
+};
+
+/* A registrar en create */
+class ErrUnsupportedChanMode : public NumericReply {
+    JoinParam *jp;
+
+    void assemble_msg() {
+        User u = server.get_user_by_id(sender_id);
+        std::string nick = u.get_nick();
+        std::string channel = jp->channels.empty() ? "" : jp->channels[0];
+
+        rpl_msg = nick + " " + channel + " :Channel doesn't support modes";
+    }
+
+	public:
+		ErrUnsupportedChanMode(Server &server, JoinParam *param)
+			: MessageOut(server),
+			NumericReply(server, ERR_UNSUPPORTEDCHANMODE),
+			jp(param) {}
+};
+
+
 
 class NumericReplyFactory {
 	Server	&server;

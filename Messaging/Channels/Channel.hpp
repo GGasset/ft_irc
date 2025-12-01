@@ -25,10 +25,13 @@ private:
 
 	channel_mode mode;
 	std::string name;
+	std::string	topic = "";
 
 public:
 	ssize_t get_id();
 	void set_id(ssize_t id);
+	std::string get_topic();
+	void set_topic(std::string topic);
 	std::vector<size_t>	get_members();
 	std::string get_name();
 };
