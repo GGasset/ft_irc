@@ -34,14 +34,13 @@ void    complete_registry(User user, Server &server, UserParam *param) {
 /* Falta gestionar el caso cuando va primero USER  y después NICK. */
 MessageOut *handleNick(MessageIn in, Server &server) {
     NickParam           *np = dynamic_cast<NickParam*>(in.getParams());
-    std::vector<User>   clients = server.getUsers(); // En realidad deberia de ser el vector del servidor.
     User                senderU;
     
-    senderU = clients[in.sender_id];
+    senderU = server.get_user_by_id(in.sender_id);
 
-    for (size_t i = 0; i < clients.size(); i++) {
+    for (size_t i = 0; i < server.n_users(); i++) {
         std::string nickClient;
-        nickClient = clients[i].get_nick();
+        nickClient = server.get_user_by_id(i).get_nick();
         if (nickClient == np->nickname) {
             MessageOut *ret = NumericReplyFactory::create_and_target(ERR_NICKNAMEINUSE, server, np,
                                                                      (std::vector<size_t>){in.sender_id}, 'u');
@@ -52,7 +51,7 @@ MessageOut *handleNick(MessageIn in, Server &server) {
     /* Necesidad de crear el ERR_UNAVAILRESOURCE, que gestiona si el nombre colisiona en la historia de nick's. */
     std::vector<std::string> nick_h = server.get_nick_history();
     for (size_t i = 0; i < nick_h.size(); i++) {
-        if (clients[i].get_nick() == nick_h[0]) {
+        if (server.get_user_by_id(i).get_nick() == nick_h[0]) {
             MessageOut  *ret = NumericReplyFactory::create_and_target(ERR_UNAVAILRESOURCE, server, np, in.sender_id, 'u');
             return ret;
         }

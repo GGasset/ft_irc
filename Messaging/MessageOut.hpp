@@ -87,7 +87,7 @@ class MessageOut
 
 	public:
 		size_t	sender_id; //id del cliente que envia el mensaje
-		MessageOut(Server &server): server(server) {}
+		MessageOut(Server &server): server(server), sender_id(0) {}
 		// MessageOut	&operator=(const MessageOut& other);
 		virtual	~MessageOut() = 0;
 		void	*get_msg();
@@ -135,7 +135,7 @@ class RplWelcome: public NumericReply {
 	UserParam	*up;
 
 	void	assemble_msg() {
-		User u = server.get_by_channel_id(sender_id);
+		User u = server.get_user_by_id(sender_id);
 		std::string	sender_info = u.get_nick() + "!" + u.getUsername() + "@";
 		rpl_msg = "Welcome to the Internet Relay Network " + sender_info;
 	}
@@ -151,7 +151,7 @@ class RplYourHost: public NumericReply {
 	UserParam	*up;
 
 	void	assemble_msg() {
-		User u = server.getUsers()[sender_id];
+		User u = server.get_user_by_id(sender_id);
 		std::string	servername = "irc.local"; //Esto deberia estar dentro de Server, que viene de la configuracion.
 		std::string ver = "1.1"; //Me lo invento. Tambien deberia estar dentro de la configuración.
 		rpl_msg = "Your host is " + servername + ", running version " + ver;

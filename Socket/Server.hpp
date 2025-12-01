@@ -11,8 +11,8 @@
 #include "User.hpp"
 #include "Channel.hpp"
 
-#define READ_SIZE 69420
-#define MAX_EVENTS 5
+#define READ_SIZE 420
+#define MAX_EVENTS 69
 
 extern int signal_server_stop;
 
@@ -35,6 +35,8 @@ private:
 	std::vector<std::queue<std::tuple<void *, size_t, bool>>> messages;
 	std::vector<Channel> servers;
 
+	std::vector<std::string> nick_history;
+
 	ssize_t get_user_index_by_fd(int fd);
 	User *get_user_by_fd(int fd);
 
@@ -48,6 +50,7 @@ public:
 	Server();
 	~Server();
 
+	size_t	n_users();
 	void disconnect_user(size_t user_index);
 	void add_msg(void *msg, size_t len, bool is_heap, User &receiver);
 	void add_msg(void *msg, size_t len, bool is_heap, Channel receivers);
@@ -58,6 +61,15 @@ public:
 	std::vector<User&> get_channel_users(const Channel channel);
 	Channel &get_by_channel_name(std::string name);
 	Channel &get_by_channel_id(size_t id);
+
+	std::string passw;
+	// std::string	get_server_password();
+
+	void	addUser(User u);
+	void	addChannel(Channel ch);
+	void	addNickHistory(std::string nick);
+	std::vector<std::string> get_nick_history();
+	size_t	n_users();
 
 	void stop();
 
