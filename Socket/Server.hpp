@@ -48,6 +48,7 @@ public:
 	Server();
 	~Server();
 
+	size_t	n_users();
 	void disconnect_user(size_t user_index);
 	void add_msg(void *msg, size_t len, bool is_heap, User &receiver);
 	void add_msg(void *msg, size_t len, bool is_heap, Channel receivers);
