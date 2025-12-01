@@ -424,9 +424,137 @@ class QuitForwardedCommand: public ForwardedCommand {
 		}
 };
 
-// class JoinForwardedCommand: public ForwardedCommand {
+class JoinForwardedCommand : public ForwardedCommand {
+    JoinParam *jp;
 
-// };
+	public:
+		JoinForwardedCommand(Server &server, JoinParam *param)
+			: MessageOut(server),
+			ForwardedCommand(server, param),
+			jp(param) {}
+
+		void assemble_msg() {
+			// En forwarding el servidor solo manda el JOIN de 1 canal
+			// Si tu parser permite múltiples, forwardeamos solo el primero
+			if (jp->channels.empty())
+				rpl_msg = "JOIN";
+			else
+				rpl_msg = "JOIN " + jp->channels[0];
+		}
+};
+
+class PartForwardedCommand : public ForwardedCommand {
+    PartParam *pp;
+
+	public:
+		PartForwardedCommand(Server &server, PartParam *param)
+			: MessageOut(server),
+			ForwardedCommand(server, param),
+			pp(param) {}
+
+		void assemble_msg() {
+			// Igual que JOIN: solo se forwardea un canal a la vez
+			std::string channel = pp->channels.empty() ? "" : pp->channels[0];
+			rpl_msg = "PART " + channel;
+
+			if (!pp->partMsg.empty())
+				rpl_msg += " :" + pp->partMsg;
+		}
+};
+
+class PrivMsgForwardedCommand : public ForwardedCommand {
+    PrivMsgParam *pm;
+
+	public:
+		PrivMsgForwardedCommand(Server &server, PrivMsgParam *param)
+			: MessageOut(server),
+			ForwardedCommand(server, param),
+			pm(param) {}
+
+		void assemble_msg() {
+			rpl_msg = "PRIVMSG " + pm->target + " :" + pm->text;
+		}
+};
+
+class NoticeForwardedCommand : public ForwardedCommand {
+    NoticeParam *np;
+
+	public:
+		NoticeForwardedCommand(Server &server, NoticeParam *param)
+			: MessageOut(server),
+			ForwardedCommand(server, param),
+			np(param) {}
+
+		void assemble_msg() {
+			if (np->text.empty())
+				rpl_msg = "NOTICE " + np->target;
+			else
+				rpl_msg = "NOTICE " + np->target + " :" + np->text;
+		}
+};
+
+class TopicForwardedCommand : public ForwardedCommand {
+    TopicParam *tp;
+
+public:
+    TopicForwardedCommand(Server &server, TopicParam *param)
+        : MessageOut(server),
+          ForwardedCommand(server, param),
+          tp(param) {}
+
+    void assemble_msg() {
+        rpl_msg = "TOPIC " + tp->channel;
+        if (!tp->topic.empty())
+            rpl_msg += " :" + tp->topic;
+    }
+};
+
+class InviteForwardedCommand : public ForwardedCommand {
+    InviteParam *ip;
+
+	public:
+		InviteForwardedCommand(Server &server, InviteParam *param)
+			: MessageOut(server),
+			ForwardedCommand(server, param),
+			ip(param) {}
+
+		void assemble_msg() {
+			rpl_msg = "INVITE " + ip->nick + " " + ip->channel;
+		}
+};
+
+class KickForwardedCommand : public ForwardedCommand {
+    KickParam *kp;
+
+	public:
+		KickForwardedCommand(Server &server, KickParam *param)
+			: MessageOut(server),
+			ForwardedCommand(server, param),
+			kp(param) {}
+
+		void assemble_msg() {
+			rpl_msg = "KICK " + kp->channel + " " + kp->user;
+			if (!kp->comment.empty())
+				rpl_msg += " :" + kp->comment;
+		}
+};
+
+class ModeForwardedCommand : public ForwardedCommand {
+    ModeParam *mp;
+
+public:
+    ModeForwardedCommand(Server &server, ModeParam *param)
+        : MessageOut(server),
+          ForwardedCommand(server, param),
+          mp(param) {}
+
+    void assemble_msg() {
+        rpl_msg = "MODE " + mp->channel + " " + mp->modeStr;
+        if (!mp->modeArg.empty())
+            rpl_msg += " " + mp->modeArg;
+    }
+};
+
 
 class ForwardedCommandFactory {
 	Server	&server;
@@ -435,5 +563,14 @@ class ForwardedCommandFactory {
 	ForwardedCommandFactory(Server &server): server(server) {}
 	static ForwardedCommand	*makeNickForward(Server &serv, NickParam *param) {return new NickForwardedCommand(serv, param);}
 	static ForwardedCommand	*makePingPongForward(Server &serv, PingPongParam *param) {return new PongForwardedCommand(serv, param);}
+	static ForwardedCommand	*makeQuitForward(Server &serv, QuitParam *param) {return new QuitForwardedCommand(serv, param);}
+	static ForwardedCommand	*makeJoinForward(Server &serv, JoinParam *param) {return new JoinForwardedCommand(serv, param);}
+	static ForwardedCommand	*makePartForward(Server &serv, PartParam *param) {return new PartForwardedCommand(serv, param);}
+	static ForwardedCommand	*makePrivMsgForward(Server &serv, PrivMsgParam *param) {return new PrivMsgForwardedCommand(serv, param);}
+	static ForwardedCommand	*makeNoticeForward(Server &serv, NoticeParam *param) {return new NoticeForwardedCommand(serv, param);}
+	static ForwardedCommand	*makeTopicForward(Server &serv, TopicParam *param) {return new TopicForwardedCommand(serv, param);}
+	static ForwardedCommand	*makeInviteForward(Server &serv, InviteParam *param) {return new InviteForwardedCommand(serv, param);}
+	static ForwardedCommand	*makeKickForward(Server &serv, KickParam *param) {return new KickForwardedCommand(serv, param);}
+	static ForwardedCommand	*makeModeForward(Server &serv, ModeParam *param) {return new ModeForwardedCommand(serv, param);}
 	static ForwardedCommand	*create(COMMAND cmd, Server &serv, Param *param);
 };

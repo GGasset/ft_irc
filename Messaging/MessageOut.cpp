@@ -65,6 +65,24 @@ ForwardedCommand *ForwardedCommandFactory::create(COMMAND cmd, Server &serv, Par
 			return makeNickForward(serv, dynamic_cast<NickParam*>(param));
 		case PONG:
 			return makePingPongForward(serv, dynamic_cast<PingPongParam*>(param));
+		case QUIT:
+            return new QuitForwardedCommand(serv, dynamic_cast<QuitParam*>(param));
+        case JOIN:
+            return new JoinForwardedCommand(serv, dynamic_cast<JoinParam*>(param));
+		case PART:
+            return new PartForwardedCommand(serv, static_cast<PartParam*>(param));
+        case PRIVMSG:
+            return new PrivMsgForwardedCommand(serv, static_cast<PrivMsgParam*>(param));
+        case NOTICE:
+            return new NoticeForwardedCommand(serv, static_cast<NoticeParam*>(param));
+        case TOPIC:
+            return new TopicForwardedCommand(serv, static_cast<TopicParam*>(param));
+        case INVITE:
+            return new InviteForwardedCommand(serv, static_cast<InviteParam*>(param));
+        case KICK:
+            return new KickForwardedCommand(serv, static_cast<KickParam*>(param));
+        case MODE:
+            return new ModeForwardedCommand(serv, static_cast<ModeParam*>(param));
 		default:
 			return NULL;
 	}
