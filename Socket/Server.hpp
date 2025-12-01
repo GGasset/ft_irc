@@ -35,6 +35,8 @@ private:
 	std::vector<std::queue<std::tuple<void *, size_t, bool>>> messages;
 	std::vector<Channel> servers;
 
+	std::vector<std::string> nick_history;
+
 	ssize_t get_user_index_by_fd(int fd);
 	User *get_user_by_fd(int fd);
 
@@ -59,6 +61,15 @@ public:
 	std::vector<User&> get_channel_users(const Channel channel);
 	Channel &get_by_channel_name(std::string name);
 	Channel &get_by_channel_id(size_t id);
+
+	std::string passw;
+	// std::string	get_server_password();
+
+	void	addUser(User u);
+	void	addChannel(Channel ch);
+	void	addNickHistory(std::string nick);
+	std::vector<std::string> get_nick_history();
+	size_t	n_users();
 
 	void stop();
 
