@@ -51,8 +51,11 @@ void Server::handle_read_event(int fd)
 	if (!sender) return;
 
 	std::vector<std::string> msgs = sender->msg_sent(read_data);
-	for (size_t i = 0; i < msgs.size(); i++) std::cout << "Msg received from " << sender->getUsername() << ": " << msgs[i];
-	for (size_t i = 0; i < msgs.size(); i++) route_message(msgs[i], *sender, sender_index);
+	//for (size_t i = 0; i < msgs.size(); i++) std::cout << "Msg received from " << sender->getUsername() << ": " << msgs[i];
+	for (size_t i = 0; i < msgs.size(); i++) {
+		std::cout << std::endl << "Msg received from " << sender->get_nick() << ": " << msgs[i] << std::endl;
+		route_message(msgs[i], *sender, sender_index);
+	}
 }
 
 void Server::handle_write_event(int fd)
@@ -60,6 +63,7 @@ void Server::handle_write_event(int fd)
 	ssize_t user_i = get_user_index_by_fd(fd);
 	if (user_i == -1) return;
 	if (!messages[user_i].size()) return;
+	std::cout << "Sending message " << clients[user_i].get_nick() << std::endl;
 
 	std::tuple<void*,size_t,bool> next_msg = messages[user_i].front();
 	messages[user_i].pop();
