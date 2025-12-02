@@ -53,7 +53,7 @@ void Server::handle_read_event(int fd)
 	std::vector<std::string> msgs = sender->msg_sent(read_data);
 	//for (size_t i = 0; i < msgs.size(); i++) std::cout << "Msg received from " << sender->getUsername() << ": " << msgs[i];
 	for (size_t i = 0; i < msgs.size(); i++) {
-		std::cout << std::endl << "Msg received from " << sender->get_nick() << ": " << msgs[i] << std::endl;
+		//std::cout << std::endl << "Msg received from " << get_user_by_id(sender_index).get_nick() << ": " << msgs[i] << std::endl;
 		route_message(msgs[i], *sender, sender_index);
 	}
 }

@@ -14,17 +14,16 @@ void    complete_registry(User user, Server &server, UserParam *param) {
 
 
         reg = NumericReplyFactory::create(RPL_WELCOME, server, param);
-        reg->setTarget(target);//, reg->deliver();
+        reg->setTarget(target), reg->deliver();
 
-        std::cout << "reg: " << reg->getRpl();
 
         reg = NumericReplyFactory::create(RPL_YOURHOST, server, param);
-        reg->setTarget(target);//, reg->deliver();
-        std::cout << "reg: " << reg->getRpl();
+        reg->setTarget(target), reg->deliver();
+        //std::cout << "reg: " << reg->getRpl();
 
         reg = NumericReplyFactory::create(RPL_CREATED, server, param);
-        reg->setTarget(target);//, reg->deliver();
-        std::cout << "reg: " << reg->getRpl();
+        reg->setTarget(target), reg->deliver();
+        //std::cout << "reg: " << reg->getRpl();
 
         // reg = NumericReplyFactory::create(RPL_MYINFO, server, param);
         // reg->setTarget(target), reg->deliver();
@@ -34,9 +33,7 @@ void    complete_registry(User user, Server &server, UserParam *param) {
 /* Falta gestionar el caso cuando va primero USER  y después NICK. */
 MessageOut *handleNick(MessageIn in, Server &server) {
     NickParam           *np = dynamic_cast<NickParam*>(in.getParams());
-    User                senderU;
-    
-    senderU = server.get_user_by_id(in.sender_id);
+    User&                senderU = server.get_user_by_id(in.sender_id);
 
     for (size_t i = 0; i < server.n_users(); i++) {
         std::string nickClient;
@@ -61,7 +58,7 @@ MessageOut *handleNick(MessageIn in, Server &server) {
     server.addNickHistory(np->nickname);
     if (!senderU.is_registered() && senderU.are_names_registered()) {
         senderU.register_user();
-        complete_registry(senderU, server, UserParam()(senderU));
+        //complete_registry(senderU, server, UserParam()(senderU));
     }
     else if (!senderU.is_registered())
         return NULL;
@@ -85,7 +82,7 @@ MessageOut  *handleUser(MessageIn in, Server &server) {
 
     if (!senderU.is_registered() && senderU.are_names_registered()) {
         senderU.register_user();
-        complete_registry(senderU, server, p);
+        //complete_registry(senderU, server, p);
     }
     return (NULL);
 }
