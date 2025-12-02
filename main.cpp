@@ -1,7 +1,6 @@
 
 #include <cstdlib>
 
-
 #include "Server.hpp"
 #include "Message.hpp"
 #include "Channel.hpp"

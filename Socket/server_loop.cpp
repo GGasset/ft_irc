@@ -30,6 +30,7 @@ static int setup_sockfd(size_t PORT)
 	 || fcntl(sockfd, F_SETFL/*Set flags*/, fcntl(sockfd, F_GETFL/*Get flags*/, 0) | O_NONBLOCK) == -1 // Set non block
 	) 
 	{
+		std::cerr << "bind err" << std::endl;
 		close(sockfd);
 		return -1;
 	}
@@ -40,14 +41,17 @@ void Server::handle_read_event(int fd)
 {
 	std::string read_data;
 	char tmp[READ_SIZE + 1] {};
+	
+	ssize_t bytes_read = read(fd, &tmp, READ_SIZE);
+	read_data += tmp;
 
-	while (read(fd, &tmp, READ_SIZE)) read_data += tmp;
 	if (!read_data.length()) return;
 	ssize_t sender_index = get_user_index_by_fd(fd);
 	User *sender = get_user_by_fd(fd);
 	if (!sender) return;
+
 	std::vector<std::string> msgs = sender->msg_sent(read_data);
-	std::cout << "mensajisto tamaño, esto es lo que se envia por route_message\n";
+	for (size_t i = 0; i < msgs.size(); i++) std::cout << "Msg received from " << sender->getUsername() << ": " << msgs[i];
 	for (size_t i = 0; i < msgs.size(); i++) route_message(msgs[i], *sender, sender_index);
 }
 
@@ -73,9 +77,12 @@ void Server::handle_event(const epoll_event event, int sockfd)
 			|| fcntl(sockfd, F_SETFL/*Set flags*/, fcntl(sockfd, F_GETFL/*Get flags*/, 0) | O_NONBLOCK) == -1 // Set non block
 		) return;
 
+		std::cout << "Bluetooth device aconnected successfully" << std::endl;
+
 		// Add client
 		client_fds.push_back(new_client_fd);
-		clients.push_back(User());
+		clients.push_back(User("unset", max_client_id));
+		max_client_id++;
 		messages.push_back(std::queue<std::tuple<void *, size_t, bool>>());
 
 		this->event.events = EPOLLIN | EPOLLOUT;
@@ -96,7 +103,7 @@ int Server::loop(size_t PORT)
 	signal_server_stop = false;
 	signal(SIGTSTP, handle_signals);
 	signal(SIGSTOP, handle_signals);
-	signal(SIGINT, handle_signals);
+	//signal(SIGINT, handle_signals);
 	signal(SIGQUIT, handle_signals);
 	signal(SIGTERM, handle_signals);
 
@@ -111,6 +118,7 @@ int Server::loop(size_t PORT)
 	// Add sockfd for read watchlist to accept clients
 	if (epoll_ctl(epollfd, EPOLL_CTL_ADD, sockfd, &event)) err = true;
 
+	std::cout << "Bluetooth device is ready to peal" << std::endl;
 	while (!stop_server && !err && !signal_server_stop)
 	{
 		size_t event_n = epoll_wait(epollfd, events, MAX_EVENTS, 1000);

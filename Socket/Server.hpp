@@ -10,6 +10,7 @@
 
 #include "User.hpp"
 #include "Channel.hpp"
+#include "iostream"
 
 #define READ_SIZE 420
 #define MAX_EVENTS 69

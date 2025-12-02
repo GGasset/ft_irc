@@ -499,25 +499,6 @@ class ErrBannedFromChan : public NumericReply {
 };
 
 /* A registrar en create */
-class ErrBadChannelKey : public NumericReply {
-    JoinParam *jp;
-
-    void assemble_msg() {
-        User u = server.get_user_by_id(sender_id);
-        std::string nick = u.get_nick();
-        std::string channel = jp->channels.empty() ? "" : jp->channels[0];
-
-        rpl_msg = nick + " " + channel + " :Cannot join (+k)";
-    }
-
-	public:
-		ErrBadChannelKey(Server &server, JoinParam *param)
-			: MessageOut(server),
-			NumericReply(server, ERR_BADCHANNELKEY),
-			jp(param) {}
-};
-
-/* A registrar en create */
 class ErrBadChanMask : public NumericReply {
     JoinParam *jp;
 
