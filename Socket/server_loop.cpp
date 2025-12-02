@@ -123,10 +123,18 @@ int Server::loop(size_t PORT)
 	if (epoll_ctl(epollfd, EPOLL_CTL_ADD, sockfd, &event)) err = true;
 
 	std::cout << "Bluetooth device is ready to peal" << std::endl;
+
+	time_t last_ping_time = std::time(0);
 	while (!stop_server && !err && !signal_server_stop)
 	{
 		size_t event_n = epoll_wait(epollfd, events, MAX_EVENTS, 1000);
 		if (event_n == -1) {err = errno != EINTR; continue;}
+
+		if (std::time(0) - last_ping_time >= 2)
+		{
+			
+			last_ping_time = std::time(0);
+		}
 
 		for (size_t i = 0; i < event_n; i++)
 			handle_event(events[i], sockfd);

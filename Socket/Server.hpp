@@ -8,6 +8,8 @@
 #include <queue>
 #include <sys/epoll.h>
 
+#include <ctime>
+
 #include "User.hpp"
 #include "Channel.hpp"
 #include "iostream"
