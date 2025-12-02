@@ -39,6 +39,8 @@ bool prepare_message(const std::string &packet, Server &server, MessageIn &in, s
 #include <unistd.h>
 /* ---------- 3. HANDLE MESSAGE ----------- */
 void handle_message(MessageIn &in, Server &server, const std::string &packet) {
+    if (in.getCommand() == COMMAND0)
+        return ;
     MessageOut *ret = fnHandlers()(in.getCommand(), in, server);
     std::cout << "Que paso???? con los handelers" << std::endl; //testeo
     if (ret != NULL)
