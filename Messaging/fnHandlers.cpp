@@ -118,12 +118,18 @@ MessageOut  *handlePINGPONG(MessageIn in, Server &server) {
     return (NumericReplyFactory::create_and_target(ERR_NOSUCHSERVER, server, p, in.sender_id, 'u'));
 }
 
+MessageOut  *handleQuit(MessageIn in, Server &server) {
+    QuitParam   *param = dynamic_cast<QuitParam*>(in.getParams());
+    return (ForwardedCommandFactory::create(QUIT, server, param));
+}
+
 fnHandlers::fnHandlers() {
     fun[NICK] = handleNick;
     fun[USER] = handleUser;
     fun[PASS] = handlePass;
     fun[PING] = handlePINGPONG;
     fun[PONG] = handlePINGPONG;
+    fun[QUIT] = handleQuit;
     //Asi con todos ...
 }
 
