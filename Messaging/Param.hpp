@@ -69,7 +69,15 @@ enum ReplyCode {
     ERR_NOSUCHSERVER          = 402,  // <nick> <server> :No such server
     
 	// COMANDO DESCONOCIDO
-    ERR_UNKNOWNCOMMAND        = 421   // <nick> <cmd> :Unknown command
+    ERR_UNKNOWNCOMMAND        = 421,   // <nick> <cmd> :Unknown command
+
+    //WHO
+    RPL_WHOREPLY              = 352,
+
+    // WHOIS
+    RPL_WHOISUSER             = 311,
+    RPL_WHOISERVER            = 312,
+
 };
 
 
@@ -409,5 +417,49 @@ public:
     }
 };
 
+class WhoisParam: public Param {
+    public:
+        std::string target = ""; //En princpio me la trae floja.
+        std::vector<std::string> nicks;
+        
+        WhoisParam(msgTokens tokens): Param(WHOIS, tokens) {}
+        ~WhoisParam() {}
+
+        virtual void    validateParam() {
+            int i = 0;
+
+            while (tokens[i].type != TOK_PARAM && tokens[i].type != CRLF)
+                i++;
+            if (tokens[i].type == TOK_PARAM)
+            {
+                target = tokens[i++].str;
+                throw BadSyntax(NAMES, ERR_NOSUCHSERVER);
+            }
+            if (tokens[++i].type = CRLF)
+                throw BadSyntax(NAMES, ERR_NONICKNAMEGIVEN);
+            splitByComma(tokens[i].str, nicks);
+        }
+};
+
+/* Si sale o detras de una máscara, entonces se buscan los que sean operadores. Como no tenemos operadores de servidor, entonces ha de devolver nosuchserver. */
+class WhoParam: public Param {
+    public:
+        std::string mask; //Cualquier cosa.
+
+
+        WhoParam(msgTokens tokens): Param(WHO, tokens), mask("") {}
+        ~WhoParam() {}
+
+        virtual void    validateParam() {
+            int i = 0;
+
+            while (tokens[i].type != TOK_PARAM && tokens[i].type != CRLF)
+                i++;
+            if (tokens[i].type != CRLF)
+                mask = tokens[i++].str;
+            if (tokens[i].str == "o")
+                throw BadSyntax(WHO, ERR_NOSUCHSERVER);
+        }
+};
 
 Param	*ParamsFactory(COMMAND cmd, msgTokens tokens);

@@ -51,6 +51,8 @@ enum COMMAND {
 	KICK,
 	NOTICE,
 	NAMES,
+	WHO,
+	WHOIS,
 	COMMAND0
 };
 

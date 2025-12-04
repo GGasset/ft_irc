@@ -70,7 +70,7 @@ NumericReply *NumericReplyFactory::create(ReplyCode code, Server &serv, Param *p
     case ERR_BADCHANNELKEY:    return makeErrBadChannelKey(serv, static_cast<JoinParam*>(param));
     case ERR_BADCHANMASK:      return makeErrBadChanMask(serv, static_cast<JoinParam*>(param));
     case ERR_UNSUPPORTEDCHANMODE:return makeErrUnsupportedChanMode(serv, static_cast<JoinParam*>(param));
-<
+
     /* Unknown */
     case ERR_UNKNOWNCOMMAND:  return makeErrUnknownCommand(serv);
 

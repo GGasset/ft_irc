@@ -330,6 +330,59 @@ class RplChannelModeIs : public NumericReply {
 			mp(param) {}
 };
 
+class RplWhoisUser : public NumericReply {
+    WhoisParam	*p;
+public:
+    RplWhoisUser(Server &serv, WhoisParam *param, int nick_idx)
+        : MessageOut(serv), NumericReply(serv, RPL_WHOISUSER), p(param) {}
+
+    void assemble_msg() {
+		User *u = server.get_user_by_nick();
+        rpl_msg = u->get_nick() + " "
+                + u->getUsername() + " "
+                + u->getHostname() + " * :"
+                + u->getRealname();
+    }
+};
+
+
+// class RplWhoReply : public NumericReply {
+//     User *u;
+//     std::string channel;
+//     std::string hopcount;
+//     std::string realname;
+// public:
+//     RplWhoReply(Server &serv, size_t target_id,
+//                 const std::string& channel,
+//                 User *u)
+//         : MessageOut(server), NumericReply(serv, RPL_WHOREPLY), u(u), channel(channel)
+//     {
+//         sender_id = target_id;
+//         hopcount = "0";
+//         realname = u->getRealname();
+//     }
+
+//     void assemble_msg() {
+//         std::string H_G = u->isAway() ? "G" : "H";
+//         std::string status = H_G;
+//         // if (u->isOperator())
+//         //     status += "*";
+//         if (server.userHasPrefix(channel, u->id()))
+//             status += server.getPrefixSymbol(channel, u->id());
+
+//         rpl_msg = channel + " "
+//             + u->getUsername() + " "
+//             + u->getHostname() + " "
+//             + "irc.local.fr" + " "
+//             // + server.get_servername() + " "
+//             + u->get_nick() + " "
+//             + status + " :"
+//             + hopcount + " "
+//             + realname;
+//     }
+// };
+
+
 class ErrBadChannelKey : public NumericReply {
     JoinParam *jp;
 
