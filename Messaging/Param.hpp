@@ -383,4 +383,31 @@ public:
     }
 };
 
+class NamesParam : public Param {
+public:
+    std::vector<std::string> channels;   // Lista de canales a consultar
+    bool listAll;                        // TRUE si no se ha especificado ningún canal
+
+    NamesParam(msgTokens tokens): Param(NAMES, tokens) {}
+    ~NamesParam() {}
+
+    virtual void validateParam() {
+        int i = 0;
+        while (tokens[i].type != TOK_PARAM && tokens[i].type != CRLF)
+            i++;
+        if (tokens[i].type == CRLF) {
+            listAll = true;
+            return;
+        }
+        std::string chanList = tokens[i].str;
+        splitByComma(chanList, channels);
+        for (size_t j = 0; j < channels.size(); ++j) {
+            if (!isValidChannelName(channels[j]))
+                throw BadSyntax(NAMES, ERR_BADCHANMASK);
+        }
+        listAll = false; //No se que tiene que hacer en caso de que falle el hijo de puta.
+    }
+};
+
+
 Param	*ParamsFactory(COMMAND cmd, msgTokens tokens);

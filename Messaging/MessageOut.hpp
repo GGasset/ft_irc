@@ -232,6 +232,103 @@ class RplTopic : public NumericReply {
 			jp(param) {}
 };
 
+/* A registrar en create */
+class RplNamReply : public NumericReply {
+    NamesParam *np; // o JoinParam, depende de tu diseño
+	Channel		channel;
+
+    void assemble_msg() {
+        User u = server.get_user_by_id(sender_id);
+        // std::string symbol = np->symbol; // normalmente "=" o "@" La obtiene del channel_mode
+        std::string symbol = "@"; // Por ahora me lo invento
+        std::vector<size_t> members = channel.get_members();
+
+		std::string member_names = "";
+		for (int i = 0; i < members.size(); i++) member_names += server.get_user_by_id(members[i]).get_nick() + " ";
+
+        rpl_msg = u.get_nick() + " " + symbol + " " + channel.get_name() + " :" + member_names;
+    }
+public:
+    RplNamReply(Server &server, NamesParam *param, std::string &ch)
+        : MessageOut(server),
+          NumericReply(server, RPL_NAMREPLY),
+          np(param),
+		  channel(server.get_by_channel_name(ch)) {}
+};
+
+/* A registrar en create */
+class RplEndOfNames : public NumericReply {
+    NamesParam *np;
+	Channel		channel;
+
+    void assemble_msg() {
+        User u = server.get_user_by_id(sender_id);
+        rpl_msg = u.get_nick() + " " + channel.get_name() + " :End of /NAMES list.";
+    }
+public:
+    RplEndOfNames(Server &server, NamesParam *param, std::string &ch)
+        : MessageOut(server),
+          NumericReply(server, RPL_ENDOFNAMES),
+          np(param),
+		  channel(server.get_by_channel_name(ch)) {}
+};
+
+/* A registrar en create */
+class RplChannelModeIs : public NumericReply {
+    ModeParam *mp;
+
+    void assemble_msg() {
+        User u = server.get_user_by_id(sender_id);
+        std::string channel = mp->channel;
+        std::string modes = mp->modeStr;
+        std::string args = mp->modeArg;
+
+        rpl_msg = u.get_nick() + " " + channel + " " + modes;
+        if (!args.empty())
+            rpl_msg += " " + args;
+    }
+	public:
+		RplChannelModeIs(Server &server, ModeParam *param)
+			: MessageOut(server),
+			NumericReply(server, RPL_CHANNELMODEIS),
+			mp(param) {}
+};
+
+/* A registrar en create */
+class RplInviting : public NumericReply {
+    InviteParam *ip;
+
+    void assemble_msg() {
+        User u = server.get_user_by_id(sender_id);
+        rpl_msg = u.get_nick() + " " + ip->nick + " " + ip->channel;
+    }
+public:
+    RplInviting(Server &server, InviteParam *param)
+        : MessageOut(server),
+          NumericReply(server, RPL_INVITING),
+          ip(param) {}
+};
+
+/* A registrar en create */
+class RplChannelModeIs : public NumericReply {
+    ModeParam *mp;
+
+    void assemble_msg() {
+        User u = server.get_user_by_id(sender_id);
+        std::string channel = mp->channel;
+        std::string modes = mp->modeStr;
+        std::string args = mp->modeArg;
+
+        rpl_msg = u.get_nick() + " " + channel + " " + modes;
+        if (!args.empty())
+            rpl_msg += " " + args;
+    }
+	public:
+		RplChannelModeIs(Server &server, ModeParam *param)
+			: MessageOut(server),
+			NumericReply(server, RPL_CHANNELMODEIS),
+			mp(param) {}
+};
 
 class ErrBadChannelKey : public NumericReply {
     JoinParam *jp;
@@ -250,8 +347,6 @@ class ErrBadChannelKey : public NumericReply {
 			NumericReply(server, ERR_BADCHANNELKEY),
 			jp(param) {}
 };
-
-
 
 class ErrGeneric: public NumericReply {
 	void	assemble_msg() {
@@ -536,35 +631,297 @@ class ErrUnsupportedChanMode : public NumericReply {
 			jp(param) {}
 };
 
+/* A registrar en create */
+class ErrNotOnChannel : public NumericReply {
+    PartParam *pp;
 
+    void assemble_msg() {
+        User u = server.get_user_by_id(sender_id);
+        std::string nick = u.get_nick();
+        std::string channel = pp->channels.empty() ? "" : pp->channels[0];
+
+        rpl_msg = nick + " " + channel + " :You're not on that channel";
+    }
+	public:
+		ErrNotOnChannel(Server &server, PartParam *param)
+			: MessageOut(server),
+			NumericReply(server, ERR_NOTONCHANNEL),
+			pp(param) {}
+};
+
+/* A registrar en create */
+class ErrNoRecipient : public NumericReply {
+    PrivMsgParam *pm;
+    void assemble_msg() {
+        User u = server.get_user_by_id(sender_id);
+        rpl_msg = u.get_nick() + " :No recipient given (PRIVMSG)";
+    }
+	public:
+		ErrNoRecipient(Server &server, PrivMsgParam *param)
+			: MessageOut(server),
+			NumericReply(server, ERR_NORECIPIENT),
+			pm(param) {}
+};
+
+/* A registrar en create */
+class ErrNoTextToSend : public NumericReply {
+    PrivMsgParam *pm;
+
+    void assemble_msg() {
+        User u = server.get_user_by_id(sender_id);
+        rpl_msg = u.get_nick() + " :No text to send";
+    }
+	public:
+		ErrNoTextToSend(Server &server, PrivMsgParam *param)
+			: MessageOut(server),
+			NumericReply(server, ERR_NOTEXTTOSEND),
+			pm(param) {}
+};
+
+/* A registrar en create */
+class ErrNoTextToSend : public NumericReply {
+    PrivMsgParam *pm;
+
+    void assemble_msg() {
+        User u = server.get_user_by_id(sender_id);
+        rpl_msg = u.get_nick() + " :No text to send";
+    }
+	public:
+		ErrNoTextToSend(Server &server, PrivMsgParam *param)
+			: MessageOut(server),
+			NumericReply(server, ERR_NOTEXTTOSEND),
+			pm(param) {}
+};
+
+/* A registrar en create */
+class ErrNoSuchNick : public NumericReply {
+    PrivMsgParam *pm;
+
+    void assemble_msg() {
+        User u = server.get_user_by_id(sender_id);
+        std::string target = pm->target;
+        rpl_msg = u.get_nick() + " " + target + " :No such nick/channel";
+    }
+	public:
+		ErrNoSuchNick(Server &server, PrivMsgParam *param)
+			: MessageOut(server),
+			NumericReply(server, ERR_NOSUCHNICK),
+			pm(param) {}
+};
+
+/* A registrar en create */
+class ErrCannotSendToChan : public NumericReply {
+    PrivMsgParam *pm;
+
+    void assemble_msg() {
+        User u = server.get_user_by_id(sender_id);
+        rpl_msg = u.get_nick() + " " + pm->target + " :Cannot send to channel";
+    }
+	public:
+		ErrCannotSendToChan(Server &server, PrivMsgParam *param)
+			: MessageOut(server),
+			NumericReply(server, ERR_CANNOTSENDTOCHAN),
+			pm(param) {}
+};
+
+/* A registrar en create */
+class ErrTooManyTargets : public NumericReply {
+    PrivMsgParam *pm;
+
+    void assemble_msg() {
+        User u = server.get_user_by_id(sender_id);
+        rpl_msg = u.get_nick() + " " + pm->target + " :Too many targets";
+    }
+	public:
+		ErrTooManyTargets(Server &server, PrivMsgParam *param)
+			: MessageOut(server),
+			NumericReply(server, ERR_TOOMANYTARGETS),
+			pm(param) {}
+};
+
+/* A registrar en create */
+class ErrNoTopLevel : public NumericReply {
+    PrivMsgParam *pm;
+
+    void assemble_msg() {
+        User u = server.get_user_by_id(sender_id);
+        rpl_msg = u.get_nick() + " " + pm->target + " :No toplevel domain specified";
+    }
+	public:
+		ErrNoTopLevel(Server &server, PrivMsgParam *param)
+			: MessageOut(server),
+			NumericReply(server, ERR_NOTOPLEVEL),
+			pm(param) {}
+};
+
+/* A registrar en create */
+class ErrWildTopLevel : public NumericReply {
+    PrivMsgParam *pm;
+
+    void assemble_msg() {
+        User u = server.get_user_by_id(sender_id);
+        rpl_msg = u.get_nick() + " " + pm->target + " :Wildcard in toplevel domain";
+    }
+	public:
+		ErrWildTopLevel(Server &server, PrivMsgParam *param)
+			: MessageOut(server),
+			NumericReply(server, ERR_WILDTOPLEVEL),
+			pm(param) {}
+};
+
+/* A registrar en create */
+class ErrUnknownMode : public NumericReply {
+    ModeParam *mp;
+    void assemble_msg() {
+        User u = server.get_user_by_id(sender_id);
+        rpl_msg = u.get_nick() + " " + mp->modeStr + " :is unknown mode character";
+    }
+	public:
+		ErrUnknownMode(Server &server, ModeParam *param)
+			: MessageOut(server),
+			NumericReply(server, ERR_UNKNOWNMODE),
+			mp(param) {}
+};
+
+/* A registrar en create */
+class ErrUModeUnknownFlag : public NumericReply {
+    ModeParam *mp;
+
+    void assemble_msg() {
+        User u = server.get_user_by_id(sender_id);
+        rpl_msg = u.get_nick() + " :Unknown MODE flag";
+    }
+	public:
+		ErrUModeUnknownFlag(Server &server, ModeParam *param)
+			: MessageOut(server),
+			NumericReply(server, ERR_UMODEUNKNOWNFLAG),
+			mp(param) {}
+};
+
+/* A registrar en create */
+class ErrKeySet : public NumericReply {
+    ModeParam *mp;
+
+    void assemble_msg() {
+        User u = server.get_user_by_id(sender_id);
+        rpl_msg = u.get_nick() + " " + mp->channel + " :Channel key already set";
+    }
+	public:
+		ErrKeySet(Server &server, ModeParam *param)
+			: MessageOut(server),
+			NumericReply(server, ERR_KEYSET),
+			mp(param) {}
+};
+
+/* A registrar en create */
+class ErrUserNotInChannel : public NumericReply {
+    ModeParam *mp;
+
+    void assemble_msg() {
+        User u = server.get_user_by_id(sender_id);
+        rpl_msg = u.get_nick() + " " + mp->modeArg + " " + mp->channel
+                + " :They aren't on that channel";
+    }
+	public:
+		ErrUserNotInChannel(Server &server, ModeParam *param)
+			: MessageOut(server),
+			NumericReply(server, ERR_USERNOTINCHANNEL),
+			mp(param) {}
+};
+
+class ErrUserOnChannel : public NumericReply {
+    InviteParam *ip;
+
+    void assemble_msg() {
+        User u = server.get_user_by_id(sender_id);
+        rpl_msg = u.get_nick() + " " + ip->nick + " " + ip->channel
+                + " :Is already on channel";
+    }
+	public:
+		ErrUserOnChannel(Server &server, InviteParam *param)
+			: MessageOut(server),
+			NumericReply(server, ERR_USERONCHANNEL),
+			ip(param) {}
+};
 
 class NumericReplyFactory {
-	Server	&server;
-	public:
+    Server  &server;
 
-		static NumericReply *create(ReplyCode code, Server &serv, Param *param);
-		static NumericReply *create_and_target(ReplyCode code, Server &serv, Param *param, std::vector<size_t> ids, char t);
-		static NumericReply *create_and_target(ReplyCode code, Server &serv, Param *param, size_t id, char t);
-		NumericReplyFactory(Server &server): server(server) {}
+public:
 
-		/* Rpl al registrarse un nuevo usuario */
-		static RplWelcome				*makeRplWelcome(Server &serv, UserParam* param) {return new RplWelcome(serv, param);}
-		static RplYourHost				*makeRplYourHost(Server &serv, UserParam* param) {return new RplYourHost(serv, param);}
-		static RplCreated				*makeRplCreated(Server &serv, UserParam* param) {return new RplCreated(serv, param);}
-		// static RplMyInfo				*makeRplMyInfo(Server &serv, UserParam* param) {return new RplMyInfo(serv, param);} Esta falta porque mucha info.
+    static NumericReply *create(ReplyCode code, Server &serv, Param *param);
+    static NumericReply *create_and_target(ReplyCode code, Server &serv, Param *param, std::vector<size_t> ids, char t);
+    static NumericReply *create_and_target(ReplyCode code, Server &serv, Param *param, size_t id, char t);
+
+    NumericReplyFactory(Server &server): server(server) {}
+
+    /* WELCOME */
+    static RplWelcome        *makeRplWelcome(Server &serv, UserParam* p) { return new RplWelcome(serv, p); }
+    static RplYourHost       *makeRplYourHost(Server &serv, UserParam* p) { return new RplYourHost(serv, p); }
+    static RplCreated        *makeRplCreated(Server &serv, UserParam* p) { return new RplCreated(serv, p); }
+
+    /* NICK */
+    static ErrErroneousNickname *makeErrErroneusNickname(Server &s, NickParam* p) { return new ErrErroneousNickname(s, p); }
+    static ErrNoNicknamegiven   *makeErrNoNicknamegiven(Server &s, NickParam* p) { return new ErrNoNicknamegiven(s, p); }
+    static ErrNicknameInUse     *makeErrNicknameInUse(Server &s, NickParam* p) { return new ErrNicknameInUse(s, p); }
+    static ErrUnavailResource   *makeErrUnavailResource(Server &s, NickParam* p) { return new ErrUnavailResource(s, p); }
+    static ErrRestricted        *makeErrRestricted(Server &s, NickParam* p) { return new ErrRestricted(s, p); }
+
+    /* GENERIC */
+    static ErrNeedMoreParams    *makeErrNeedMoreParams(Server &s, Param *p) { return new ErrNeedMoreParams(s, p->command()); }
+	static ErrUnknownCommand		*makeErrUnknownCommand(Server &serv) {return new ErrUnknownCommand(serv);}
 
 
-		static ErrErroneousNickname		*makeErrErroneusNickname(Server &serv, NickParam* param) {return new ErrErroneousNickname(serv, param);}
-		static ErrNoNicknamegiven		*makeErrNoNicknamegiven(Server &serv, NickParam* param) {return new ErrNoNicknamegiven(serv, param);};
-		static ErrNicknameInUse			*makeErrNicknameInUse(Server &serv, NickParam* param) {return new ErrNicknameInUse(serv, param);};
-		static ErrUnavailResource		*makeErrUnavailResource(Server &serv, NickParam* param) {return new ErrUnavailResource(serv, param);};
-		static ErrRestricted			*makeErrRestricted(Server &serv, NickParam* param) {return new ErrRestricted(serv, param);};
-		static ErrNeedMoreParams		*makeErrNeedMoreParams(Server &serv, Param *param) {return new ErrNeedMoreParams(serv, param->command());}
-		static ErrAlredyRegistered		*makeErrAlredyRegistered(Server &serv, UserParam *param) {return new ErrAlredyRegistered(serv, param);}
-		static ErrNoOrigin				*makeErrNoOrigin(Server &serv, PingPongParam *param) {return new ErrNoOrigin(serv, param);}
-		static ErrNoSuchServer			*makeErrNoSuchServer(Server &serv, PingPongParam *param) {return new ErrNoSuchServer(serv, param);}
-		static ErrUnknownCommand		*makeErrUnknownCommand(Server &serv) {return new ErrUnknownCommand(serv);}
+    /* PASS / USER */
+    static ErrAlredyRegistered  *makeErrAlredyRegistered(Server &s, Param *p) {
+        // válido para USER y PASS
+        if (dynamic_cast<UserParam*>(p))
+            return new ErrAlredyRegistered(s, static_cast<UserParam*>(p));
+        if (dynamic_cast<PassParam*>(p))
+            return new ErrAlredyRegistered(s, static_cast<PassParam*>(p));
+        return NULL;
+    }
+
+    /* PING / PONG */
+    static ErrNoOrigin       *makeErrNoOrigin(Server &s, PingPongParam *p) { return new ErrNoOrigin(s, p); }
+    static ErrNoSuchServer   *makeErrNoSuchServer(Server &s, PingPongParam *p) { return new ErrNoSuchServer(s, p); }
+
+    /* PART */
+    static ErrNotOnChannel   *makeErrNotOnChannel(Server &s, PartParam *p) { return new ErrNotOnChannel(s, p); }
+
+    /* PRIVMSG */
+    static ErrNoRecipient      *makeErrNoRecipient(Server &s, PrivMsgParam *p) { return new ErrNoRecipient(s, p); }
+    static ErrNoTextToSend     *makeErrNoTextToSend(Server &s, PrivMsgParam *p) { return new ErrNoTextToSend(s, p); }
+    static ErrNoSuchNick       *makeErrNoSuchNick(Server &s, PrivMsgParam *p) { return new ErrNoSuchNick(s, p); }
+    static ErrCannotSendToChan *makeErrCannotSendToChan(Server &s, PrivMsgParam *p) { return new ErrCannotSendToChan(s, p); }
+    static ErrTooManyTargets   *makeErrTooManyTargets(Server &s, PrivMsgParam *p) { return new ErrTooManyTargets(s, p); }
+    static ErrNoTopLevel       *makeErrNoTopLevel(Server &s, PrivMsgParam *p) { return new ErrNoTopLevel(s, p); }
+    static ErrWildTopLevel     *makeErrWildTopLevel(Server &s, PrivMsgParam *p) { return new ErrWildTopLevel(s, p); }
+
+    /* MODE */
+    static RplChannelModeIs   *makeRplChannelModeIs(Server &s, ModeParam *p) { return new RplChannelModeIs(s, p); }
+    static ErrUnknownMode     *makeErrUnknownMode(Server &s, ModeParam *p) { return new ErrUnknownMode(s, p); }
+    static ErrUModeUnknownFlag*makeErrUModeUnknownFlag(Server &s, ModeParam *p) { return new ErrUModeUnknownFlag(s, p); }
+    static ErrKeySet          *makeErrKeySet(Server &s, ModeParam *p) { return new ErrKeySet(s, p); }
+    static ErrUserNotInChannel*makeErrUserNotInChannel(Server &s, ModeParam *p) { return new ErrUserNotInChannel(s, p); }
+
+    /* INVITE */
+    static RplInviting        *makeRplInviting(Server &s, InviteParam *p) { return new RplInviting(s, p); }
+    static ErrUserOnChannel   *makeErrUserOnChannel(Server &s, InviteParam *p) { return new ErrUserOnChannel(s, p); }
+
+    /* JOIN (ya hechos en mensaje anterior) */
+    static RplNoTopic         *makeRplNoTopic(Server &s, JoinParam *p) { return new RplNoTopic(s, p); }
+    static RplTopic           *makeRplTopic(Server &s, JoinParam *p) { return new RplTopic(s, p); }
+    static ErrNoSuchChannel   *makeErrNoSuchChannel(Server &s, JoinParam *p) { return new ErrNoSuchChannel(s, p); }
+    static ErrTooManyChannels *makeErrTooManyChannels(Server &s, JoinParam *p) { return new ErrTooManyChannels(s, p); }
+    static ErrChannelIsFull   *makeErrChannelIsFull(Server &s, JoinParam *p) { return new ErrChannelIsFull(s, p); }
+    static ErrInviteOnlyChan  *makeErrInviteOnlyChan(Server &s, JoinParam *p) { return new ErrInviteOnlyChan(s, p); }
+    static ErrBannedFromChan  *makeErrBannedFromChan(Server &s, JoinParam *p) { return new ErrBannedFromChan(s, p); }
+    static ErrBadChannelKey   *makeErrBadChannelKey(Server &s, JoinParam *p) { return new ErrBadChannelKey(s, p); }
+    static ErrBadChanMask     *makeErrBadChanMask(Server &s, JoinParam *p) { return new ErrBadChanMask(s, p); }
+    static ErrUnsupportedChanMode *makeErrUnsupportedChanMode(Server &s, JoinParam *p) { return new ErrUnsupportedChanMode(s, p); }
 };
+
 
 class ForwardedCommand: virtual public MessageOut {
 	Param	*param;

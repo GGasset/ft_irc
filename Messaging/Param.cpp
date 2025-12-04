@@ -113,6 +113,8 @@ Param	*ParamsFactory(COMMAND cmd, msgTokens tokens) {
 			return new KickParam(tokens);
 		case MODE:
 			return new ModeParam(tokens);
+		case NAMES:
+			return new NamesParam(tokens);
 		default:
 			NULL;
 	}
