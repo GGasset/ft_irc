@@ -80,8 +80,6 @@ enum ReplyCode {
 
 };
 
-
-
 class Param {
 	protected:
 		COMMAND		cmd;

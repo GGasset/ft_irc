@@ -134,6 +134,7 @@ class NumericReply: virtual public MessageOut {
 
 class NickParam;
 
+// Triggers: USER, NICK, PASS
 class RplWelcome: public NumericReply {
 	UserParam	*up;
 
@@ -150,6 +151,7 @@ class RplWelcome: public NumericReply {
 		~RplWelcome() {}
 };
 
+// Triggers: USER, NICK, PASS
 class RplYourHost: public NumericReply {
 	UserParam	*up;
 
@@ -167,6 +169,7 @@ class RplYourHost: public NumericReply {
 		~RplYourHost() {}
 };
 
+// Triggers: USER, NICK, PASS
 class RplCreated: public NumericReply {
 	UserParam	*up;
 
@@ -193,6 +196,8 @@ class RplCreated: public NumericReply {
 // };
 
 /* A registrar en create */
+/* A registrar en create */
+// Triggers: JOIN, TOPIC
 class RplNoTopic : public NumericReply {
 	JoinParam *jp;
 
@@ -212,6 +217,8 @@ class RplNoTopic : public NumericReply {
 };
 
 /* A registrar en create */
+/* A registrar en create */
+// Triggers: JOIN, TOPIC
 class RplTopic : public NumericReply {
     JoinParam *jp;
 
@@ -233,6 +240,8 @@ class RplTopic : public NumericReply {
 };
 
 /* A registrar en create */
+/* A registrar en create */
+// Triggers: JOIN, NAMES
 class RplNamReply : public NumericReply {
     NamesParam *np; // o JoinParam, depende de tu diseño
 	Channel		channel;
@@ -257,6 +266,8 @@ public:
 };
 
 /* A registrar en create */
+/* A registrar en create */
+// Triggers: JOIN, NAMES
 class RplEndOfNames : public NumericReply {
     NamesParam *np;
 	Channel		channel;
@@ -274,6 +285,8 @@ public:
 };
 
 /* A registrar en create */
+/* A registrar en create */
+// Triggers: MODE
 class RplChannelModeIs : public NumericReply {
     ModeParam *mp;
 
@@ -295,6 +308,8 @@ class RplChannelModeIs : public NumericReply {
 };
 
 /* A registrar en create */
+/* A registrar en create */
+// Triggers: INVITE
 class RplInviting : public NumericReply {
     InviteParam *ip;
 
@@ -383,6 +398,7 @@ public:
 // };
 
 
+// Triggers: JOIN
 class ErrBadChannelKey : public NumericReply {
     JoinParam *jp;
 
@@ -401,6 +417,7 @@ class ErrBadChannelKey : public NumericReply {
 			jp(param) {}
 };
 
+// Triggers: PASS
 class ErrGeneric: public NumericReply {
 	void	assemble_msg() {
 		rpl_msg = "Generic";
@@ -411,6 +428,7 @@ class ErrGeneric: public NumericReply {
 		~ErrGeneric() {}
 };
 
+// Triggers: NICK
 class ErrErroneousNickname: public NumericReply {
 	NickParam *np;
 
@@ -426,6 +444,7 @@ class ErrErroneousNickname: public NumericReply {
 		~ErrErroneousNickname() {}
 };
 
+// Triggers: NICK
 class ErrNoNicknamegiven: public NumericReply {
 	NickParam *np;
 
@@ -439,6 +458,7 @@ class ErrNoNicknamegiven: public NumericReply {
 		~ErrNoNicknamegiven() {}
 };
 
+// Triggers: NICK
 class ErrNicknameInUse: public NumericReply {
 	NickParam *np;
 
@@ -453,6 +473,7 @@ class ErrNicknameInUse: public NumericReply {
 		~ErrNicknameInUse() {}
 };
 
+// Triggers: NICK
 class ErrUnavailResource: public NumericReply {
 	NickParam 	*np;
 	std::string	name;
@@ -469,6 +490,7 @@ class ErrUnavailResource: public NumericReply {
 		~ErrUnavailResource() {}
 };
 
+// Triggers: JOIN, PART, PRIVMSG, TOPIC, INVITE, KICK, MODE
 class ErrNeedMoreParams: public NumericReply {
 	Param 	*p;
 	std::string	commandname;
@@ -485,6 +507,7 @@ class ErrNeedMoreParams: public NumericReply {
 		~ErrNeedMoreParams() {}
 };
 
+// Triggers: NICK
 class ErrRestricted: public NumericReply {
 	NickParam *np;
 
@@ -499,6 +522,7 @@ class ErrRestricted: public NumericReply {
 		~ErrRestricted() {}
 };
 
+// Triggers: USER, PASS
 class ErrAlredyRegistered: public NumericReply {
 	Param	*p;
 
@@ -515,6 +539,7 @@ class ErrAlredyRegistered: public NumericReply {
 		~ErrAlredyRegistered() {}
 };
 
+// Triggers: PING
 class ErrNoOrigin: public NumericReply {
 	PingPongParam	*pip;
 
@@ -528,6 +553,7 @@ class ErrNoOrigin: public NumericReply {
 		~ErrNoOrigin() {}
 };
 
+// Triggers: PING, WHO, WHOIS
 class ErrNoSuchServer: public NumericReply {
 	PingPongParam	*pip;
 
@@ -541,6 +567,7 @@ class ErrNoSuchServer: public NumericReply {
 		~ErrNoSuchServer() {}
 };
 
+// Triggers: Unknown Command
 class ErrUnknownCommand: public NumericReply {
 	void	assemble_msg() {
 		rpl_msg = "UnknownCommand";
@@ -552,6 +579,8 @@ class ErrUnknownCommand: public NumericReply {
 };
 
 /* A registrar en create */
+/* A registrar en create */
+// Triggers: JOIN, PART, KICK, TOPIC, INVITE, MODE
 class ErrNoSuchChannel : public NumericReply {
     JoinParam *jp;
 
@@ -571,6 +600,8 @@ class ErrNoSuchChannel : public NumericReply {
 };
 
 /* A registrar en create */
+/* A registrar en create */
+// Triggers: JOIN
 class ErrTooManyChannels : public NumericReply {
     JoinParam *jp;
 
@@ -590,6 +621,8 @@ class ErrTooManyChannels : public NumericReply {
 };
 
 /* A registrar en create */
+/* A registrar en create */
+// Triggers: JOIN
 class ErrChannelIsFull : public NumericReply {
     JoinParam *jp;
 
@@ -609,6 +642,8 @@ class ErrChannelIsFull : public NumericReply {
 };
 
 /* A registrar en create */
+/* A registrar en create */
+// Triggers: JOIN
 class ErrInviteOnlyChan : public NumericReply {
     JoinParam *jp;
 
@@ -628,6 +663,8 @@ class ErrInviteOnlyChan : public NumericReply {
 };
 
 /* A registrar en create */
+/* A registrar en create */
+// Triggers: JOIN
 class ErrBannedFromChan : public NumericReply {
     JoinParam *jp;
 
@@ -647,6 +684,8 @@ class ErrBannedFromChan : public NumericReply {
 };
 
 /* A registrar en create */
+/* A registrar en create */
+// Triggers: JOIN, NAMES
 class ErrBadChanMask : public NumericReply {
     JoinParam *jp;
 
@@ -666,6 +705,8 @@ class ErrBadChanMask : public NumericReply {
 };
 
 /* A registrar en create */
+/* A registrar en create */
+// Triggers: MODE
 class ErrUnsupportedChanMode : public NumericReply {
     JoinParam *jp;
 
@@ -685,6 +726,8 @@ class ErrUnsupportedChanMode : public NumericReply {
 };
 
 /* A registrar en create */
+/* A registrar en create */
+// Triggers: PART, TOPIC, INVITE
 class ErrNotOnChannel : public NumericReply {
     PartParam *pp;
 
@@ -703,6 +746,8 @@ class ErrNotOnChannel : public NumericReply {
 };
 
 /* A registrar en create */
+/* A registrar en create */
+// Triggers: PRIVMSG
 class ErrNoRecipient : public NumericReply {
     PrivMsgParam *pm;
     void assemble_msg() {
@@ -717,6 +762,8 @@ class ErrNoRecipient : public NumericReply {
 };
 
 /* A registrar en create */
+/* A registrar en create */
+// Triggers: PRIVMSG
 class ErrNoTextToSend : public NumericReply {
     PrivMsgParam *pm;
 
@@ -731,22 +778,11 @@ class ErrNoTextToSend : public NumericReply {
 			pm(param) {}
 };
 
-/* A registrar en create */
-class ErrNoTextToSend : public NumericReply {
-    PrivMsgParam *pm;
 
-    void assemble_msg() {
-        User u = server.get_user_by_id(sender_id);
-        rpl_msg = u.get_nick() + " :No text to send";
-    }
-	public:
-		ErrNoTextToSend(Server &server, PrivMsgParam *param)
-			: MessageOut(server),
-			NumericReply(server, ERR_NOTEXTTOSEND),
-			pm(param) {}
-};
 
 /* A registrar en create */
+/* A registrar en create */
+// Triggers: PRIVMSG, WHOIS
 class ErrNoSuchNick : public NumericReply {
     PrivMsgParam *pm;
 
@@ -763,6 +799,8 @@ class ErrNoSuchNick : public NumericReply {
 };
 
 /* A registrar en create */
+/* A registrar en create */
+// Triggers: PRIVMSG
 class ErrCannotSendToChan : public NumericReply {
     PrivMsgParam *pm;
 
@@ -778,6 +816,8 @@ class ErrCannotSendToChan : public NumericReply {
 };
 
 /* A registrar en create */
+/* A registrar en create */
+// Triggers: PRIVMSG
 class ErrTooManyTargets : public NumericReply {
     PrivMsgParam *pm;
 
@@ -793,6 +833,8 @@ class ErrTooManyTargets : public NumericReply {
 };
 
 /* A registrar en create */
+/* A registrar en create */
+// Triggers: PRIVMSG
 class ErrNoTopLevel : public NumericReply {
     PrivMsgParam *pm;
 
