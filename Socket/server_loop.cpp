@@ -52,7 +52,9 @@ void Server::handle_read_event(int fd)
 
 	std::vector<std::string> msgs = sender->msg_sent(read_data);
 	for (size_t i = 0; i < msgs.size(); i++) {
+#ifndef DONT_LOG
 		std::cout << std::endl << "Msg received from " << sender->getUsername() << ": " << msgs[i] << std::endl;
+#endif
 		route_message(msgs[i], *sender, sender_index);
 	}
 }
@@ -62,7 +64,9 @@ void Server::handle_write_event(int fd)
 	ssize_t user_i = get_user_index_by_fd(fd);
 	if (user_i == -1) return;
 	if (!messages[user_i].size()) return;
+#ifndef DONT_LOG
 	std::cout << "Sending message to " << clients[user_i].getUsername() << std::endl;
+#endif
 
 	std::tuple<void*,size_t,bool> next_msg = messages[user_i].front();
 	messages[user_i].pop();
@@ -80,7 +84,9 @@ void Server::handle_event(const epoll_event event, int sockfd)
 			|| fcntl(sockfd, F_SETFL/*Set flags*/, fcntl(sockfd, F_GETFL/*Get flags*/, 0) | O_NONBLOCK) == -1 // Set non block
 		) return;
 
+#ifndef DONT_LOG
 		std::cout << "Bluetooth device aconnected successfully" << std::endl;
+#endif
 
 		// Add client
 		client_fds.push_back(new_client_fd);
@@ -122,7 +128,9 @@ int Server::loop(size_t PORT)
 	// Add sockfd for read watchlist to accept clients
 	if (epoll_ctl(epollfd, EPOLL_CTL_ADD, sockfd, &event)) err = true;
 
+#ifndef DONT_LOG
 	std::cout << "Bluetooth device is ready to peal" << std::endl;
+#endif
 
 	last_ping_time = std::time(0);
 	while (!stop_server && !err && !signal_server_stop)
