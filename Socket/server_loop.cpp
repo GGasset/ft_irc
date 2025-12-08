@@ -51,9 +51,8 @@ void Server::handle_read_event(int fd)
 	if (!sender) return;
 
 	std::vector<std::string> msgs = sender->msg_sent(read_data);
-	//for (size_t i = 0; i < msgs.size(); i++) std::cout << "Msg received from " << sender->getUsername() << ": " << msgs[i];
 	for (size_t i = 0; i < msgs.size(); i++) {
-		std::cout << std::endl << "Msg received from " << sender->get_nick() << ": " << msgs[i] << std::endl;
+		std::cout << std::endl << "Msg received from " << sender->getUsername() << ": " << msgs[i] << std::endl;
 		route_message(msgs[i], *sender, sender_index);
 	}
 }
@@ -63,7 +62,7 @@ void Server::handle_write_event(int fd)
 	ssize_t user_i = get_user_index_by_fd(fd);
 	if (user_i == -1) return;
 	if (!messages[user_i].size()) return;
-	std::cout << "Sending message " << clients[user_i].get_nick() << std::endl;
+	std::cout << "Sending message to " << clients[user_i].getUsername() << std::endl;
 
 	std::tuple<void*,size_t,bool> next_msg = messages[user_i].front();
 	messages[user_i].pop();
@@ -132,9 +131,7 @@ int Server::loop(size_t PORT)
 		if (event_n == -1) {err = errno != EINTR; continue;}
 
 		if (std::time(0) - last_ping_time >= PING_SEPARATION_S)
-		{
 			send_pings();
-		}
 
 		for (size_t i = 0; i < event_n; i++)
 			handle_event(events[i], sockfd);
