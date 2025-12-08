@@ -32,6 +32,7 @@ Server::~Server()
 		}
 	}
 	client_fds.clear();
+	last_pong_time.clear();
 	clients.clear();
 	messages.clear();
 	servers.clear();
@@ -63,7 +64,9 @@ void Server::disconnect_user(size_t user_index)
 	if (epoll_ctl(epollfd, EPOLL_CTL_DEL, client_fds[user_index], &event)) stop();
 
 	close(client_fds[user_index]);
+
 	client_fds.erase(client_fds.begin() + user_index);
+	last_pong_time.erase(last_pong_time.begin() + user_index);
 	messages.erase(messages.begin() + user_index);
 	clients.erase(clients.begin() + user_index);
 
@@ -118,6 +121,24 @@ User *Server::get_user_by_fd(int fd)
 	ssize_t user_index = get_user_index_by_fd(fd);
 	if (user_index) return 0;
 	return &clients[user_index];
+}
+
+void Server::send_pings()
+{
+	for (size_t i = 0; i < clients.size(); i++)
+	{
+		if (time(NULL) - last_pong_time[i] > USER_TIMEOUT)
+		{
+			disconnect_user(i);
+			i--;
+			continue;
+		}
+		if (last_pong_time[i] < last_ping_time) continue; // Don't queue pings, wait until client responded
+
+		// send ping
+		//add_msg(,,,clients[i]);
+	}
+	last_ping_time = std::time(NULL);
 }
 
 size_t	Server::n_users() {

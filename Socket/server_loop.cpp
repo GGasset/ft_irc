@@ -86,6 +86,7 @@ void Server::handle_event(const epoll_event event, int sockfd)
 		// Add client
 		client_fds.push_back(new_client_fd);
 		clients.push_back(User("unset", max_client_id));
+		last_pong_time.push_back(std::time(NULL));
 		max_client_id++;
 		messages.push_back(std::queue<std::tuple<void *, size_t, bool>>());
 
@@ -124,16 +125,15 @@ int Server::loop(size_t PORT)
 
 	std::cout << "Bluetooth device is ready to peal" << std::endl;
 
-	time_t last_ping_time = std::time(0);
+	last_ping_time = std::time(0);
 	while (!stop_server && !err && !signal_server_stop)
 	{
 		size_t event_n = epoll_wait(epollfd, events, MAX_EVENTS, 1000);
 		if (event_n == -1) {err = errno != EINTR; continue;}
 
-		if (std::time(0) - last_ping_time >= 2)
+		if (std::time(0) - last_ping_time >= PING_SEPARATION)
 		{
-			
-			last_ping_time = std::time(0);
+			send_pings();
 		}
 
 		for (size_t i = 0; i < event_n; i++)
