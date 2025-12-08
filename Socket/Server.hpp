@@ -16,8 +16,9 @@
 
 #define READ_SIZE 420
 #define MAX_EVENTS 69
-#define USER_TIMEOUT 42
-#define PING_SEPARATION USER_TIMEOUT / 3 - 1
+#define USER_TIMEOUT_S 42
+#define N_PINGS_UNTIL_TIMEOUT 5
+#define PING_SEPARATION_S USER_TIMEOUT_S / N_PINGS_UNTIL_TIMEOUT - 1
 
 extern int signal_server_stop;
 

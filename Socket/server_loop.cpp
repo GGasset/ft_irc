@@ -131,7 +131,7 @@ int Server::loop(size_t PORT)
 		size_t event_n = epoll_wait(epollfd, events, MAX_EVENTS, 1000);
 		if (event_n == -1) {err = errno != EINTR; continue;}
 
-		if (std::time(0) - last_ping_time >= PING_SEPARATION)
+		if (std::time(0) - last_ping_time >= PING_SEPARATION_S)
 		{
 			send_pings();
 		}

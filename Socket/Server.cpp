@@ -65,6 +65,10 @@ void Server::disconnect_user(size_t user_index)
 
 	close(client_fds[user_index]);
 
+#ifndef DONT_LOG
+	std::cout << clients[user_index].getUsername() << " disconnected" << std::endl;;
+#endif
+
 	client_fds.erase(client_fds.begin() + user_index);
 	last_pong_time.erase(last_pong_time.begin() + user_index);
 	messages.erase(messages.begin() + user_index);
@@ -127,8 +131,11 @@ void Server::send_pings()
 {
 	for (size_t i = 0; i < clients.size(); i++)
 	{
-		if (time(NULL) - last_pong_time[i] > USER_TIMEOUT)
+		if (time(NULL) - last_pong_time[i] > USER_TIMEOUT_S)
 		{
+#ifndef DONT_LOG
+			std::cout << "User timed out: ";
+#endif
 			disconnect_user(i);
 			i--;
 			continue;
