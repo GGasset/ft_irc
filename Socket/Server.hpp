@@ -55,7 +55,7 @@ private:
 	void route_message(std::string msg, User &sender, size_t user_index);
 
 	// Only sends to users who have responded previous pings, also disconnects users who timeout
-	void send_pings();
+	void send_pings(); // TODO: actually send the message
 
 public:
 	Server();
