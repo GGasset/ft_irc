@@ -433,7 +433,7 @@ class WhoisParam: public Param {
                 target = tokens[i++].str;
                 throw BadSyntax(NAMES, ERR_NOSUCHSERVER);
             }
-            if (tokens[++i].type = CRLF)
+            if (tokens[++i].type == CRLF)
                 throw BadSyntax(NAMES, ERR_NONICKNAMEGIVEN);
             splitByComma(tokens[i].str, nicks);
         }

@@ -1,4 +1,5 @@
 #include "MessageOut.hpp"
+#include "Factories.hpp"
 
 MessageOut::~MessageOut() {}
 

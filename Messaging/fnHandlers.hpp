@@ -1,6 +1,7 @@
 #pragma once
 
-#include "MessageOut.hpp"
+//#include "MessageOut.hpp"
+#include "Factories.hpp"
 #include "MessageIn.hpp"
 #include <deque>
 
