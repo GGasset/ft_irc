@@ -8,18 +8,24 @@
 #include <queue>
 #include <sys/epoll.h>
 
+#include <ctime>
+
 #include "User.hpp"
 #include "Channel.hpp"
 #include "iostream"
 
 #define READ_SIZE 420
 #define MAX_EVENTS 69
+#define USER_TIMEOUT_S 42
+#define N_PINGS_UNTIL_TIMEOUT 5
+#define PING_SEPARATION_S USER_TIMEOUT_S / N_PINGS_UNTIL_TIMEOUT - 1
 
 extern int signal_server_stop;
 
 class Server
 {
 private:
+	size_t				last_ping_time;
 	bool				stop_server;
 	int					sockfd;
 	int					epollfd;
@@ -32,6 +38,7 @@ private:
 	size_t				max_channel_id;
 
 	std::vector<int>	client_fds;
+	std::vector<size_t>	last_pong_time; // TODO: set during message handling
 	std::vector<User>	clients;
 	std::vector<std::queue<std::tuple<void *, size_t, bool>>> messages;
 	std::vector<Channel> servers;
@@ -46,6 +53,9 @@ private:
 	void handle_event(const epoll_event event, int sockfd);
 
 	void route_message(std::string msg, User &sender, size_t user_index);
+
+	// Only sends to users who have responded previous pings, also disconnects users who timeout
+	void send_pings(); // TODO: actually send the message
 
 public:
 	Server();
