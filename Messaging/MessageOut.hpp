@@ -389,63 +389,63 @@ class ErrGeneric: public NumericReply {
 		~ErrGeneric() {}
 };
 
-class ErrErroneousNickname: public NumericReply {
-	NickParam *np;
+// class ErrErroneousNickname: public NumericReply {
+// 	NickParam *np;
 
-	void	assemble_msg() {
-		std::string nickname = np->nickname;
-		rpl_msg = nickname + " :Erroneous nickname";
-	}
+// 	void	assemble_msg() {
+// 		std::string nickname = np->nickname;
+// 		rpl_msg = nickname + " :Erroneous nickname";
+// 	}
 
-	public:
-		ErrErroneousNickname(Server &server, NickParam *param): MessageOut(server),
-															  NumericReply(server, ERR_ERRONEUSNICKNAME),
-															  np(param) {}
-		~ErrErroneousNickname() {}
-};
+// 	public:
+// 		ErrErroneousNickname(Server &server, NickParam *param): MessageOut(server),
+// 															  NumericReply(server, ERR_ERRONEUSNICKNAME),
+// 															  np(param) {}
+// 		~ErrErroneousNickname() {}
+// };
 
-class ErrNoNicknamegiven: public NumericReply {
-	NickParam *np;
+// class ErrNoNicknamegiven: public NumericReply {
+// 	NickParam *np;
 
-	void	assemble_msg() {
-		rpl_msg = ":No nickname given";
-	}
-	public:
-		ErrNoNicknamegiven(Server &server, NickParam *param): MessageOut(server),
-															  NumericReply(server, ERR_NONICKNAMEGIVEN),
-															  np(param) {}
-		~ErrNoNicknamegiven() {}
-};
+// 	void	assemble_msg() {
+// 		rpl_msg = ":No nickname given";
+// 	}
+// 	public:
+// 		ErrNoNicknamegiven(Server &server, NickParam *param): MessageOut(server),
+// 															  NumericReply(server, ERR_NONICKNAMEGIVEN),
+// 															  np(param) {}
+// 		~ErrNoNicknamegiven() {}
+// };
 
-class ErrNicknameInUse: public NumericReply {
-	NickParam *np;
+// class ErrNicknameInUse: public NumericReply {
+// 	NickParam *np;
 
-	void	assemble_msg() {
-		std::string nickname = np->nickname;
-		rpl_msg = nickname + " :Nickname is already in use";
-	}
-	public:
-		ErrNicknameInUse(Server &server, NickParam *param): MessageOut(server),
-															  NumericReply(server, ERR_NICKNAMEINUSE),
-															  np(param) {}
-		~ErrNicknameInUse() {}
-};
+// 	void	assemble_msg() {
+// 		std::string nickname = np->nickname;
+// 		rpl_msg = nickname + " :Nickname is already in use";
+// 	}
+// 	public:
+// 		ErrNicknameInUse(Server &server, NickParam *param): MessageOut(server),
+// 															  NumericReply(server, ERR_NICKNAMEINUSE),
+// 															  np(param) {}
+// 		~ErrNicknameInUse() {}
+// };
 
-class ErrUnavailResource: public NumericReply {
-	NickParam 	*np;
-	std::string	name;
+// class ErrUnavailResource: public NumericReply {
+// 	NickParam 	*np;
+// 	std::string	name;
 
-	void	assemble_msg() {
-		rpl_msg = name + " :Nick/channel is temporarily unavailable";
-	}
-	public:
-		ErrUnavailResource(Server &server, NickParam *param): MessageOut(server),
-															  NumericReply(server, ERR_UNAVAILRESOURCE),
-															  np(param),
-															  name(param->nickname) {}
-		/* ..... Se ha de overridear para todos los Comandos que lo utilizen.  */
-		~ErrUnavailResource() {}
-};
+// 	void	assemble_msg() {
+// 		rpl_msg = name + " :Nick/channel is temporarily unavailable";
+// 	}
+// 	public:
+// 		ErrUnavailResource(Server &server, NickParam *param): MessageOut(server),
+// 															  NumericReply(server, ERR_UNAVAILRESOURCE),
+// 															  np(param),
+// 															  name(param->nickname) {}
+// 		/* ..... Se ha de overridear para todos los Comandos que lo utilizen.  */
+// 		~ErrUnavailResource() {}
+// };
 
 class ErrNeedMoreParams: public NumericReply {
 	Param 	*p;

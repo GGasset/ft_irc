@@ -1,6 +1,7 @@
 #pragma once
 
 #include "MessageOut.hpp"
+#include "Nick.hpp"
 
 
 class NumericReplyFactory {
@@ -28,7 +29,7 @@ public:
 
     /* GENERIC */
     static ErrNeedMoreParams    *makeErrNeedMoreParams(Server &s, Param *p) { return new ErrNeedMoreParams(s, p->command()); }
-	static ErrUnknownCommand		*makeErrUnknownCommand(Server &serv) {return new ErrUnknownCommand(serv);}
+	static ErrUnknownCommand	*makeErrUnknownCommand(Server &serv) {return new ErrUnknownCommand(serv);}
 
 
     /* PASS / USER */
