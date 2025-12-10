@@ -866,7 +866,7 @@ class ForwardedCommand: virtual public MessageOut {
 	Param	*param;
 
 	void	fill_prefix() {
-		User u = server.getUsers()[sender_id];
+		User u = server.get_user_by_id(sender_id);
 		prefix = u.get_nick() + "!" + u.getUsername() + "@"; //+ u.getHostname;
 	}
 	void	serialize() {

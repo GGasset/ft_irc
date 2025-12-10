@@ -160,6 +160,7 @@ class PingPongParam: public Param {
 		std::string server2 = "";
 
 		PingPongParam(msgTokens tokens);
+        PingPongParam(std::string server1);
 		~PingPongParam() {}
 		PingPongParam& operator=(const PingPongParam& other) {
 			return (*this);

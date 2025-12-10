@@ -100,4 +100,6 @@ class ForwardedCommandFactory {
 	static ForwardedCommand	*makeKickForward(Server &serv, KickParam *param) {return new KickForwardedCommand(serv, param);}
 	static ForwardedCommand	*makeModeForward(Server &serv, ModeParam *param) {return new ModeForwardedCommand(serv, param);}
 	static ForwardedCommand	*create(COMMAND cmd, Server &serv, Param *param);
+    static ForwardedCommand *create_and_target(COMMAND cmd, Server &serv, Param *param, size_t id, char t);
+    static ForwardedCommand *create_and_target(COMMAND cmd, Server &serv, Param *param, std::vector<size_t> ids, char t);
 };
