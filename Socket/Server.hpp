@@ -68,7 +68,7 @@ public:
 
 	void set_pong_time(size_t user_id);
 
-	size_t get_user_index_by_id(size_t id);
+	ssize_t get_user_index_by_id(size_t id);
 	User &get_user_by_nick(std::string nick);
 	User &get_user_by_id(size_t id);
 	std::vector<User&> get_channel_users(const Channel channel);

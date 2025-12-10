@@ -86,6 +86,21 @@ void Server::add_msg(void *msg, size_t len, bool is_heap, User &receiver)
 	messages[user_index].push(std::make_tuple(msg, len, is_heap));
 }
 
+void Server::set_pong_time(size_t user_id)
+{
+	ssize_t index = get_user_index_by_id(user_id);
+	if (index != -1) return;
+	last_pong_time[index] = time(NULL);
+}
+
+ssize_t Server::get_user_index_by_id(size_t id)
+{
+	for (size_t i = 0; i < clients.size(); i++)
+		if (clients[i].get_id() == id)
+			return i;
+	return -1;
+}
+
 User &Server::get_user_by_nick(std::string nick)
 {
 	for (size_t i = 0; i < clients.size(); i++) 
