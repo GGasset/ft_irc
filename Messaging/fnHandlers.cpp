@@ -102,8 +102,10 @@ MessageOut  *handlePINGPONG(MessageIn in, Server &server) {
     PingPongParam   *p = dynamic_cast<PingPongParam*>(in.getParams());
     
     // Asumimos que un PONG no está mal formado para clientes correctos.
-    if (p->command() == PONG)
+    if (p->command() == PONG) {
+        server.set_pong_time(in.sender_id);
         return NULL;
+    }
     if (p->server2.empty())
         return (ForwardedCommandFactory::create(PONG, server, p));
     else {

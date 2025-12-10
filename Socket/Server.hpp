@@ -66,7 +66,9 @@ public:
 	void add_msg(void *msg, size_t len, bool is_heap, User &receiver);
 	void add_msg(void *msg, size_t len, bool is_heap, Channel receivers);
 
+	void set_pong_time(size_t user_id);
 
+	size_t get_user_index_by_id(size_t id);
 	User &get_user_by_nick(std::string nick);
 	User &get_user_by_id(size_t id);
 	std::vector<User&> get_channel_users(const Channel channel);
