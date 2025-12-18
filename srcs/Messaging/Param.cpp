@@ -76,6 +76,9 @@ void	PingPongParam::validateParam() {
 		server2 = tokens[i].str;
 }
 
+PingPongParam::PingPongParam(std::string server1): Param(PONG, std::vector<msg_token>{}),
+												   server1(server1) {}
+
 QuitParam::QuitParam(msgTokens tokens): Param(QUIT, tokens) {}
 
 void	QuitParam::validateParam() {}

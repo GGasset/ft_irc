@@ -158,6 +158,10 @@ void Server::send_pings()
 		if (last_pong_time[i] < last_ping_time) continue; // Don't queue pings, wait until client responded
 
 		// send ping
+		User u = clients[i];
+		std::string prefix = u.get_nick() + "!" + u.getUsername() + "@"; //+ u.getHostname;
+		std::string ping_msg = prefix + " PING " + u.getHostname() + "\n"; //En principio al mandarse por el socket se envia \r\n, pero no estoy del todo seguro.
+		
 		//add_msg(,,,clients[i]);
 	}
 	last_ping_time = std::time(NULL);
