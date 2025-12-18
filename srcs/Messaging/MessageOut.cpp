@@ -39,7 +39,11 @@ NumericReply *NumericReplyFactory::create(ReplyCode code, Server &serv, Param *p
 
     /* PART */
     case ERR_NOTONCHANNEL:  return makeErrNotOnChannel(serv, static_cast<PartParam*>(param));
+/*
 
+se crea canal -> server response = canal creado!
+
+*/
     /* PRIVMSG */
     case ERR_NORECIPIENT:     return makeErrNoRecipient(serv, static_cast<PrivMsgParam*>(param));
     case ERR_NOTEXTTOSEND:    return makeErrNoTextToSend(serv, static_cast<PrivMsgParam*>(param));

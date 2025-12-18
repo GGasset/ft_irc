@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <cstring>
 #include "User.hpp"
 #include "string"
 
@@ -13,6 +14,8 @@ struct channel_mode
 	std::vector<size_t> operator_user_id;
 	std::string topic;
 };
+
+class Server;
 
 class Channel
 {
@@ -29,6 +32,7 @@ private:
 
 public:
 	Channel(void);
+	Channel(std::string _name);
 	~Channel(void);
 	ssize_t get_id(void);
 	void set_id(ssize_t id);
@@ -36,4 +40,6 @@ public:
 	void set_topic(std::string topic);
 	std::vector<size_t>	get_members(void);
 	std::string get_name(void);
+
+	void	broadcast(Server& serv, const std::string &mgs);
 };
