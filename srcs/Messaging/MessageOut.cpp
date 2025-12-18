@@ -126,3 +126,16 @@ ForwardedCommand *ForwardedCommandFactory::create(COMMAND cmd, Server &serv, Par
 			return NULL;
 	}
 }
+    
+ForwardedCommand *ForwardedCommandFactory::create_and_target(COMMAND cmd, Server &serv, Param *param, size_t id, char t) {
+	std::vector<size_t> ids = {id};
+    ForwardedCommand    *ret = create(cmd, serv, param);
+    MessageTarget       *target = MessageTargetFactory::create(serv, ids, t);
+
+    ret->setTarget(target);
+    return (ret);
+}
+
+static ForwardedCommand *create_and_target(Server &serv, Param *param, std::vector<size_t> ids, char t) {
+
+}
