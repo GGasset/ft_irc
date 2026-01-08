@@ -2,7 +2,7 @@
 #include "ParserMessage.hpp"
 
 /* Comandito para compilar.*/
-//c++ -g main.cpp Message.cpp ParserMessage.cpp Param.cpp MessageOut.cpp fnHandlers.cpp Server_Mock.cpp  ../Authentication/User.cpp  Channels/Channel.cpp -I../Authentication/ -IChannels/
+// c++ -g main.cpp Message.cpp ParserMessage.cpp Param.cpp MessageOut.cpp fnHandlers.cpp  ../Authentication/User.cpp  Channels/Channel.cpp ../Socket/Server.cpp Nick/Nick.cpp  -I../../Include/Server/ -I../../Include/Channels -I ../../Include/Parsing -I../../Include
 
 /* ---------- 1. INIT SERVER ----------- */
 void init_server(Server &server, std::string passw) {

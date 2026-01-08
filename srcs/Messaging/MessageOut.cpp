@@ -136,6 +136,6 @@ ForwardedCommand *ForwardedCommandFactory::create_and_target(COMMAND cmd, Server
     return (ret);
 }
 
-static ForwardedCommand *create_and_target(Server &serv, Param *param, std::vector<size_t> ids, char t) {
+// static ForwardedCommand *create_and_target(Server &serv, Param *param, std::vector<size_t> ids, char t) {
 
-}
+// }
