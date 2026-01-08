@@ -1,4 +1,5 @@
 #include "Param.hpp"
+#include <unistd.h>
 
 Param::~Param() {}
 
@@ -6,7 +7,7 @@ NickParam::NickParam(msgTokens tokens): Param(NICK, tokens) {}
 
 void	NickParam::validateParam() {
 	int i = 0;
-	while (tokens[i].type != TOK_PARAM)
+	while (tokens[i].type != TOK_PARAM && i < tokens.size() - 1)
 		i++;
 	if (tokens[i].type == CRLF)
 		throw BadSyntax(NICK, ERR_NONICKNAMEGIVEN);
@@ -32,6 +33,8 @@ void	UserParam::validateParam() {
 	// Lo que he extraído del RFC es que se traga lo que sea.
 	// Solo se gestiona el caso cuando username es incorrecto.
 	int i = 0;
+    std::cout << "Que me estas contando de tokens" << tokens.size() << std::endl;
+	write(1, "Que onda\n", 10);
 	
 	while (tokens[i].type != TOK_PARAM)
 		i++;

@@ -90,6 +90,8 @@ MessageOut  *handleUser(MessageIn in, Server &server) {
 MessageOut  *handlePass(MessageIn in, Server &server) {
     User        &senderU = server.get_user_by_id(in.sender_id);
     PassParam   *p = dynamic_cast<PassParam*>(in.getParams());
+    std::cout << "Cual es la contraseña?" << p->password << std::endl;
+    std::cout << "Cual es la contraseña del servidor: " << server.passw << std::endl;
     if (p->password != server.passw) {
         return (NumericReplyFactory::create_and_target(ERR_GENERIC, server, p, in.sender_id, 'u'));
     }

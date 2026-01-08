@@ -11,6 +11,9 @@ bool prepare_message(const std::string &packet, Server &server, MessageIn &in, s
     ParseStatus status = VALID_MSG;
 
     tokens = msgTokenizer(packet);
+    if (tokens.size() == 0)
+        return (false);
+
     in = parseMessage(tokens, status);
 
     if (status != VALID_MSG)
@@ -48,6 +51,6 @@ void handle_message(MessageIn &in, Server &server, const std::string &packet) {
 void Server::route_message(std::string msg, User &sender, size_t user_index) {
 	MessageIn in;
 
-	prepare_message(msg, *this, in, user_index);
-	handle_message(in, *this, msg);
+	if (prepare_message(msg, *this, in, user_index))
+	    handle_message(in, *this, msg);
 }

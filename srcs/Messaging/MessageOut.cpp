@@ -29,6 +29,7 @@ NumericReply *NumericReplyFactory::create(ReplyCode code, Server &serv, Param *p
 
     /* GENERIC */
     case ERR_NEEDMOREPARAMS:   return makeErrNeedMoreParams(serv, param);
+    case ERR_GENERIC:          return makeErrGeneric(serv);
 
     /* PASS / USER */
     case ERR_ALREADYREGISTRED: return makeErrAlredyRegistered(serv, param);
