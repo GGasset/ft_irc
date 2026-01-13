@@ -3,151 +3,231 @@
 #include <sys/socket.h>
 #include <fcntl.h>
 #include <signal.h>
+#include <errno.h>
+#include <cstring>
+#include <iostream>
 
 #include "Server.hpp"
 
 int signal_server_stop;
 
+/* ===================== SIGNALS ===================== */
 
-void handle_signals(int signal)
+void handle_signals(int)
 {
-	signal_server_stop = true;
+    signal_server_stop = true;
 }
+
+/* ===================== SOCKET SETUP ===================== */
 
 static int setup_sockfd(size_t PORT)
 {
-	int sockfd = socket(AF_INET, SOCK_STREAM, 0); // Create socket fd
+    int sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    if (sockfd == -1)
+        return -1;
 
-	sockaddr_in addr;
-	addr.sin_family = AF_INET;
-	addr.sin_port = htons(PORT);
-	addr.sin_addr.s_addr = INADDR_ANY;
+    sockaddr_in addr;
+    std::memset(&addr, 0, sizeof(addr));
+    addr.sin_family = AF_INET;
+    addr.sin_port = htons(PORT);
+    addr.sin_addr.s_addr = INADDR_ANY;
 
-	if (
-	 	sockfd == -1
-	 || bind(sockfd, (const sockaddr*)&addr, sizeof(addr))// Attach fd to PORT
-	 || listen(sockfd, 20) // Mark fd as the one used to accept connections
-	 || fcntl(sockfd, F_SETFL/*Set flags*/, fcntl(sockfd, F_GETFL/*Get flags*/, 0) | O_NONBLOCK) == -1 // Set non block
-	) 
-	{
-		std::cerr << "bind err" << std::endl;
-		close(sockfd);
-		return -1;
-	}
-	return sockfd;
+    if (bind(sockfd, (const sockaddr*)&addr, sizeof(addr)) == -1 ||
+        listen(sockfd, 20) == -1)
+    {
+        close(sockfd);
+        return -1;
+    }
+
+    int flags = fcntl(sockfd, F_GETFL, 0);
+    fcntl(sockfd, F_SETFL, flags | O_NONBLOCK);
+
+    return sockfd;
 }
+
+/* ===================== READ EVENT ===================== */
 
 void Server::handle_read_event(int fd)
 {
-	std::string read_data;
-	char tmp[READ_SIZE + 1] {};
-	
-	ssize_t bytes_read = read(fd, &tmp, READ_SIZE);
-	read_data += tmp;
+    char tmp[READ_SIZE];
 
-	if (!read_data.length()) return;
-	ssize_t sender_index = get_user_index_by_fd(fd);
-	User *sender = get_user_by_fd(fd);
-	if (!sender) return;
+    while (true)
+    {
+        ssize_t bytes_read = read(fd, tmp, READ_SIZE);
 
-	std::vector<std::string> msgs = sender->msg_sent(read_data);
-	for (size_t i = 0; i < msgs.size(); i++) {
+        if (bytes_read > 0)
+        {
+            ssize_t sender_index = get_user_index_by_fd(fd);
+            User *sender = get_user_by_fd(fd);
+            if (!sender)
+                return;
+
+            std::string read_data(tmp, bytes_read);
+            std::vector<std::string> msgs = sender->msg_sent(read_data);
+
+            for (size_t i = 0; i < msgs.size(); i++)
+            {
 #ifndef DONT_LOG
-		std::cout << std::endl << "Msg received from " << sender->getUsername() << ": " << msgs[i] << std::endl;
+                std::cout << "\nMsg received from "
+                          << sender->getUsername()
+                          << ": " << msgs[i] << std::endl;
 #endif
-		route_message(msgs[i], *sender, sender_index);
-	}
+                route_message(msgs[i], *sender, sender_index);
+            }
+        }
+        else if (bytes_read == 0)
+        {
+            // ⚠️ AQUÍ FALTA una función para limpiar correctamente el cliente
+            // Debería:
+            //  - eliminar fd de epoll
+            //  - cerrar fd
+            //  - borrar User, messages, client_fds, etc.
+            close(fd);
+            return;
+        }
+        else
+        {
+            if (errno == EAGAIN || errno == EWOULDBLOCK)
+                return;
+
+            // ⚠️ Error real: mismo problema que arriba
+            close(fd);
+            return;
+        }
+    }
 }
+
+/* ===================== WRITE EVENT ===================== */
 
 void Server::handle_write_event(int fd)
 {
-	ssize_t user_i = get_user_index_by_fd(fd);
-	if (user_i == -1) return;
-	if (!messages[user_i].size()) return;
-#ifndef DONT_LOG
-	std::cout << "Sending message to " << clients[user_i].getUsername() << std::endl;
-#endif
+    ssize_t user_i = get_user_index_by_fd(fd);
+    if (user_i == -1)
+        return;
 
-	std::tuple<void*,size_t,bool> next_msg = messages[user_i].front();
-	messages[user_i].pop();
+    if (messages[user_i].empty())
+        return;
 
-	write(fd, std::get<0>(next_msg), std::get<1>(next_msg));
-	if (std::get<2>(next_msg)) delete[] std::get<0>(next_msg);
+    while (!messages[user_i].empty())
+    {
+        std::tuple<void*, size_t, bool> &msg = messages[user_i].front();
+        char *buf = static_cast<char*>(std::get<0>(msg));
+        size_t &len = std::get<1>(msg);
+        bool free_buf = std::get<2>(msg);
+
+        ssize_t written = write(fd, buf, len);
+
+        if (written > 0)
+        {
+            if ((size_t)written < len)
+            {
+                // Escritura parcial
+                memmove(buf, buf + written, len - written);
+                len -= written;
+                return;
+            }
+            else
+            {
+                // Mensaje completo
+                if (free_buf)
+                    delete[] buf;
+                messages[user_i].pop();
+            }
+        }
+        else
+        {
+            if (errno == EAGAIN || errno == EWOULDBLOCK)
+                return;
+
+            // ⚠️ Error real → debería limpiar cliente
+            close(fd);
+            return;
+        }
+    }
+
+    // ⚠️ AQUÍ debería desactivarse EPOLLOUT con epoll_ctl(EPOLL_CTL_MOD)
+    // pero no existe ninguna función auxiliar para ello en tu código actual
 }
+
+/* ===================== EVENT DISPATCH ===================== */
 
 void Server::handle_event(const epoll_event event, int sockfd)
 {
-	if (event.data.fd == sockfd) // Socket fd is redeable (someone is trying to connect)
-	{
-		int new_client_fd = accept(sockfd, 0, 0);
-		if (new_client_fd == -1
-			|| fcntl(sockfd, F_SETFL/*Set flags*/, fcntl(sockfd, F_GETFL/*Get flags*/, 0) | O_NONBLOCK) == -1 // Set non block
-		) return;
+    if (event.data.fd == sockfd)
+    {
+        int new_client_fd = accept(sockfd, 0, 0);
+        if (new_client_fd == -1)
+            return;
+
+        int flags = fcntl(new_client_fd, F_GETFL, 0);
+        fcntl(new_client_fd, F_SETFL, flags | O_NONBLOCK);
 
 #ifndef DONT_LOG
-		std::cout << "Bluetooth device aconnected successfully" << std::endl;
+        std::cout << "Client connected fd=" << new_client_fd << std::endl;
 #endif
 
-		// Add client
-		client_fds.push_back(new_client_fd);
-		clients.push_back(User("unset", max_client_id));
-		last_pong_time.push_back(std::time(NULL));
-		max_client_id++;
-		messages.push_back(std::queue<std::tuple<void *, size_t, bool>>());
+        client_fds.push_back(new_client_fd);
+        clients.push_back(User("unset", max_client_id));
+        last_pong_time.push_back(std::time(NULL));
+        messages.push_back(std::queue<std::tuple<void*, size_t, bool>>());
+        max_client_id++;
 
-		this->event.events = EPOLLIN | EPOLLOUT;
-		this->event.data.fd = new_client_fd;
-		if (epoll_ctl(epollfd, EPOLL_CTL_ADD, new_client_fd, &this->event)) stop();
-	}
-	else
-	{
-		if (event.events & EPOLLIN)
-			handle_read_event(event.data.fd);
-		if (event.events & EPOLLOUT)
-			handle_write_event(event.data.fd);
-	}
+        epoll_event ev;
+        ev.events = EPOLLIN; // ❗ NO EPOLLOUT aquí
+        ev.data.fd = new_client_fd;
+        epoll_ctl(epollfd, EPOLL_CTL_ADD, new_client_fd, &ev);
+    }
+    else
+    {
+        if (event.events & EPOLLIN)
+            handle_read_event(event.data.fd);
+        if (event.events & EPOLLOUT)
+            handle_write_event(event.data.fd);
+    }
 }
+
+/* ===================== MAIN LOOP ===================== */
 
 int Server::loop(size_t PORT)
 {
-	signal_server_stop = false;
-	signal(SIGTSTP, handle_signals);
-	signal(SIGSTOP, handle_signals);
-	//signal(SIGINT, handle_signals);
-	signal(SIGQUIT, handle_signals);
-	signal(SIGTERM, handle_signals);
+    signal_server_stop = false;
+    signal(SIGINT, handle_signals);
+    signal(SIGTERM, handle_signals);
 
-	sockfd = setup_sockfd(PORT);
-	if (sockfd == -1) return true;
-	epollfd = epoll_create1(0);
+    sockfd = setup_sockfd(PORT);
+    if (sockfd == -1)
+        return 1;
 
-	event.events = EPOLLIN;
-	event.data.fd = sockfd;
+    epollfd = epoll_create1(0);
 
-	int err = 0;
-	// Add sockfd for read watchlist to accept clients
-	if (epoll_ctl(epollfd, EPOLL_CTL_ADD, sockfd, &event)) err = true;
+    epoll_event ev;
+    ev.events = EPOLLIN;
+    ev.data.fd = sockfd;
+    epoll_ctl(epollfd, EPOLL_CTL_ADD, sockfd, &ev);
 
 #ifndef DONT_LOG
-	std::cout << "Bluetooth device is ready to peal" << std::endl;
+    std::cout << "Server listening on port " << PORT << std::endl;
 #endif
 
-	last_ping_time = std::time(0);
-	while (!stop_server && !err && !signal_server_stop)
-	{
-		size_t event_n = epoll_wait(epollfd, events, MAX_EVENTS, 1000);
-		if (event_n == -1) {err = errno != EINTR; continue;}
+    while (!stop_server && !signal_server_stop)
+    {
+        int n = epoll_wait(epollfd, events, MAX_EVENTS, 1000);
+        if (n == -1)
+        {
+            if (errno == EINTR)
+                continue;
+            break;
+        }
 
-		// if (std::time(0) - last_ping_time >= PING_SEPARATION_S)
-		// 	send_pings();
+        for (int i = 0; i < n; i++)
+            handle_event(events[i], sockfd);
+    }
 
-		for (size_t i = 0; i < event_n; i++)
-			handle_event(events[i], sockfd);
-	}
-	
-	close(sockfd);
-	close(epollfd);
-	for (size_t i = 0; i < client_fds.size(); i++)
-		close(client_fds[i]);
-	return err;
+    close(sockfd);
+    close(epollfd);
+    for (size_t i = 0; i < client_fds.size(); i++)
+        close(client_fds[i]);
+
+    return 0;
 }
+
