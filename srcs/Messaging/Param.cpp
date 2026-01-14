@@ -2,19 +2,25 @@
 
 Param::~Param() {}
 
+void	checkSyntax(ReplyCode code, COMMAND cmd, int condition, msgTokens tokens, int i, bool throwExcep) {
+	i = 0;
+	while (i < (int)tokens.size() && tokens[i].type != TOK_PARAM && tokens[i].type != CRLF)
+		i++;
+	if (condition && throwExcep)
+		throw Param::BadSyntax(cmd, code);
+	else if (condition && !throwExcep)
+		return;
+}
+
 NickParam::NickParam(msgTokens tokens): Param(NICK, tokens) {}
 
 void	NickParam::validateParam() {
 	int i = 0;
-	while (i < (int)tokens.size() && tokens[i].type != TOK_PARAM && tokens[i].type != CRLF)
-		i++;
-	if (i >= (int)tokens.size() || tokens[i].type == CRLF)
-		throw BadSyntax(NICK, ERR_NONICKNAMEGIVEN);
+	checkSyntax(ERR_NONICKNAMEGIVEN, NICK, i >= (int)tokens.size() || tokens[i].type == CRLF, tokens, i, true);
 	nickname = tokens[i].str;
 	if (!isValidNickName(tokens[i].str))
 		throw BadSyntax(NICK, ERR_ERRONEUSNICKNAME);
 }
-
 
 UserParam::UserParam(): Param(USER) {}
 
@@ -54,7 +60,6 @@ PassParam::PassParam(msgTokens tokens): Param(PASS, tokens) {}
 
 void	PassParam::validateParam() {
 	int i = 0;
-
 	while (i < (int)tokens.size() && tokens[i].type != TOK_PARAM && tokens[i].type != CRLF)
 		i++;
 	password = tokens[i].str;
@@ -67,10 +72,7 @@ PingPongParam::PingPongParam(msgTokens tokens): Param(PING, tokens) {}
 void	PingPongParam::validateParam() {
 	int i = 0;
 
-	while (i < (int)tokens.size() && tokens[i].type != TOK_PARAM && tokens[i].type != CRLF)
-		i++;
-	if (i >= (int)tokens.size() || tokens[i].type == CRLF)
-		throw BadSyntax(PING, ERR_NOORIGIN);
+	checkSyntax(ERR_NOORIGIN, PING, i >= (int)tokens.size() || tokens[i].type == CRLF, tokens, i, true);
 	server1 = tokens[i++].str;
 	if (tokens[i].type == TOK_PARAM)
 		server2 = tokens[i].str;
@@ -88,10 +90,7 @@ JoinParam::JoinParam(msgTokens tokens): Param(JOIN, tokens) {}
 void	JoinParam::validateParam()
 {
     int i = 0;
-    while (i < (int)tokens.size() && tokens[i].type != TOK_PARAM && tokens[i].type != CRLF)
-        i++;
-    if (i >= (int)tokens.size() || tokens[i].type == CRLF)
-            throw BadSyntax(JOIN, ERR_NEEDMOREPARAMS);
+	checkSyntax(ERR_NEEDMOREPARAMS, JOIN, i >= (int)tokens.size() || tokens[i].type == CRLF, tokens, i, true);
     std::string chanList = tokens[i++].str;
     splitByComma(chanList, channels);
     for (size_t j=0; j<channels.size(); ++j)
@@ -110,10 +109,7 @@ PartParam::PartParam(msgTokens tokens): Param(PART, tokens) {}
 void	PartParam::validateParam()
 {
     int i = 0;
-    while (i < (int)tokens.size() && tokens[i].type != TOK_PARAM && tokens[i].type != CRLF)
-        i++;
-    if (i >= (int)tokens.size() || tokens[i].type == CRLF)
-        throw BadSyntax(PART, ERR_NEEDMOREPARAMS);
+	checkSyntax(ERR_NEEDMOREPARAMS, PART, i >= (int)tokens.size() || tokens[i].type == CRLF, tokens, i, true);
     std::string chanList = tokens[i++].str;
     splitByComma(chanList, channels);
     if (tokens[i].type == TOK_PARAM)
@@ -125,10 +121,7 @@ PrivMsgParam::PrivMsgParam(msgTokens tokens): Param(PRIVMSG, tokens) {}
 void PrivMsgParam::validateParam()
 {
     int i = 0;
-    while (i < (int)tokens.size() && tokens[i].type != TOK_PARAM && tokens[i].type != CRLF)
-        i++;
-    if (i >= (int)tokens.size() || tokens[i].type == CRLF)
-        throw BadSyntax(PRIVMSG, ERR_NORECIPIENT);
+	checkSyntax(ERR_NOTEXTTOSEND, PRIVMSG, i >= (int)tokens.size() || tokens[i].type == CRLF, tokens, i, true);
     target = tokens[i++].str;
     if (tokens[i].type != TOK_PARAM)
         throw BadSyntax(PRIVMSG, ERR_NOTEXTTOSEND);
@@ -140,10 +133,11 @@ NoticeParam::NoticeParam(msgTokens tokens): Param(NOTICE, tokens) {}
 void	NoticeParam::validateParam()
 {
         int i = 0;
-        while (i < (int)tokens.size() && tokens[i].type != TOK_PARAM && tokens[i].type != CRLF)
-            i++;
-        if (i >= (int)tokens.size() || tokens[i].type == CRLF)
-            return;
+        // while (i < (int)tokens.size() && tokens[i].type != TOK_PARAM && tokens[i].type != CRLF)
+        //     i++;
+        // if (i >= (int)tokens.size() || tokens[i].type == CRLF)
+        //     return;
+		checkSyntax(ERR_NOORIGIN, NOTICE, i >= (int)tokens.size() || tokens[i].type == CRLF, tokens, i, false);
         target = tokens[i++].str;
         if (tokens[i].type == TOK_PARAM)
             text = tokens[i].str;
@@ -183,10 +177,7 @@ KickParam::KickParam(msgTokens tokens): Param(KICK, tokens) {}
 void 	KickParam::validateParam()
 {
 	int i = 0;
-	while (i < (int)tokens.size() && tokens[i].type != TOK_PARAM && tokens[i].type != CRLF)
-		i++;
-	if (i >= (int)tokens.size() || tokens[i].type == CRLF)
-		throw BadSyntax(KICK, ERR_NEEDMOREPARAMS);
+	checkSyntax(ERR_NEEDMOREPARAMS, KICK, i >= (int)tokens.size() || tokens[i].type == CRLF, tokens, i, true);
 	channel = tokens[i++].str;
 	if (i >= (int)tokens.size() || tokens[i].type == CRLF)
 		throw BadSyntax(KICK, ERR_NEEDMOREPARAMS);
@@ -201,27 +192,7 @@ ModeParam::ModeParam(msgTokens tokens): Param(MODE, tokens) {}
 void	ModeParam::validateParam()
 {
 	int i = 0;
-	while (i < (int)tokens.size() && tokens[i].type != TOK_PARAM && tokens[i].type != CRLF)
-		i++;
-	if (i >= (int)tokens.size() || tokens[i].type == CRLF)
-		throw BadSyntax(MODE, ERR_NEEDMOREPARAMS);
-	channel = tokens[i++].str;
-	if (tokens[i].type == CRLF)
-		return; // MODE <channel> → listar modos
-	modeStr = tokens[i++].str;
-	if (tokens[i].type == TOK_PARAM)
-		modeArg = tokens[i].str;
-}
-
-ModeParam::ModeParam(msgTokens tokens): Param(MODE, tokens) {}
-
-void	ModeParam::validateParam()
-{
-	int i = 0;
-	while (i < (int)tokens.size() && tokens[i].type != TOK_PARAM && tokens[i].type != CRLF)
-		i++;
-	if (i >= (int)tokens.size() || tokens[i].type == CRLF)
-		throw BadSyntax(MODE, ERR_NEEDMOREPARAMS);
+	checkSyntax(ERR_NEEDMOREPARAMS, MODE, i >= (int)tokens.size() || tokens[i].type == CRLF, tokens, i, true);
 	channel = tokens[i++].str;
 	if (tokens[i].type == CRLF)
 		return; // MODE <channel> → listar modos
@@ -235,10 +206,7 @@ WhoisParam::WhoisParam(msgTokens tokens): Param(WHOIS, tokens) {}
 void	WhoisParam::validateParam()
 {
 	int i = 0;
-	while (i < (int)tokens.size() && tokens[i].type != TOK_PARAM && tokens[i].type != CRLF)
-		i++;
-	if (i >= (int)tokens.size() || tokens[i].type == CRLF)
-		throw BadSyntax(WHOIS, ERR_NONICKNAMEGIVEN);
+	checkSyntax(ERR_NONICKNAMEGIVEN, WHOIS, i >= (int)tokens.size() || tokens[i].type == CRLF, tokens, i, true);
 	nicks.push_back(tokens[i++].str);
 	if (tokens[i].type == CRLF)
 		return; // WHOIS <nick> → listar modos
@@ -249,13 +217,30 @@ WhoParam::WhoParam(msgTokens tokens): Param(WHO, tokens), mask("") {}
 void WhoParam::validateParam()
 {
 	int i = 0;
-	while (i < (int)tokens.size() && tokens[i].type != TOK_PARAM && tokens[i].type != CRLF)
-		i++;
-	if (i >= (int)tokens.size() || tokens[i].type == CRLF)
-		throw BadSyntax(WHO, ERR_NONICKNAMEGIVEN);
+	checkSyntax(ERR_NOSUCHSERVER, WHO, i >= (int)tokens.size() || tokens[i].type == CRLF, tokens, i, true);
 	mask = tokens[i++].str;
 	if (tokens[i].str == "o")
 		throw BadSyntax(WHO, ERR_NOSUCHSERVER);
+}
+
+NamesParam::NamesParam(msgTokens tokens): Param(NAMES, tokens) {}
+
+void	NamesParam::validateParam()
+{
+	int i = 0;
+    while (tokens[i].type != TOK_PARAM && tokens[i].type != CRLF)
+        i++;
+    if (tokens[i].type == CRLF) {
+        listAll = true;
+        return;
+    }
+    std::string chanList = tokens[i].str;
+    splitByComma(chanList, channels);
+    for (size_t j = 0; j < channels.size(); ++j) {
+        if (!isValidChannelName(channels[j]))
+            throw BadSyntax(NAMES, ERR_BADCHANMASK);
+    }
+    listAll = false;
 }
 
 Param	*ParamsFactory(COMMAND cmd, msgTokens tokens) {
