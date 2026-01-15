@@ -186,32 +186,10 @@ public:
     std::vector<std::string> channels;
     std::vector<std::string> keys;
 
-    JoinParam(msgTokens tokens): Param(JOIN, tokens) {}
+    JoinParam(msgTokens tokens);
     ~JoinParam() {}
 
-    virtual void validateParam() {
-        int i = 0;
-        while (tokens[i].type != TOK_PARAM)
-            i++;
-
-        if (tokens[i].type == CRLF)
-            throw BadSyntax(JOIN, ERR_NEEDMOREPARAMS);
-
-        // Channels (may be comma-separated)
-        std::string chanList = tokens[i++].str;
-        splitByComma(chanList, channels);
-
-        for (size_t j=0; j<channels.size(); ++j) {
-            if (!isValidChannelName(channels[j]))
-                throw BadSyntax(JOIN, ERR_BADCHANMASK);
-        }
-
-        // Optional keys
-        if (tokens[i].type == TOK_PARAM) {
-            std::string keyList = tokens[i].str;
-            splitByComma(keyList, keys);
-        }
-    }
+    virtual void validateParam();
 };
 
 class PartParam : public Param {
@@ -219,23 +197,10 @@ public:
     std::vector<std::string> channels;
     std::string partMsg;
 
-    PartParam(msgTokens tokens): Param(PART, tokens) {}
+    PartParam(msgTokens tokens);
     ~PartParam() {}
 
-    virtual void validateParam() {
-        int i = 0;
-        while (tokens[i].type != TOK_PARAM)
-            i++;
-
-        if (tokens[i].type == CRLF)
-            throw BadSyntax(PART, ERR_NEEDMOREPARAMS);
-
-        std::string chanList = tokens[i++].str;
-        splitByComma(chanList, channels);
-
-        if (tokens[i].type == TOK_PARAM)
-            partMsg = tokens[i].str; // trailing
-    }
+    virtual void validateParam();
 };
 
 class PrivMsgParam : public Param {
@@ -243,24 +208,10 @@ public:
     std::string target;
     std::string text;
 
-    PrivMsgParam(msgTokens tokens): Param(PRIVMSG, tokens) {}
+    PrivMsgParam(msgTokens tokens);
     ~PrivMsgParam() {}
 
-    virtual void validateParam() {
-        int i = 0;
-        while (tokens[i].type != TOK_PARAM)
-            i++;
-
-        if (tokens[i].type == CRLF)
-            throw BadSyntax(PRIVMSG, ERR_NORECIPIENT);
-
-        target = tokens[i++].str;
-
-        if (tokens[i].type != TOK_PARAM)
-            throw BadSyntax(PRIVMSG, ERR_NOTEXTTOSEND);
-
-        text = tokens[i].str;
-    }
+    virtual void validateParam();
 };
 
 class NoticeParam : public Param {
@@ -268,20 +219,10 @@ public:
     std::string target;
     std::string text;
 
-    NoticeParam(msgTokens tokens): Param(NOTICE, tokens) {}
+    NoticeParam(msgTokens tokens);
     ~NoticeParam() {}
 
-    virtual void validateParam() {
-        int i = 0;
-        while (tokens[i].type != TOK_PARAM)
-            i++;
-        if (tokens[i].type == CRLF)
-            return;
-
-        target = tokens[i++].str;
-        if (tokens[i].type == TOK_PARAM)
-            text = tokens[i].str;
-    }
+    virtual void validateParam();
 };
 
 class TopicParam : public Param {
@@ -289,22 +230,10 @@ public:
     std::string channel;
     std::string topic;
 
-    TopicParam(msgTokens tokens): Param(TOPIC, tokens) {}
+    TopicParam(msgTokens tokens);
     ~TopicParam() {}
 
-    virtual void validateParam() {
-        int i = 0;
-        while (tokens[i].type != TOK_PARAM)
-            i++;
-
-        if (tokens[i].type == CRLF)
-            throw BadSyntax(TOPIC, ERR_NEEDMOREPARAMS);
-
-        channel = tokens[i++].str;
-
-        if (tokens[i].type == TOK_PARAM)
-            topic = tokens[i].str;
-    }
+    virtual void validateParam();
 };
 
 class InviteParam : public Param {
@@ -312,24 +241,10 @@ public:
     std::string nick;
     std::string channel;
 
-    InviteParam(msgTokens tokens): Param(INVITE, tokens) {}
+    InviteParam(msgTokens tokens);
     ~InviteParam() {}
 
-    virtual void validateParam() {
-        int i = 0;
-        while (tokens[i].type != TOK_PARAM)
-            i++;
-
-        if (tokens[i].type == CRLF)
-            throw BadSyntax(INVITE, ERR_NEEDMOREPARAMS);
-
-        nick = tokens[i++].str;
-
-        if (tokens[i].type != TOK_PARAM)
-            throw BadSyntax(INVITE, ERR_NEEDMOREPARAMS);
-
-        channel = tokens[i].str;
-    }
+    virtual void validateParam();
 };
 
 class KickParam : public Param {
@@ -338,27 +253,10 @@ public:
     std::string user;
     std::string comment;
 
-    KickParam(msgTokens tokens): Param(KICK, tokens) {}
+    KickParam(msgTokens tokens);
     ~KickParam() {}
 
-    virtual void validateParam() {
-        int i = 0;
-        while (tokens[i].type != TOK_PARAM)
-            i++;
-
-        if (tokens[i].type == CRLF)
-            throw BadSyntax(KICK, ERR_NEEDMOREPARAMS);
-
-        channel = tokens[i++].str;
-
-        if (tokens[i].type != TOK_PARAM)
-            throw BadSyntax(KICK, ERR_NEEDMOREPARAMS);
-
-        user = tokens[i++].str;
-
-        if (tokens[i].type == TOK_PARAM)
-            comment = tokens[i].str;
-    }
+    virtual void validateParam();
 };
 
 class ModeParam : public Param {
@@ -367,27 +265,10 @@ public:
     std::string modeStr;
     std::string modeArg;  // opcional, a veces nick o key
 
-    ModeParam(msgTokens tokens): Param(MODE, tokens) {}
+    ModeParam(msgTokens tokens);
     ~ModeParam() {}
 
-    virtual void validateParam() {
-        int i = 0;
-        while (tokens[i].type != TOK_PARAM)
-            i++;
-
-        if (tokens[i].type == CRLF)
-            throw BadSyntax(MODE, ERR_NEEDMOREPARAMS);
-
-        channel = tokens[i++].str;
-
-        if (tokens[i].type == CRLF)
-            return; // MODE <channel> → listar modos
-
-        modeStr = tokens[i++].str;
-
-        if (tokens[i].type == TOK_PARAM)
-            modeArg = tokens[i].str;
-    }
+    virtual void validateParam();
 };
 
 class NamesParam : public Param {
@@ -395,25 +276,10 @@ public:
     std::vector<std::string> channels;   // Lista de canales a consultar
     bool listAll;                        // TRUE si no se ha especificado ningún canal
 
-    NamesParam(msgTokens tokens): Param(NAMES, tokens) {}
+    NamesParam(msgTokens tokens);
     ~NamesParam() {}
 
-    virtual void validateParam() {
-        int i = 0;
-        while (tokens[i].type != TOK_PARAM && tokens[i].type != CRLF)
-            i++;
-        if (tokens[i].type == CRLF) {
-            listAll = true;
-            return;
-        }
-        std::string chanList = tokens[i].str;
-        splitByComma(chanList, channels);
-        for (size_t j = 0; j < channels.size(); ++j) {
-            if (!isValidChannelName(channels[j]))
-                throw BadSyntax(NAMES, ERR_BADCHANMASK);
-        }
-        listAll = false; //No se que tiene que hacer en caso de que falle el hijo de puta.
-    }
+    virtual void validateParam();
 };
 
 class WhoisParam: public Param {
@@ -421,23 +287,10 @@ class WhoisParam: public Param {
         std::string target = ""; //En princpio me la trae floja.
         std::vector<std::string> nicks;
         
-        WhoisParam(msgTokens tokens): Param(WHOIS, tokens) {}
+        WhoisParam(msgTokens tokens);
         ~WhoisParam() {}
 
-        virtual void    validateParam() {
-            int i = 0;
-
-            while (tokens[i].type != TOK_PARAM && tokens[i].type != CRLF)
-                i++;
-            if (tokens[i].type == TOK_PARAM)
-            {
-                target = tokens[i++].str;
-                throw BadSyntax(NAMES, ERR_NOSUCHSERVER);
-            }
-            if (tokens[++i].type == CRLF)
-                throw BadSyntax(NAMES, ERR_NONICKNAMEGIVEN);
-            splitByComma(tokens[i].str, nicks);
-        }
+        virtual void    validateParam();
 };
 
 /* Si sale o detras de una máscara, entonces se buscan los que sean operadores. Como no tenemos operadores de servidor, entonces ha de devolver nosuchserver. */
@@ -449,16 +302,7 @@ class WhoParam: public Param {
         WhoParam(msgTokens tokens): Param(WHO, tokens), mask("") {}
         ~WhoParam() {}
 
-        virtual void    validateParam() {
-            int i = 0;
-
-            while (tokens[i].type != TOK_PARAM && tokens[i].type != CRLF)
-                i++;
-            if (tokens[i].type != CRLF)
-                mask = tokens[i++].str;
-            if (tokens[i].str == "o")
-                throw BadSyntax(WHO, ERR_NOSUCHSERVER);
-        }
+        virtual void    validateParam();
 };
 
 Param	*ParamsFactory(COMMAND cmd, msgTokens tokens);
