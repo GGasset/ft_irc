@@ -43,6 +43,7 @@ bool prepare_message(const std::string &packet, Server &server, MessageIn &in) {
 #include <unistd.h>
 /* ---------- 3. HANDLE MESSAGE ----------- */
 void handle_message(MessageIn &in, Server &server, const std::string &packet) {
+
     MessageOut *ret = fnHandlers()(in.getCommand(), in, server);
     if (ret != NULL) {
         std::cout << "Respuesta que se enviaría por el socket ante [packet]: "

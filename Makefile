@@ -13,13 +13,7 @@ O_FILES=$(patsubst %.cpp,%.o,${CPP_FILES})
 NAME=ircserv
 
 SUBJECT_FLAGS= #-Wall -Wextra -Werror #--std=c++98
-
-ifeq ($(DEBUG), 1)
-SHARED_FLAGS=${SUBJECT_FLAGS} -fsanitize=address,undefined
-else
-SHARED_FLAGS=${SUBJECT_FLAGS}
-endif
-
+SHARED_FLAGS=${SUBJECT_FLAGS} #-fsanitize=address,undefined
 
 COMPILING_FLAGS=${SHARED_FLAGS} ${INCLUDE} -g3
 LINKING_FLAGS=${SHARED_FLAGS} -lc

@@ -10,8 +10,8 @@ class MessageIn {
 		Param		*params;
 
 	public:
-		MessageIn(): cmd(COMMAND0) {}
-		MessageIn(COMMAND cmd): cmd(cmd) {}
+		MessageIn(): cmd(COMMAND0), params(nullptr), sender_id(0) {}
+		MessageIn(COMMAND cmd): cmd(cmd), params(nullptr), sender_id(0) {}
 								// prefix(prefix) {}
 		MessageIn(const MessageIn& other) {
 			cmd = other.cmd;
@@ -22,7 +22,7 @@ class MessageIn {
 			if (this != &other) {
 				cmd = other.cmd;
 				sender_id = other.sender_id;
-				// params = other.params; Estoy hay que verlo. Quizá con nuestra propia implementación de shared_ptr.
+				params = other.params; //Estoy hay que verlo. Quizá con nuestra propia implementación de shared_ptr.
 			}
 			return (*this);
 		}

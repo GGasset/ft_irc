@@ -15,25 +15,27 @@ bool prepare_message(const std::string &packet, Server &server, MessageIn &in, s
         return (false);
 
     in = parseMessage(tokens, status);
-
+    
     if (status != VALID_MSG)
-        return false;
-
+    return false;
+    
     in.sender_id = sender_id;
-
+    
     Param *params = ParamsFactory(in.getCommand(), tokens);
-
-    try {
-        params->validateParam();
-    } catch (Param::BadSyntax &e) {
-        MessageOut *ret =
+    
+    if (params != NULL)
+    {
+        try {
+            params->validateParam();
+        } catch (Param::BadSyntax &e) {
+            MessageOut *ret =
             NumericReplyFactory::create_and_target(e.getErrCode(), server, params,
-                std::vector<size_t>{in.sender_id}, 'u');
-
-        ret->deliver();
-        return false;
+            std::vector<size_t>{in.sender_id}, 'u');
+            
+            ret->deliver();
+            return false;
+        }
     }
-
     in.setParams(params);
     return true;
 }

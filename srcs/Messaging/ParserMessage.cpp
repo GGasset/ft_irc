@@ -346,5 +346,15 @@ MessageIn   parseMessage(msgTokens tokens, ParseStatus &status) {
 	status = checkCommand(ret, tokens, i);
 	if (status != VALID_MSG) return (ret);
 	status = checkParams(tokens, i);
+	    status = checkParams(tokens, i);
+    if (status != VALID_MSG) return (ret);
+
+    /* Los params (handlejoin handlenick etc) estaban recibiendo puros nullptr porque parsemessage
+	 no está creando ni asignadno el objeto param a messagein.param parseMessage devuelve 
+	 MessageIn con params == nullptr. dynamic_cast sobre nullptr devuelve nullptr, por eso cae en if (!param) y siempre devuelve null*/
+    if (ret.getCommand() != COMMAND0) {
+        Param *p = ParamsFactory(ret.getCommand(), tokens);
+        ret.setParams(p);
+    }
 	return (ret);
 }

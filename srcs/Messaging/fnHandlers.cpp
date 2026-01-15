@@ -124,6 +124,23 @@ MessageOut  *handleQuit(MessageIn in, Server &server) {
     return (ForwardedCommandFactory::create(QUIT, server, param));
 }
 
+MessageOut  *handleJoin(MessageIn in, Server &server)
+{
+    JoinParam   *join = dynamic_cast<JoinParam*>(in.getParams());
+    if (!join)
+        return (NULL);
+    try
+    {
+        join->validateParam();
+    }
+    catch(const Param::BadSyntax &e)
+    {
+        std::cerr << e.what() << '\n';
+    }
+    std::cout << "AQUI DEBE IR UN CANAL TO GUAPO" << std::endl;
+    return (NULL);
+}
+
 fnHandlers::fnHandlers() {
     fun[NICK] = handleNick;
     fun[USER] = handleUser;
@@ -131,6 +148,7 @@ fnHandlers::fnHandlers() {
     fun[PING] = handlePINGPONG;
     fun[PONG] = handlePINGPONG;
     fun[QUIT] = handleQuit;
+    fun[JOIN] = handleJoin;
     //Asi con todos ...
 }
 
