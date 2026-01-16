@@ -47,13 +47,13 @@ MessageOut *handleNick(MessageIn in, Server &server) {
     }
     
     /* Necesidad de crear el ERR_UNAVAILRESOURCE, que gestiona si el nombre colisiona en la historia de nick's. */
-    std::vector<std::string> nick_h = server.get_nick_history();
-    for (size_t i = 0; i < nick_h.size(); i++) {
-        if (server.get_user_by_id(i).get_nick() == nick_h[0]) {
-            MessageOut  *ret = NumericReplyFactory::create_and_target(ERR_UNAVAILRESOURCE, server, np, in.sender_id, 'u');
-            return ret;
-        }
-    }
+    // std::vector<std::string> nick_h = server.get_nick_history();
+    // for (size_t i = 0; i < nick_h.size(); i++) {
+    //     if (server.get_user_by_id(i).get_nick() == nick_h[0]) {
+    //         MessageOut  *ret = NumericReplyFactory::create_and_target(ERR_UNAVAILRESOURCE, server, np, in.sender_id, 'u');
+    //         return ret;
+    //     }
+    // }
 
     senderU.setNick(np->nickname);
     server.addNickHistory(np->nickname);
