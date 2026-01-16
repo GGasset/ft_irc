@@ -33,8 +33,6 @@ void	UserParam::validateParam() {
 	// Lo que he extraído del RFC es que se traga lo que sea.
 	// Solo se gestiona el caso cuando username es incorrecto.
 	int i = 0;
-    std::cout << "Que me estas contando de tokens" << tokens.size() << std::endl;
-	write(1, "Que onda\n", 10);
 	
 	while (i < (int)tokens.size() && tokens[i].type != TOK_PARAM && tokens[i].type != CRLF)
 		i++;
