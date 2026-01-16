@@ -27,6 +27,7 @@ bool prepare_message(const std::string &packet, Server &server, MessageIn &in, s
     {
         try {
             params->validateParam();
+            std::cout << "rata de raton" << std::endl;
         } catch (Param::BadSyntax &e) {
             MessageOut *ret =
             NumericReplyFactory::create_and_target(e.getErrCode(), server, params,
@@ -45,6 +46,7 @@ bool prepare_message(const std::string &packet, Server &server, MessageIn &in, s
 void handle_message(MessageIn &in, Server &server, const std::string &packet) {
     if (in.getCommand() == COMMAND0)
         return ;
+    std::cout << "Raton de rata" << std::endl;
     MessageOut *ret = fnHandlers()(in.getCommand(), in, server);
     if (ret != NULL)
         ret->deliver();
