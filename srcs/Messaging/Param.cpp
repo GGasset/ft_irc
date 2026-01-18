@@ -64,7 +64,7 @@ void	PassParam::validateParam() {
 		throw BadSyntax(PASS, ERR_NEEDMOREPARAMS);
 }
 
-PingPongParam::PingPongParam(msgTokens tokens): Param(PING, tokens) {}
+PingPongParam::PingPongParam(msgTokens tokens, COMMAND cmd): Param(cmd, tokens) {}
 
 void	PingPongParam::validateParam() {
 	int i = 0;
@@ -253,9 +253,9 @@ Param	*ParamsFactory(COMMAND cmd, msgTokens tokens) {
 		case PASS:
 			return new PassParam(tokens);
 		case PING:
-			return new PingPongParam(tokens);
+			return new PingPongParam(tokens, cmd);
 		case PONG:
-			return new PingPongParam(tokens);
+			return new PingPongParam(tokens, cmd);
 		case QUIT:
 			return new QuitParam(tokens);
 		case JOIN:

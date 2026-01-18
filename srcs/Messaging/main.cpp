@@ -23,7 +23,7 @@ bool prepare_message(const std::string &packet, Server &server, MessageIn &in) {
 
     in.sender_id = 0;  // Normalmente te lo pasa GG
 
-    Param *params = ParamsFactory(in.getCommand(), tokens);
+     Param *params = ParamsFactory(in.getCommand(), tokens);
 
     try {
         params->validateParam();

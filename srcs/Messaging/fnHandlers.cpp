@@ -110,11 +110,11 @@ MessageOut  *handlePINGPONG(MessageIn in, Server &server) {
         return NULL;
     }
     if (p->server2.empty())
-        return (ForwardedCommandFactory::create(PONG, server, p));
+        return (ForwardedCommandFactory::create_and_target(PONG, server, p, in.sender_id, 'u'));
     else {
         for (size_t i = 0; i < server.n_users(); i++) {
             if (server.get_user_by_id(i).getHostname() == p->server2)
-                return (ForwardedCommandFactory::create(PONG, server, p));
+                return (ForwardedCommandFactory::create_and_target(PONG, server, p, i, 'u'));
         }
     }
     return (NumericReplyFactory::create_and_target(ERR_NOSUCHSERVER, server, p, in.sender_id, 'u'));
