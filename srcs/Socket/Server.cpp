@@ -18,19 +18,9 @@ Server::Server()
 
 Server::~Server()
 {
-	for (size_t i = 0; i < clients.size(); i++)
-	{
-		event.events = EPOLLIN | EPOLLOUT;
-		event.data.fd = client_fds[i];
-		epoll_ctl(epollfd, EPOLL_CTL_DEL, client_fds[i], &event);
+	for (;clients.size();)
+		disconnect_user(0);
 
-		close(client_fds[i]);
-		while (messages[i].size())
-		{
-			if (std::get<2>(messages[i].front())) delete[] std::get<0>(messages[i].front());
-			messages[i].pop();
-		}
-	}
 	client_fds.clear();
 	last_pong_time.clear();
 	clients.clear();
@@ -51,13 +41,9 @@ void Server::disconnect_user(size_t user_index)
 {
 	if (user_index >= clients.size()) throw;
 
-	std::queue<std::tuple<void *, size_t, bool>> user_messages = messages[user_index];
+	std::queue<std::string> user_messages = messages[user_index];
 	while (user_messages.size())
-	{
-		if (std::get<2>(user_messages.front()))
-			delete[] std::get<0>(user_messages.front());
 		user_messages.pop();
-	}
 
 	event.data.fd = client_fds[user_index];
 	event.events = EPOLLIN | EPOLLOUT;
@@ -66,7 +52,7 @@ void Server::disconnect_user(size_t user_index)
 	close(client_fds[user_index]);
 
 #ifndef DONT_LOG
-	std::cout << clients[user_index].getUsername() << " disconnected" << std::endl;;
+	std::cout << clients[user_index].get_nick() << " disconnected" << std::endl;;
 #endif
 
 	client_fds.erase(client_fds.begin() + user_index);
@@ -76,14 +62,15 @@ void Server::disconnect_user(size_t user_index)
 
 }
 
-void Server::add_msg(void *msg, size_t len, bool is_heap, User &receiver)
+void Server::add_msg(std::string msg, User &receiver)
 {
 	assert(receiver.get_id() != -1);
-	ssize_t user_index = -1;
-	for (ssize_t i = 0; i < clients.size() && user_index != -1; i++)
-		user_index += (i - user_index) * (clients[i].get_id() == receiver.get_id());
-	if (user_index == -1) return;
-	messages[user_index].push(std::make_tuple(msg, len, is_heap));
+
+	ssize_t user_index = get_user_index_by_id(receiver.get_id());
+	
+	if (user_index == -1) {std::cerr << "user not found" << std::endl; return;};
+
+	messages[user_index].push(msg);
 }
 
 void Server::set_pong_time(size_t user_id)
@@ -160,9 +147,10 @@ void Server::send_pings()
 		// send ping
 		User u = clients[i];
 		std::string prefix = u.get_nick() + "!" + u.getUsername() + "@"; //+ u.getHostname;
-		std::string ping_msg = prefix + " PING " + u.getHostname() + "\n"; //En principio al mandarse por el socket se envia \r\n, pero no estoy del todo seguro.
-		
-		//add_msg(,,,clients[i]);
+		//std::string ping_msg = prefix + " PING " + u.getHostname() + "\r\n"; //En principio al mandarse por el socket se envia \r\n, pero no estoy del todo seguro.
+		std::string ping_msg = prefix + " PING " + "localhost\r\n"; //En principio al mandarse por el socket se envia \r\n, pero no estoy del todo seguro.
+
+		add_msg(ping_msg, clients[i]);
 	}
 	last_ping_time = std::time(NULL);
 }
@@ -174,7 +162,7 @@ size_t	Server::n_users() {
 void	Server::addUser(User u) {
 	clients.push_back(u);
 	client_fds.push_back(-1);
-	messages.push_back(std::queue<std::tuple<void *, size_t, bool>>());
+	messages.push_back(std::queue<std::string>());
 }
 
 void	Server::addChannel(Channel ch) {
