@@ -40,7 +40,7 @@ private:
 	std::vector<int>	client_fds;
 	std::vector<size_t>	last_pong_time; // TODO: set during message handling
 	std::vector<User>	clients;
-	std::vector<std::queue<std::tuple<void *, size_t, bool>>> messages;
+	std::vector<std::queue<std::string>> messages;
 	std::vector<Channel> servers;
 
 	std::vector<std::string> nick_history;
@@ -57,14 +57,17 @@ private:
 	// Only sends to users who have responded previous pings, also disconnects users who timeout
 	void send_pings(); // TODO: actually send the message
 
+	Server &operator=(const Server &src);
+	Server(const Server &src);
+
 public:
 	Server();
 	~Server();
 
 	size_t	n_users();
 	void disconnect_user(size_t user_index);
-	void add_msg(void *msg, size_t len, bool is_heap, User &receiver);
-	void add_msg(void *msg, size_t len, bool is_heap, Channel receivers);
+	void add_msg(std::string msg, User &receiver);
+	void add_msg(std::string msg, Channel receivers);
 
 	void set_pong_time(size_t user_id);
 
