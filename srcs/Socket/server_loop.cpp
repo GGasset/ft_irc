@@ -62,17 +62,18 @@ void Server::handle_read_event(int fd)
 void Server::handle_write_event(int fd)
 {
 	ssize_t user_i = get_user_index_by_fd(fd);
+
 	if (user_i == -1) return;
 	if (!messages[user_i].size()) return;
-#ifndef DONT_LOG
-	std::cout << "Sending message to " << clients[user_i].getUsername() << std::endl;
-#endif
-
-	std::tuple<void*,size_t,bool> next_msg = messages[user_i].front();
+	
+	std::string next_msg = messages[user_i].front();
 	messages[user_i].pop();
+	
+	#ifndef DONT_LOG
+		std::cout << "Sending message to " << clients[user_i].get_nick() << ": " << next_msg << std::endl;
+	#endif
 
-	write(fd, std::get<0>(next_msg), std::get<1>(next_msg));
-	if (std::get<2>(next_msg)) delete[] std::get<0>(next_msg);
+	write(fd, next_msg.data(), next_msg.size() + 1);
 }
 
 void Server::handle_event(const epoll_event event, int sockfd)
@@ -93,7 +94,7 @@ void Server::handle_event(const epoll_event event, int sockfd)
 		clients.push_back(User("unset", max_client_id));
 		last_pong_time.push_back(std::time(NULL));
 		max_client_id++;
-		messages.push_back(std::queue<std::tuple<void *, size_t, bool>>());
+		messages.push_back(std::queue<std::string>());
 
 		this->event.events = EPOLLIN | EPOLLOUT;
 		this->event.data.fd = new_client_fd;
@@ -129,7 +130,7 @@ int Server::loop(size_t PORT)
 	if (epoll_ctl(epollfd, EPOLL_CTL_ADD, sockfd, &event)) err = true;
 
 #ifndef DONT_LOG
-	std::cout << "Bluetooth device is ready to peal" << std::endl;
+	std::cout << "Bluetooth device is ready to peal at " << PORT << std::endl;
 #endif
 
 	last_ping_time = std::time(0);

@@ -1,5 +1,5 @@
 
-INCLUDE=-I Include -I Include/Channels -I Include/Server
+INCLUDE=-I Include -I Include/Channels -I Include/Server -I Include/Parsing
 
 SOCKET_CPP_FILES=function_router.cpp server_loop.cpp Server.cpp
 AUTHENTICATION_CPP_FILES=User.cpp
