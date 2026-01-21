@@ -8,6 +8,7 @@ void	*MessageOut::get_msg() {
 }
 
 void	MessageOut::setTarget(MessageTarget *target) {
+    if (!target) {std::cerr << "NULL TARGET SEGFAULT AVOIDED!" << std::endl; throw;}
 	this->target = target;
 }
 
@@ -96,6 +97,7 @@ NumericReply *NumericReplyFactory::create_and_target(ReplyCode code, Server &ser
 	std::vector<size_t> ids = {id};
 	NumericReply	*ret = create(code, serv, param);
 	MessageTarget	*target = MessageTargetFactory::create(serv, ids, t);
+    if (!ret) {std::cerr << "REPLY CODE NOT FOUND in create and target, code: " << code << std::endl; return 0;}
 	ret->setTarget(target);
 	return (ret);
 }

@@ -46,6 +46,6 @@ void	Channel::broadcast(Server& serv, const std::string &msg)
 		len = msg.size();
 		buffer = new char[len];
 		std::memcpy(buffer, msg.data(), len);
-		serv.add_msg(buffer, len, true, *catcher);
+		serv.add_msg(buffer, *catcher);
 	}
 }

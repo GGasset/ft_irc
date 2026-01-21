@@ -69,8 +69,10 @@ void	PingPongParam::validateParam() {
 
 	while (i < (int)tokens.size() && tokens[i].type != TOK_PARAM && tokens[i].type != CRLF)
 		i++;
-	if (i >= (int)tokens.size() || tokens[i].type == CRLF)
+	if (i >= (int)tokens.size())
+	{
 		throw BadSyntax(PING, ERR_NOORIGIN);
+	}
 	server1 = tokens[i++].str;
 	if (tokens[i].type == TOK_PARAM)
 		server2 = tokens[i].str;
@@ -213,23 +215,6 @@ void	ModeParam::validateParam()
 		modeArg = tokens[i].str;
 }
 
-ModeParam::ModeParam(msgTokens tokens): Param(MODE, tokens) {}
-
-void	ModeParam::validateParam()
-{
-	int i = 0;
-	while (i < (int)tokens.size() && tokens[i].type != TOK_PARAM && tokens[i].type != CRLF)
-		i++;
-	if (i >= (int)tokens.size() || tokens[i].type == CRLF)
-		throw BadSyntax(MODE, ERR_NEEDMOREPARAMS);
-	channel = tokens[i++].str;
-	if (tokens[i].type == CRLF)
-		return; // MODE <channel> → listar modos
-	modeStr = tokens[i++].str;
-	if (tokens[i].type == TOK_PARAM)
-		modeArg = tokens[i].str;
-}
-
 WhoisParam::WhoisParam(msgTokens tokens): Param(WHOIS, tokens) {}
 
 void	WhoisParam::validateParam()
@@ -289,8 +274,8 @@ Param	*ParamsFactory(COMMAND cmd, msgTokens tokens) {
 			return new KickParam(tokens);
 		case MODE:
 			return new ModeParam(tokens);
-		case NAMES:
-			return new NamesParam(tokens);
+		// case NAMES:
+		// 	return new NamesParam(tokens);
 		default:
 			NULL;
 	}
