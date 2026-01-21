@@ -3,6 +3,7 @@
 #include <sys/socket.h>
 #include <fcntl.h>
 #include <signal.h>
+#include <cctype>
 
 #include "Server.hpp"
 
@@ -12,6 +13,13 @@ int signal_server_stop;
 void handle_signals(int signal)
 {
 	signal_server_stop = true;
+}
+
+static std::string sanitize(std::string in)
+{
+    std::string out;
+    for (size_t i = 0; i < in.size(); i++) if (std::isprint(in[i])) out += in[i];
+    return out;
 }
 
 static int setup_sockfd(size_t PORT)
@@ -53,7 +61,8 @@ void Server::handle_read_event(int fd)
 	std::vector<std::string> msgs = sender->msg_sent(read_data);
 	for (size_t i = 0; i < msgs.size(); i++) {
 #ifndef DONT_LOG
-		std::cout << std::endl << "Msg received from " << sender->getUsername() << ": " << msgs[i] << std::endl;
+        std::string msg = msgs[i];
+		std::cout << std::endl << "Msg received from " << sender->getUsername() << ": " << sanitize(msg) << std::endl;
 #endif
 		route_message(msgs[i], *sender, sender_index);
 	}
@@ -70,7 +79,7 @@ void Server::handle_write_event(int fd)
 	messages[user_i].pop();
 
 	#ifndef DONT_LOG
-		std::cout << "Sending message to " << clients[user_i].get_nick() << ": " << next_msg << std::endl;
+		std::cout << "Sending message to " << clients[user_i].get_nick() << ": " << sanitize(next_msg) << std::endl;
 	#endif
 
 	write(fd, next_msg.data(), next_msg.size() + 1);

@@ -77,7 +77,7 @@ void Server::add_msg(std::string msg, User &receiver)
 void Server::set_pong_time(size_t user_id)
 {
 	ssize_t index = get_user_index_by_id(user_id);
-	if (index != -1) return;
+	if (index == -1) return;
 	last_pong_time[index] = time(NULL);
 }
 
@@ -143,7 +143,7 @@ void Server::send_pings()
 			i--;
 			continue;
 		}
-		if (last_pong_time[i] < last_ping_time) continue; // Don't queue pings, wait until client responded
+		if (last_pong_time[i] <= last_ping_time) continue; // Don't queue pings, wait until client responded
 
 		// send ping
 		User u = clients[i];

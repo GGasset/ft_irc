@@ -1,0 +1,4 @@
+<< CAP LS
+<< PASS 1234
+<< NICK Paco
+<< USER alvmoral alvmoral localhost :Alvaro Morales De Vera
