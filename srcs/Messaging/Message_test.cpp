@@ -94,8 +94,16 @@ void	test_validity(size_t id, std::string packet, msgTokens testT, ParseStatus t
 	std::cout << "---------------------------------\n";
 }
 
+int main(void) {
+	std::string packet = "NICK\r\n";
+	msgTokens testT = {
+		(msg_token) {WORD, "NICK"},
+		(msg_token) {CRLF, "\r\n"}
+	};
+	test_validity(9, packet, testT, VALID_MSG, NICK);
+}
 
-int main(void)
+int mein(void)
 {
 	std::string packet;
 	msgs		packet_msgs;
@@ -489,5 +497,6 @@ int main(void)
 		{SPACE, " "}, {CRLF, "\r\n"}
 	};
 	test_validity(42, packet, testT, PERR_MISSING_COMMAND, COMMAND0);
+	return (0);
 }
 

@@ -25,6 +25,7 @@ extern int signal_server_stop;
 class Server
 {
 private:
+    int					send_pings_actively;
 	size_t				last_ping_time;
 	bool				stop_server;
 	int					sockfd;

@@ -9,6 +9,7 @@ void Server::stop()
 
 Server::Server()
 {
+	send_pings_actively = true;
 	stop_server = false;
 	sockfd = -1;
 	epollfd = -1;
@@ -67,7 +68,7 @@ void Server::add_msg(std::string msg, User &receiver)
 	assert(receiver.get_id() != -1);
 
 	ssize_t user_index = get_user_index_by_id(receiver.get_id());
-	
+
 	if (user_index == -1) {std::cerr << "user not found" << std::endl; return;};
 
 	messages[user_index].push(msg);
@@ -76,7 +77,7 @@ void Server::add_msg(std::string msg, User &receiver)
 void Server::set_pong_time(size_t user_id)
 {
 	ssize_t index = get_user_index_by_id(user_id);
-	if (index != -1) return;
+	if (index == -1) return;
 	last_pong_time[index] = time(NULL);
 }
 
@@ -90,9 +91,9 @@ ssize_t Server::get_user_index_by_id(size_t id)
 
 User &Server::get_user_by_nick(std::string nick)
 {
-	for (size_t i = 0; i < clients.size(); i++) 
+	for (size_t i = 0; i < clients.size(); i++)
 		if (clients[i].get_id() != -1 && clients[i].get_nick() == nick)
-			return clients[i];	
+			return clients[i];
 	return (clients[0]);
 }
 
@@ -102,9 +103,9 @@ User &Server::get_user_by_id(size_t id)
 }
 
 Channel &Server::get_by_channel_name(std::string name) {
-	for (size_t i = 0; i < servers.size(); i++) 
+	for (size_t i = 0; i < servers.size(); i++)
 		if (servers[i].get_id() != -1 && servers[i].get_name() == name)
-			return servers[i];	
+			return servers[i];
 	return (servers[0]);
 }
 
@@ -142,7 +143,7 @@ void Server::send_pings()
 			i--;
 			continue;
 		}
-		if (last_pong_time[i] < last_ping_time) continue; // Don't queue pings, wait until client responded
+		if (last_pong_time[i] <= last_ping_time) continue; // Don't queue pings, wait until client responded
 
 		// send ping
 		User u = clients[i];

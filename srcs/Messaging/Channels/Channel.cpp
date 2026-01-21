@@ -43,9 +43,10 @@ void	Channel::broadcast(Server& serv, const std::string &msg)
 		catcher = &serv.get_user_by_id(user_id);
 		if (!catcher)
 			continue;
-		len = msg.size();
-		buffer = new char[len];
-		std::memcpy(buffer, msg.data(), len);
-		serv.add_msg(buffer, *catcher);
+		// len = msg.size();
+		// buffer = new char[len];
+		// std::memcpy(buffer, msg.data(), len);
+		// serv.add_msg(buffer, len, true, *catcher);
+		serv.add_msg(msg, *catcher);
 	}
 }

@@ -30,6 +30,7 @@ NumericReply *NumericReplyFactory::create(ReplyCode code, Server &serv, Param *p
 
     /* GENERIC */
     case ERR_NEEDMOREPARAMS:   return makeErrNeedMoreParams(serv, param);
+    case ERR_GENERIC:          return makeErrGeneric(serv);
 
     /* PASS / USER */
     case ERR_ALREADYREGISTRED: return makeErrAlredyRegistered(serv, param);
@@ -142,6 +143,6 @@ ForwardedCommand *ForwardedCommandFactory::create_and_target(COMMAND cmd, Server
     return (ret);
 }
 
-static ForwardedCommand *create_and_target(Server &serv, Param *param, std::vector<size_t> ids, char t) {
+// static ForwardedCommand *create_and_target(Server &serv, Param *param, std::vector<size_t> ids, char t) {
 
-}
+// }

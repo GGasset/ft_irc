@@ -1,8 +1,9 @@
 
 #include <cstdlib>
+#include <exception>
 
 #include "Server.hpp"
-#include "Message.hpp"
+#include "fnHandlers.hpp"
 #include "Channel.hpp"
 #include "User.hpp"
 
@@ -10,13 +11,13 @@
 
 int main(int argc, char **argv)
 {
-	if (2 > argc || argc > 3) 
+	if (2 > argc || argc > 3)
 		{std::cerr << "Invalid parameters " << USAGE_STR << std::endl; return 0;}
 
 	bool port_is_digits = !argv[1][0];
 	for (size_t i = 0; argv[1][i]; i++)
 		port_is_digits = port_is_digits && argv[1][i] >= '0' && argv[1][i] <= '9';
-	if (port_is_digits) 
+	if (port_is_digits)
 		{std::cerr << "Invalid port paramter, only digits expected" << std::endl; return 0;}
 
 	int port = std::atoi(argv[1]);

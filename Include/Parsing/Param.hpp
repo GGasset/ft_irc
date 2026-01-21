@@ -159,7 +159,7 @@ class PingPongParam: public Param {
 		std::string server1; //El mensaje si no hay server2, el origen si hay server2
 		std::string server2 = "";
 
-		PingPongParam(msgTokens tokens);
+		PingPongParam(msgTokens tokens, COMMAND cmd);
         PingPongParam(std::string server1);
 		~PingPongParam() {}
 		PingPongParam& operator=(const PingPongParam& other) {

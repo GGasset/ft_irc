@@ -30,7 +30,7 @@ public:
     /* GENERIC */
     static ErrNeedMoreParams    *makeErrNeedMoreParams(Server &s, Param *p) { return new ErrNeedMoreParams(s, p->command()); }
 	static ErrUnknownCommand	*makeErrUnknownCommand(Server &serv) {return new ErrUnknownCommand(serv);}
-
+    static ErrGeneric           *makeErrGeneric(Server &serv) {return new ErrGeneric(serv);}
 
     /* PASS / USER */
     static ErrAlredyRegistered  *makeErrAlredyRegistered(Server &s, Param *p) {

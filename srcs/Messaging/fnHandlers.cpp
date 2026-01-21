@@ -14,16 +14,17 @@ void    complete_registry(User user, Server &server, UserParam *param) {
 
 
         reg = NumericReplyFactory::create(RPL_WELCOME, server, param);
-        reg->setTarget(target), reg->deliver();
+        // reg->setTarget(target), reg->deliver();
+        std::cout << "reg: " << reg->getRpl();
 
 
         reg = NumericReplyFactory::create(RPL_YOURHOST, server, param);
-        reg->setTarget(target), reg->deliver();
-        //std::cout << "reg: " << reg->getRpl();
+        // reg->setTarget(target), reg->deliver();
+        std::cout << "reg: " << reg->getRpl();
 
         reg = NumericReplyFactory::create(RPL_CREATED, server, param);
-        reg->setTarget(target), reg->deliver();
-        //std::cout << "reg: " << reg->getRpl();
+        // reg->setTarget(target), reg->deliver();
+        std::cout << "reg: " << reg->getRpl();
 
         // reg = NumericReplyFactory::create(RPL_MYINFO, server, param);
         // reg->setTarget(target), reg->deliver();
@@ -46,13 +47,13 @@ MessageOut *handleNick(MessageIn in, Server &server) {
     }
     
     /* Necesidad de crear el ERR_UNAVAILRESOURCE, que gestiona si el nombre colisiona en la historia de nick's. */
-    std::vector<std::string> nick_h = server.get_nick_history();
-    for (size_t i = 0; i < nick_h.size(); i++) {
-        if (server.get_user_by_id(i).get_nick() == nick_h[0]) {
-            MessageOut  *ret = NumericReplyFactory::create_and_target(ERR_UNAVAILRESOURCE, server, np, in.sender_id, 'u');
-            return ret;
-        }
-    }
+    // std::vector<std::string> nick_h = server.get_nick_history();
+    // for (size_t i = 0; i < nick_h.size(); i++) {
+    //     if (server.get_user_by_id(i).get_nick() == nick_h[0]) {
+    //         MessageOut  *ret = NumericReplyFactory::create_and_target(ERR_UNAVAILRESOURCE, server, np, in.sender_id, 'u');
+    //         return ret;
+    //     }
+    // }
 
     senderU.setNick(np->nickname);
     server.addNickHistory(np->nickname);
@@ -82,7 +83,7 @@ MessageOut  *handleUser(MessageIn in, Server &server) {
 
     if (!senderU.is_registered() && senderU.are_names_registered()) {
         senderU.register_user();
-        //complete_registry(senderU, server, p);
+        complete_registry(senderU, server, p);
     }
     return (NULL);
 }
@@ -90,6 +91,8 @@ MessageOut  *handleUser(MessageIn in, Server &server) {
 MessageOut  *handlePass(MessageIn in, Server &server) {
     User        &senderU = server.get_user_by_id(in.sender_id);
     PassParam   *p = dynamic_cast<PassParam*>(in.getParams());
+    std::cout << "Cual es la contraseña?" << p->password << std::endl;
+    std::cout << "Cual es la contraseña del servidor: " << server.passw << std::endl;
     if (p->password != server.passw) {
         return (NumericReplyFactory::create_and_target(ERR_GENERIC, server, p, in.sender_id, 'u'));
     }
@@ -107,11 +110,11 @@ MessageOut  *handlePINGPONG(MessageIn in, Server &server) {
         return NULL;
     }
     if (p->server2.empty())
-        return (ForwardedCommandFactory::create(PONG, server, p));
+        return (ForwardedCommandFactory::create_and_target(PONG, server, p, in.sender_id, 'u'));
     else {
         for (size_t i = 0; i < server.n_users(); i++) {
             if (server.get_user_by_id(i).getHostname() == p->server2)
-                return (ForwardedCommandFactory::create(PONG, server, p));
+                return (ForwardedCommandFactory::create_and_target(PONG, server, p, i, 'u'));
         }
     }
     return (NumericReplyFactory::create_and_target(ERR_NOSUCHSERVER, server, p, in.sender_id, 'u'));

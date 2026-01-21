@@ -1,4 +1,5 @@
 #include "Param.hpp"
+#include <unistd.h>
 
 Param::~Param() {}
 
@@ -35,6 +36,7 @@ void	UserParam::validateParam() {
 	
 	while (i < (int)tokens.size() && tokens[i].type != TOK_PARAM && tokens[i].type != CRLF)
 		i++;
+	if (tokens.size() - i < 7) throw BadSyntax(USER, ERR_NEEDMOREPARAMS);
 	tokens[i].type != CRLF ? username = tokens[i++].str : throw BadSyntax(USER, ERR_NEEDMOREPARAMS);
 	i++;
 	tokens[i].type != CRLF ? usermode = tokens[i++].str : throw BadSyntax(USER, ERR_NEEDMOREPARAMS);
@@ -62,7 +64,7 @@ void	PassParam::validateParam() {
 		throw BadSyntax(PASS, ERR_NEEDMOREPARAMS);
 }
 
-PingPongParam::PingPongParam(msgTokens tokens): Param(PING, tokens) {}
+PingPongParam::PingPongParam(msgTokens tokens, COMMAND cmd): Param(cmd, tokens) {}
 
 void	PingPongParam::validateParam() {
 	int i = 0;
@@ -217,31 +219,31 @@ void	ModeParam::validateParam()
 
 WhoisParam::WhoisParam(msgTokens tokens): Param(WHOIS, tokens) {}
 
-void	WhoisParam::validateParam()
-{
-	int i = 0;
-	while (i < (int)tokens.size() && tokens[i].type != TOK_PARAM && tokens[i].type != CRLF)
-		i++;
-	if (i >= (int)tokens.size() || tokens[i].type == CRLF)
-		throw BadSyntax(WHOIS, ERR_NONICKNAMEGIVEN);
-	nicks.push_back(tokens[i++].str);
-	if (tokens[i].type == CRLF)
-		return; // WHOIS <nick> → listar modos
-}
+// void	WhoisParam::validateParam()
+// {
+// 	int i = 0;
+// 	while (i < (int)tokens.size() && tokens[i].type != TOK_PARAM && tokens[i].type != CRLF)
+// 		i++;
+// 	if (i >= (int)tokens.size() || tokens[i].type == CRLF)
+// 		throw BadSyntax(WHOIS, ERR_NONICKNAMEGIVEN);
+// 	nicks.push_back(tokens[i++].str);
+// 	if (tokens[i].type == CRLF)
+// 		return; // WHOIS <nick> → listar modos
+// }
 
-WhoParam::WhoParam(msgTokens tokens): Param(WHO, tokens), mask("") {}
+// WhoParam::WhoParam(msgTokens tokens): Param(WHO, tokens), mask("") {}
 
-void WhoParam::validateParam()
-{
-	int i = 0;
-	while (i < (int)tokens.size() && tokens[i].type != TOK_PARAM && tokens[i].type != CRLF)
-		i++;
-	if (i >= (int)tokens.size() || tokens[i].type == CRLF)
-		throw BadSyntax(WHO, ERR_NONICKNAMEGIVEN);
-	mask = tokens[i++].str;
-	if (tokens[i].str == "o")
-		throw BadSyntax(WHO, ERR_NOSUCHSERVER);
-}
+// void WhoParam::validateParam()
+// {
+// 	int i = 0;
+// 	while (i < (int)tokens.size() && tokens[i].type != TOK_PARAM && tokens[i].type != CRLF)
+// 		i++;
+// 	if (i >= (int)tokens.size() || tokens[i].type == CRLF)
+// 		throw BadSyntax(WHO, ERR_NONICKNAMEGIVEN);
+// 	mask = tokens[i++].str;
+// 	if (tokens[i].str == "o")
+// 		throw BadSyntax(WHO, ERR_NOSUCHSERVER);
+// }
 
 Param	*ParamsFactory(COMMAND cmd, msgTokens tokens) {
 	switch (cmd)
@@ -253,9 +255,9 @@ Param	*ParamsFactory(COMMAND cmd, msgTokens tokens) {
 		case PASS:
 			return new PassParam(tokens);
 		case PING:
-			return new PingPongParam(tokens);
+			return new PingPongParam(tokens, cmd);
 		case PONG:
-			return new PingPongParam(tokens);
+			return new PingPongParam(tokens, cmd);
 		case QUIT:
 			return new QuitParam(tokens);
 		case JOIN:
