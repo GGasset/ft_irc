@@ -14,9 +14,9 @@
 #include "Channel.hpp"
 #include "iostream"
 
-#define READ_SIZE 420
+#define READ_SIZE 42
 #define MAX_EVENTS 69
-#define USER_TIMEOUT_S 42
+#define USER_TIMEOUT_S 420
 #define N_PINGS_UNTIL_TIMEOUT 5
 #define PING_SEPARATION_S USER_TIMEOUT_S / N_PINGS_UNTIL_TIMEOUT - 1
 
@@ -25,6 +25,7 @@ extern int signal_server_stop;
 class Server
 {
 private:
+    int					send_pings_actively;
 	size_t				last_ping_time;
 	bool				stop_server;
 	int					sockfd;

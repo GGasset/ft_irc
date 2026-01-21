@@ -1,0 +1,6 @@
+CompileFlags:
+  Add:
+    - "--include-directory=/home/ggasset-/projects/ft_irc/Include/"
+    - "--include-directory=/home/ggasset-/projects/ft_irc/Include/Server/"
+    - "--include-directory=/home/ggasset-/projects/ft_irc/Include/Parsing/"
+    - "--include-directory=/home/ggasset-/projects/ft_irc/Include/Channels/"

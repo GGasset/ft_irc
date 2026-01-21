@@ -28,7 +28,7 @@ static int setup_sockfd(size_t PORT)
 	 || bind(sockfd, (const sockaddr*)&addr, sizeof(addr))// Attach fd to PORT
 	 || listen(sockfd, 20) // Mark fd as the one used to accept connections
 	 || fcntl(sockfd, F_SETFL/*Set flags*/, fcntl(sockfd, F_GETFL/*Get flags*/, 0) | O_NONBLOCK) == -1 // Set non block
-	) 
+	)
 	{
 		std::cerr << "bind err" << std::endl;
 		close(sockfd);
@@ -41,7 +41,7 @@ void Server::handle_read_event(int fd)
 {
 	std::string read_data;
 	char tmp[READ_SIZE + 1] {};
-	
+
 	ssize_t bytes_read = read(fd, &tmp, READ_SIZE);
 	read_data += tmp;
 
@@ -65,10 +65,10 @@ void Server::handle_write_event(int fd)
 
 	if (user_i == -1) return;
 	if (!messages[user_i].size()) return;
-	
+
 	std::string next_msg = messages[user_i].front();
 	messages[user_i].pop();
-	
+
 	#ifndef DONT_LOG
 		std::cout << "Sending message to " << clients[user_i].get_nick() << ": " << next_msg << std::endl;
 	#endif
@@ -100,6 +100,30 @@ void Server::handle_event(const epoll_event event, int sockfd)
 		this->event.data.fd = new_client_fd;
 		if (epoll_ctl(epollfd, EPOLL_CTL_ADD, new_client_fd, &this->event)) stop();
 	}
+	else if (event.data.fd == 0)
+	{
+	    std::string data;
+		char tmp[READ_SIZE + 1]{};
+		while (read(0, tmp, READ_SIZE) == READ_SIZE)
+		{
+		    data += tmp;
+			for (size_t i = 0; i < READ_SIZE; i++) tmp[i] = 0;
+		}
+		std::string tmp_str;
+		for (size_t i = 0; data[i]; i++)
+		{
+		    tmp_str += data[i] * (data[i] != '\n');
+			if (data[i] == '\n' || !data[i + 1])
+			{
+			    if (tmp_str == "q" || tmp_str == "Q" || tmp_str == "quit" || tmp_str == "Quit")
+        			stop_server = true;
+
+				if (tmp_str == "no ping") send_pings_actively = false;
+				if (tmp_str == "ping") send_pings_actively = true;
+			    tmp_str = "";
+			}
+		}
+	}
 	else
 	{
 		if (event.events & EPOLLIN)
@@ -129,6 +153,11 @@ int Server::loop(size_t PORT)
 	// Add sockfd for read watchlist to accept clients
 	if (epoll_ctl(epollfd, EPOLL_CTL_ADD, sockfd, &event)) err = true;
 
+	if (fcntl(0, F_SETFL/*Set flags*/, fcntl(0, F_GETFL/*Get flags*/, 0) | O_NONBLOCK) == -1) err = true;
+	event.events = EPOLLIN;
+	event.data.fd = 0;
+	if (epoll_ctl(epollfd, EPOLL_CTL_ADD, 0, &event)) err = true;
+
 #ifndef DONT_LOG
 	std::cout << "Bluetooth device is ready to peal at " << PORT << std::endl;
 #endif
@@ -139,13 +168,13 @@ int Server::loop(size_t PORT)
 		size_t event_n = epoll_wait(epollfd, events, MAX_EVENTS, 1000);
 		if (event_n == -1) {err = errno != EINTR; continue;}
 
-		if (std::time(0) - last_ping_time >= PING_SEPARATION_S)
+		if (send_pings_actively && std::time(0) - last_ping_time >= PING_SEPARATION_S)
 			send_pings();
 
 		for (size_t i = 0; i < event_n; i++)
 			handle_event(events[i], sockfd);
 	}
-	
+
 	close(sockfd);
 	close(epollfd);
 	for (size_t i = 0; i < client_fds.size(); i++)
