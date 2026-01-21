@@ -11,6 +11,7 @@
 /* ************************************************************************** */
 
 #include "Message.hpp"
+#include <string>
 
 msgs    getMsgs(std::string packet)
 {
@@ -28,7 +29,7 @@ msgs    getMsgs(std::string packet)
 		packet = packet.substr(pos + 2);
 	}
 	if (!packet.empty())
-	ret.push_back(packet + "\r\n");
+		ret.push_back(packet + "\r\n");
 	return (ret);
 }
 
@@ -58,7 +59,7 @@ std::string	getSPACE(std::string &packet, size_t &beginSpace)
 	size_t tmp = beginSpace;
 	for (; it != packet.end() && *it == ' '; it++)
 		beginSpace++;
-	
+
 	std::string ret = tmp == beginSpace ? "" : " ";
 	return (ret);
 }
@@ -94,7 +95,7 @@ char iterStr(const std::string& str, bool restart) {
 
 bool	isNUMBER(const std::string &param) {
 	char c;
-	
+
 	iterStr(param, 1);
 	while (1) {
 		c = iterStr(param, 0);
@@ -193,4 +194,3 @@ msgTokens	msgTokenizer(std::string msg)
 	}
 	return (ret);
 }
-

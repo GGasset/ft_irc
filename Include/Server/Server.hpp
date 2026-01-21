@@ -14,9 +14,9 @@
 #include "Channel.hpp"
 #include "iostream"
 
-#define READ_SIZE 42
+#define READ_SIZE 420
 #define MAX_EVENTS 69
-#define USER_TIMEOUT_S 420
+#define USER_TIMEOUT_S 42
 #define N_PINGS_UNTIL_TIMEOUT 5
 #define PING_SEPARATION_S USER_TIMEOUT_S / N_PINGS_UNTIL_TIMEOUT - 1
 

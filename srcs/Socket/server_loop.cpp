@@ -1,3 +1,4 @@
+#include <sys/epoll.h>
 #include <unistd.h>
 #include <netinet/in.h>
 #include <sys/socket.h>
@@ -113,7 +114,7 @@ void Server::handle_event(const epoll_event event, int sockfd)
 	{
 	    std::string data;
 		char tmp[READ_SIZE + 1]{};
-		while (read(0, tmp, READ_SIZE) == READ_SIZE)
+		while (read(0, tmp, READ_SIZE) > 0)
 		{
 		    data += tmp;
 			for (size_t i = 0; i < READ_SIZE; i++) tmp[i] = 0;
@@ -121,14 +122,15 @@ void Server::handle_event(const epoll_event event, int sockfd)
 		std::string tmp_str;
 		for (size_t i = 0; data[i]; i++)
 		{
-		    tmp_str += data[i] * (data[i] != '\n');
-			if (data[i] == '\n' || !data[i + 1])
+		    tmp_str += data[i];
+			if (data[i] == '\n' || i == data.size() - 1)
 			{
+				tmp_str = sanitize(tmp_str);
 			    if (tmp_str == "q" || tmp_str == "Q" || tmp_str == "quit" || tmp_str == "Quit")
         			stop_server = true;
 
-				if (tmp_str == "no ping") send_pings_actively = false;
-				if (tmp_str == "ping") send_pings_actively = true;
+				if (tmp_str == "no ping") {send_pings_actively = false; std::cout << "Stopped active pinging" << std::endl;}
+				if (tmp_str == "ping") {send_pings_actively = true; std::cout << "Started pinging actively" << std::endl;}
 			    tmp_str = "";
 			}
 		}
@@ -146,8 +148,8 @@ int Server::loop(size_t PORT)
 {
 	signal_server_stop = false;
 	signal(SIGTSTP, handle_signals);
-	signal(SIGSTOP, handle_signals);
-	//signal(SIGINT, handle_signals);
+	//signal(SIGSTOP, handle_signals);
+	signal(SIGINT, handle_signals);
 	signal(SIGQUIT, handle_signals);
 	signal(SIGTERM, handle_signals);
 
@@ -161,9 +163,9 @@ int Server::loop(size_t PORT)
 	int err = 0;
 	// Add sockfd for read watchlist to accept clients
 	if (epoll_ctl(epollfd, EPOLL_CTL_ADD, sockfd, &event)) err = true;
-
 	if (fcntl(0, F_SETFL/*Set flags*/, fcntl(0, F_GETFL/*Get flags*/, 0) | O_NONBLOCK) == -1) err = true;
-	event.events = EPOLLIN;
+
+	event.events = EPOLLIN | EPOLLET;
 	event.data.fd = 0;
 	if (epoll_ctl(epollfd, EPOLL_CTL_ADD, 0, &event)) err = true;
 
@@ -188,5 +190,6 @@ int Server::loop(size_t PORT)
 	close(epollfd);
 	for (size_t i = 0; i < client_fds.size(); i++)
 		close(client_fds[i]);
+	std::cout << "\nBye!" << std::endl;
 	return err;
 }
