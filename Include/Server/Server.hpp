@@ -41,7 +41,7 @@ private:
 	std::vector<int>	client_fds;
 	std::vector<size_t>	last_pong_time; // TODO: set during message handling
 	std::vector<User>	clients;
-	std::vector<std::queue<std::string>> messages;
+	std::vector<std::queue<std::string> > messages;
 	std::vector<Channel> servers;
 
 	std::vector<std::string> nick_history;

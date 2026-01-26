@@ -130,7 +130,7 @@ void Server::handle_event(const epoll_event event, int sockfd)
         			stop_server = true;
 
 				if (tmp_str == "no ping") {send_pings_actively = false; std::cout << "Stopped active pinging" << std::endl;}
-				if (tmp_str == "ping") {send_pings_actively = true; std::cout << "Started pinging actively" << std::endl;}
+				if (tmp_str == "ping") {send_pings_actively = true; for (size_t i = 0; i < clients.size(); i++) set_pong_time(clients[i].get_id()); std::cout << "Started pinging actively" << std::endl;}
 			    tmp_str = "";
 			}
 		}
@@ -148,7 +148,6 @@ int Server::loop(size_t PORT)
 {
 	signal_server_stop = false;
 	signal(SIGTSTP, handle_signals);
-	//signal(SIGSTOP, handle_signals);
 	signal(SIGINT, handle_signals);
 	signal(SIGQUIT, handle_signals);
 	signal(SIGTERM, handle_signals);

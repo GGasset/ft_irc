@@ -126,7 +126,7 @@ ssize_t Server::get_user_index_by_fd(int fd)
 User *Server::get_user_by_fd(int fd)
 {
 	ssize_t user_index = get_user_index_by_fd(fd);
-	if (user_index) return 0;
+	if (user_index == -1) return 0;
 	return &clients[user_index];
 }
 
