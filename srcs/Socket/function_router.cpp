@@ -20,9 +20,7 @@ bool prepare_message(const std::string &packet, Server &server, MessageIn &in, s
     return false;
     
     in.sender_id = sender_id;
-    
     Param *params = ParamsFactory(in.getCommand(), tokens);
-    
     if (params != NULL)
     {
         try {

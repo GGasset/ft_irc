@@ -138,7 +138,6 @@ MessageOut  *handleJoin(MessageIn in, Server &server)
     {
         std::cerr << e.what() << '\n';
     }
-    std::cout << "AQUI DEBE IR UN CANAL TO GUAPO" << std::endl;
     return (NULL);
 }
 

@@ -19,8 +19,10 @@ class MessageTarget {
 
 class UsersTarget : public MessageTarget {
 	public:
-		UsersTarget(Server& server, std::vector<size_t> ids): MessageTarget(server, ids) {}
-		UsersTarget(const UsersTarget& other): MessageTarget(other.server, other.ids) {}
+		UsersTarget(Server& server, std::vector<size_t> ids): MessageTarget(server, ids) {
+		}
+		UsersTarget(const UsersTarget& other): MessageTarget(other.server, other.ids) {
+		}
 		~UsersTarget() {}
 		UsersTarget&	operator=(const UsersTarget& other) {
 			if (this != &other)
@@ -35,7 +37,8 @@ class UsersTarget : public MessageTarget {
 
 class ChannelTarget : public MessageTarget {
 	public:
-		ChannelTarget(Server& server, std::vector<size_t> ids): MessageTarget(server, ids) {}
+		ChannelTarget(Server& server, std::vector<size_t> ids): MessageTarget(server, ids) {
+		}
 		ChannelTarget(const ChannelTarget& other): MessageTarget(other.server, other.ids) {}
 		~ChannelTarget() {}
 		ChannelTarget&	operator=(const ChannelTarget& other) {
@@ -62,9 +65,13 @@ class MessageTargetFactory {
 		MessageTargetFactory() {}
 		static MessageTarget	*create(Server &server, std::vector<size_t> ids, char t) {
 			if (t == 'u')
+			{
 				return new UsersTarget(server, ids);
+			}
 			else if (t == 'c')
+			{
 				return new ChannelTarget(server, ids);
+			}
 			else
 				return NULL;
 		}

@@ -299,7 +299,7 @@ class WhoParam: public Param {
         std::string mask; //Cualquier cosa.
 
 
-        WhoParam(msgTokens tokens): Param(WHO, tokens), mask("") {}
+        WhoParam(msgTokens tokens);
         ~WhoParam() {}
 
         virtual void    validateParam();
