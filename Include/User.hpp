@@ -22,9 +22,7 @@ private:
 	std::vector<size_t> joined_channels_ids;
 
 	// current state of the received msg, may not be complete
-	// Is not saved to disk
 	std::string current_message;
-	std::string passw;
 
 public:
 	User();
@@ -41,7 +39,7 @@ public:
 	void	set_username(std::string username);
 	void	set_realname(std::string realname);
 	bool	passwd_match_pop(bool cond);
-	
+
 	// Called when this user sends a message
 	// This function is part of the socket function collection
 	std::vector<std::string> msg_sent(std::string data);

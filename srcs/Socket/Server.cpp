@@ -89,12 +89,12 @@ ssize_t Server::get_user_index_by_id(size_t id)
 	return -1;
 }
 
-User &Server::get_user_by_nick(std::string nick)
+User *Server::get_user_by_nick(std::string nick)
 {
 	for (size_t i = 0; i < clients.size(); i++)
 		if (clients[i].get_id() != -1 && clients[i].get_nick() == nick)
-			return clients[i];
-	return (clients[0]);
+			return &clients[i];
+	return (0);
 }
 
 User &Server::get_user_by_id(size_t id)

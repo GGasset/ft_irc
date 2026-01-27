@@ -3,15 +3,15 @@
 #include <exception>
 
 #include "Server.hpp"
-#include "fnHandlers.hpp"
+//#include "fnHandlers.hpp"
 #include "Channel.hpp"
 #include "User.hpp"
 
-#define USAGE_STR "irc PORT [passw]"
+#define USAGE_STR "irc PORT passw"
 
 int main(int argc, char **argv)
 {
-	if (2 > argc || argc > 3)
+	if (argc != 3)
 		{std::cerr << "Invalid parameters " << USAGE_STR << std::endl; return 0;}
 
 	bool port_is_digits = !argv[1][0];
@@ -22,7 +22,7 @@ int main(int argc, char **argv)
 
 	int port = std::atoi(argv[1]);
 
-	Server server;
+	Server server(argv[2]);
 	if (server.loop(port))
 		{std::cerr << "Internal server err" << std::endl; return 0;}
 }

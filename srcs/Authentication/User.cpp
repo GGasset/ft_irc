@@ -22,7 +22,7 @@ std::vector<std::string> User::msg_sent(std::string data)
 	{
 		char prev = i? data[i - 1] : -1;
 
-		if (prev == -1 && current_message.size()) prev = current_message.back(); 
+		if (prev == -1 && current_message.size()) prev = current_message.back();
 
 		char c = data[i];
 
@@ -85,8 +85,8 @@ void	User::set_realname(std::string real) {
 }
 
 bool	User::passwd_match_pop(bool cond) {
-	bool	ret = this->passwd_match;
-	passwd_match = cond;
+	bool ret = this->passwd_match;
+	passwd_match = cond || passwd_match;
 	return (ret);
 }
 

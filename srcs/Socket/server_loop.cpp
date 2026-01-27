@@ -16,11 +16,20 @@ void handle_signals(int signal)
 	signal_server_stop = true;
 }
 
-static std::string sanitize(std::string in)
+std::string sanitize(std::string in)
 {
-    std::string out;
-    for (size_t i = 0; i < in.size(); i++) if (std::isprint(in[i])) out += in[i];
-    return out;
+	std::string out;
+	for (size_t i = 0; i < in.size(); i++)
+	{
+		if (std::isprint(in[i]))
+		{
+			if (std::isspace(in[i]))
+				out += " ";
+			else
+				out += in[i];
+		}
+	}
+	return out;
 }
 
 static int setup_sockfd(size_t PORT)
@@ -36,7 +45,7 @@ static int setup_sockfd(size_t PORT)
 	 	sockfd == -1
 	 || bind(sockfd, (const sockaddr*)&addr, sizeof(addr))// Attach fd to PORT
 	 || listen(sockfd, 20) // Mark fd as the one used to accept connections
-	 || fcntl(sockfd, F_SETFL/*Set flags*/, fcntl(sockfd, F_GETFL/*Get flags*/, 0) | O_NONBLOCK) == -1 // Set non block
+	 || fcntl(sockfd, F_SETFL, O_NONBLOCK) == -1 // Set non block
 	)
 	{
 		std::cerr << "bind err" << std::endl;
@@ -92,7 +101,7 @@ void Server::handle_event(const epoll_event event, int sockfd)
 	{
 		int new_client_fd = accept(sockfd, 0, 0);
 		if (new_client_fd == -1
-			|| fcntl(sockfd, F_SETFL/*Set flags*/, fcntl(sockfd, F_GETFL/*Get flags*/, 0) | O_NONBLOCK) == -1 // Set non block
+		 || fcntl(sockfd, F_SETFL, O_NONBLOCK) == -1 // Set non block
 		) return;
 
 #ifndef DONT_LOG
@@ -162,7 +171,7 @@ int Server::loop(size_t PORT)
 	int err = 0;
 	// Add sockfd for read watchlist to accept clients
 	if (epoll_ctl(epollfd, EPOLL_CTL_ADD, sockfd, &event)) err = true;
-	if (fcntl(0, F_SETFL/*Set flags*/, fcntl(0, F_GETFL/*Get flags*/, 0) | O_NONBLOCK) == -1) err = true;
+	if (fcntl(sockfd, F_SETFL, O_NONBLOCK) == -1) err = true;
 
 	event.events = EPOLLIN | EPOLLET;
 	event.data.fd = 0;

@@ -22,6 +22,8 @@
 
 extern int signal_server_stop;
 
+std::string sanitize(std::string in);
+
 class Server
 {
 private:
@@ -46,6 +48,8 @@ private:
 
 	std::vector<std::string> nick_history;
 
+	std::string passw;
+
 	ssize_t get_user_index_by_fd(int fd);
 	User *get_user_by_fd(int fd);
 
@@ -62,7 +66,7 @@ private:
 	Server(const Server &src);
 
 public:
-	Server();
+	Server(std::string passw);
 	~Server();
 
 	size_t	n_users();
@@ -73,14 +77,13 @@ public:
 	void set_pong_time(size_t user_id);
 
 	ssize_t get_user_index_by_id(size_t id);
-	User &get_user_by_nick(std::string nick);
+	User *get_user_by_nick(std::string nick);
 	User &get_user_by_id(size_t id);
 	std::vector<User&> get_channel_users(const Channel channel);
 	Channel &get_by_channel_name(std::string name);
 	Channel &get_by_channel_id(size_t id);
 
-	std::string passw;
-	// std::string	get_server_password();
+	std::string	get_server_password();
 
 	void	addUser(User u);
 	void	addChannel(Channel ch);
@@ -90,6 +93,8 @@ public:
 	void stop();
 
 	std::vector<User>	&getUsers(void);
+
+	std::string get_prefix();
 
 	// Returns true on errors
 	int loop(size_t PORT);

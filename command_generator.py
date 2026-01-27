@@ -41,8 +41,8 @@ def main():
         elif args[0] == "QUIT" or args[0] == "Q":
             print("QUIT Bye!", end=crlf)
             return
-        elif args[0] == "PRIVATE" and len(args) >= 4:
-            print(f"CPRIVMSG {args[1]} {args[2]} :{args[3]}", end=crlf)
+        elif args[0] == "PRIVATE" and len(args) >= 3:
+            print(f"PRIVMSG {args[1]} :{args[2]}", end=crlf)
 
 
 if __name__ == "__main__":
