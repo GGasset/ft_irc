@@ -7,12 +7,12 @@
 #include "Channel.hpp"
 #include "User.hpp"
 
-#define USAGE_STR "irc PORT passw"
+#define USAGE_STR "Usage: ./ircserv PORT PASSW"
 
 int main(int argc, char **argv)
 {
 	if (argc != 3)
-		{std::cerr << "Invalid parameters " << USAGE_STR << std::endl; return 0;}
+		{std::cerr << "Invalid parameters. " << USAGE_STR << std::endl; return 0;}
 
 	bool port_is_digits = !argv[1][0];
 	for (size_t i = 0; argv[1][i]; i++)

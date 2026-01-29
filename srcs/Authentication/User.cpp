@@ -2,7 +2,7 @@
 
 User::User() {}
 
-User::User(std::string nick, size_t id): nick(nick), id(id)  {}
+User::User(std::string nick, size_t id): id(id), nick(nick)  {}
 
 User &User::operator=(const User &other) {
 	id = other.id;
@@ -22,7 +22,7 @@ std::vector<std::string> User::msg_sent(std::string data)
 	{
 		char prev = i? data[i - 1] : -1;
 
-		if (prev == -1 && current_message.size()) prev = current_message.back();
+		if (prev == -1 && current_message.size()) prev = *current_message.end();
 
 		char c = data[i];
 
@@ -82,6 +82,11 @@ void	User::set_username(std::string user) {
 
 void	User::set_realname(std::string real) {
 	this->realname = real;
+}
+
+void	User::set_hostname(std::string hostname)
+{
+	this->hostname = hostname;
 }
 
 bool	User::passwd_match_pop(bool cond) {

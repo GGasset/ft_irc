@@ -3,7 +3,6 @@
 #include <sys/epoll.h>
 #include <cstddef>
 #include <string>
-#include <tuple>
 #include <vector>
 #include <queue>
 #include <sys/epoll.h>
@@ -14,9 +13,9 @@
 #include "Channel.hpp"
 #include "iostream"
 
-#define READ_SIZE 420
+#define READ_SIZE 42
 #define MAX_EVENTS 69
-#define USER_TIMEOUT_S 42
+#define USER_TIMEOUT_S 420
 #define N_PINGS_UNTIL_TIMEOUT 5
 #define PING_SEPARATION_S USER_TIMEOUT_S / N_PINGS_UNTIL_TIMEOUT - 1
 
@@ -49,6 +48,8 @@ private:
 	std::vector<std::string> nick_history;
 
 	std::string passw;
+
+	bool replace_LF_to_CRLF;
 
 	ssize_t get_user_index_by_fd(int fd);
 	User *get_user_by_fd(int fd);
@@ -94,6 +95,7 @@ public:
 
 	std::vector<User>	&getUsers(void);
 
+	// prefix does not contain ':' at the beginning
 	std::string get_prefix();
 
 	// Returns true on errors

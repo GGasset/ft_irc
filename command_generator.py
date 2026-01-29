@@ -32,7 +32,7 @@ def main():
         elif args[0] == "NICK" and len(args) >= 2:
             print(f"NICK {args[1]}", end=crlf)
         elif args[0] == "USER" and len(args) >= 2:
-            print(f"USER * : {args[1]}", end=crlf)
+            print(f"USER {args[1]} :{args[2]}", end=crlf)
         elif args[0] == "JOIN" and len(args) >= 2:
             list: str = ""
             for i in range(1, argc):

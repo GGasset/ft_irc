@@ -1,3 +1,4 @@
+#include <string>
 #include <sys/epoll.h>
 #include <unistd.h>
 #include <netinet/in.h>
@@ -5,6 +6,7 @@
 #include <fcntl.h>
 #include <signal.h>
 #include <cctype>
+#include "cerrno"
 
 #include "Server.hpp"
 
@@ -13,6 +15,7 @@ int signal_server_stop;
 
 void handle_signals(int signal)
 {
+	signal = 0;
 	signal_server_stop = true;
 }
 
@@ -42,7 +45,7 @@ static int setup_sockfd(size_t PORT)
 	addr.sin_addr.s_addr = INADDR_ANY;
 
 	if (
-	 	sockfd == -1
+		sockfd == -1
 	 || bind(sockfd, (const sockaddr*)&addr, sizeof(addr))// Attach fd to PORT
 	 || listen(sockfd, 20) // Mark fd as the one used to accept connections
 	 || fcntl(sockfd, F_SETFL, O_NONBLOCK) == -1 // Set non block
@@ -57,21 +60,66 @@ static int setup_sockfd(size_t PORT)
 
 void Server::handle_read_event(int fd)
 {
-	std::string read_data;
-	char tmp[READ_SIZE + 1] {};
+	std::string data;
+	char tmp[READ_SIZE + 1];
 
-	ssize_t bytes_read = read(fd, &tmp, READ_SIZE);
-	read_data += tmp;
+	ssize_t bytes_read;
+	do
+	{
+		for (size_t i = 0; i < READ_SIZE; i++) tmp[i] = 0;
+		bytes_read = read(fd, tmp, READ_SIZE);
+		data += tmp;
+	}
+	while (bytes_read == READ_SIZE);
+	//std::cout << "Raw read: " << data << std::endl;
 
-	if (!read_data.length()) return;
+	{
+		std::string str_tmp;
+		for (size_t i = 0; replace_LF_to_CRLF && i < data.size(); i++)
+		{
+			if (data.size() == 1 && data[0] == '\n' && replace_LF_to_CRLF)
+				str_tmp += "\r\n";
+			else if (i && data[i - 1] != '\r' && data[i] == '\n' && replace_LF_to_CRLF)
+				str_tmp += "\r\n";
+			else
+				str_tmp += data[i];
+		}
+		if (replace_LF_to_CRLF)
+			data = str_tmp;
+	}
+
+	if (!data.length()) return;
+
+	if (!fd)
+	{
+		std::string tmp_str;
+		for (size_t i = 0; data[i]; i++)
+		{
+			tmp_str += data[i];
+			if (data[i] == '\n' || i == data.size() - 1)
+			{
+				tmp_str = sanitize(tmp_str);
+				if (tmp_str == "q" || tmp_str == "Q" || tmp_str == "quit" || tmp_str == "Quit")
+					stop_server = true;
+
+				if (tmp_str == "no ping" || tmp_str == "why") {send_pings_actively = false; std::cout << "Stopped active pinging" << std::endl;}
+				if (tmp_str == "ping") {send_pings_actively = true; for (size_t i = 0; i < clients.size(); i++) set_pong_time(clients[i].get_id()); std::cout << "Started pinging actively" << std::endl;}
+				if (tmp_str == "no crlf" || tmp_str == "why") {replace_LF_to_CRLF = true; std::cout << "Get those filthy CRLF away from me!" << std::endl;}
+				if (tmp_str == "crlf") {replace_LF_to_CRLF = false; std::cout << "Whatever, activate CRLF requirements, by the way, will you also write quit? Please." << std::endl;}
+				tmp_str = "";
+			}
+		}
+		return;
+	}
+
 	ssize_t sender_index = get_user_index_by_fd(fd);
 	User *sender = get_user_by_fd(fd);
 	if (!sender) return;
 
-	std::vector<std::string> msgs = sender->msg_sent(read_data);
+	std::vector<std::string> msgs = sender->msg_sent(data);
 	for (size_t i = 0; i < msgs.size(); i++) {
 #ifndef DONT_LOG
-        std::string msg = msgs[i];
+		std::string msg = msgs[i];
 		std::cout << std::endl << "Msg received from " << sender->getUsername() << ": " << sanitize(msg) << std::endl;
 #endif
 		route_message(msgs[i], *sender, sender_index);
@@ -110,7 +158,7 @@ void Server::handle_event(const epoll_event event, int sockfd)
 
 		// Add client
 		client_fds.push_back(new_client_fd);
-		clients.push_back(User("unset", max_client_id));
+		clients.push_back(User("", max_client_id));
 		last_pong_time.push_back(std::time(NULL));
 		max_client_id++;
 		messages.push_back(std::queue<std::string>());
@@ -118,31 +166,8 @@ void Server::handle_event(const epoll_event event, int sockfd)
 		this->event.events = EPOLLIN | EPOLLOUT;
 		this->event.data.fd = new_client_fd;
 		if (epoll_ctl(epollfd, EPOLL_CTL_ADD, new_client_fd, &this->event)) stop();
-	}
-	else if (event.data.fd == 0)
-	{
-	    std::string data;
-		char tmp[READ_SIZE + 1]{};
-		while (read(0, tmp, READ_SIZE) > 0)
-		{
-		    data += tmp;
-			for (size_t i = 0; i < READ_SIZE; i++) tmp[i] = 0;
-		}
-		std::string tmp_str;
-		for (size_t i = 0; data[i]; i++)
-		{
-		    tmp_str += data[i];
-			if (data[i] == '\n' || i == data.size() - 1)
-			{
-				tmp_str = sanitize(tmp_str);
-			    if (tmp_str == "q" || tmp_str == "Q" || tmp_str == "quit" || tmp_str == "Quit")
-        			stop_server = true;
 
-				if (tmp_str == "no ping") {send_pings_actively = false; std::cout << "Stopped active pinging" << std::endl;}
-				if (tmp_str == "ping") {send_pings_actively = true; for (size_t i = 0; i < clients.size(); i++) set_pong_time(clients[i].get_id()); std::cout << "Started pinging actively" << std::endl;}
-			    tmp_str = "";
-			}
-		}
+		add_msg("NOTICE " + (std::string)"unregistered" + "\nWelcome! Go ahead and login with PASS [passw].\nYou may also write HELP to get a list of commands", clients.end()[-1]);
 	}
 	else
 	{
@@ -184,13 +209,13 @@ int Server::loop(size_t PORT)
 	last_ping_time = std::time(0);
 	while (!stop_server && !err && !signal_server_stop)
 	{
-		size_t event_n = epoll_wait(epollfd, events, MAX_EVENTS, 1000);
+		int event_n = epoll_wait(epollfd, events, MAX_EVENTS, 1000);
 		if (event_n == -1) {err = errno != EINTR; continue;}
 
 		if (send_pings_actively && std::time(0) - last_ping_time >= PING_SEPARATION_S)
 			send_pings();
 
-		for (size_t i = 0; i < event_n; i++)
+		for (int i = 0; i < event_n; i++)
 			handle_event(events[i], sockfd);
 	}
 

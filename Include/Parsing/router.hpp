@@ -24,6 +24,7 @@ enum commands
 	INVITE,
 	TOPIC,
 	MODE,
+	HELP,
 	last_command
 };
 
@@ -58,6 +59,7 @@ void KICK_fn(command_args args, Server& server, User& sender);
 void INVITE_fn(command_args args, Server& server, User& sender);
 void TOPIC_fn(command_args args, Server& server, User& sender);
 void MODE_fn(command_args args, Server& server, User& sender);
+void HELP_fn(command_args args, Server& server, User& sender);
 
 
 #endif

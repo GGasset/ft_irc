@@ -1,6 +1,8 @@
-// #include "Server.hpp"
-#include "fnHandlers.hpp"
-#include "ParserMessage.hpp"
+#include "Server.hpp"
+#include "router.hpp"
+
+//#include "fnHandlers.hpp"
+//#include "ParserMessage.hpp"
 
 /* Comandito para compilar.*/
 //c++ -g main.cpp Message.cpp ParserMessage.cpp Param.cpp MessageOut.cpp fnHandlers.cpp Server_Mock.cpp  ../Authentication/User.cpp  Channels/Channel.cpp -I../Authentication/ -IChannels/
@@ -56,3 +58,8 @@ void Server::route_message(std::string msg, User &sender, size_t user_index) {
 	if (prepare_message(msg, *this, in, user_index))
 	    handle_message(in, *this, msg);
 }*/
+
+void Server::route_message(std::string msg, User &sender, size_t user_index) {
+	user_index = 0;
+	router()(msg, *this, sender);
+}

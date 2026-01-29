@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include "aio.h"
 #include <cstring>
 #include "User.hpp"
 #include "string"
@@ -20,7 +21,7 @@ class Server;
 class Channel
 {
 private:
-	size_t id = -1;
+	size_t id;
 	std::vector<size_t> member_user_ids;
 	// I don't know if this is correct (would be used for users who just joined the channel and the msg history would be sent)
 	// Just the msgs meant to be read by other people
@@ -28,7 +29,7 @@ private:
 	std::vector<User *> users;
 	channel_mode mode;
 	std::string name;
-	std::string	topic = "";
+	std::string	topic;
 
 public:
 	Channel(void);

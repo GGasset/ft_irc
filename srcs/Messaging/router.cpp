@@ -27,6 +27,9 @@ router::router()
 	command_string[PING] = "PING";
 	fun[PING] = PING_fn;
 
+	command_string[PONG] = "PONG";
+	fun[PONG] = PONG_fn;
+
 	command_string[QUIT] = "QUIT";
 	fun[QUIT] = QUIT_fn;
 
@@ -41,6 +44,9 @@ router::router()
 
 	command_string[MODE] = "MODE";
 	fun[MODE] = MODE_fn;*/
+
+	command_string[HELP] = "HELP";
+	fun[HELP] = HELP_fn;
 }
 
 static std::vector<std::string> split(std::string in, char splitter)
@@ -69,31 +75,33 @@ void router::operator()(std::string message, Server& server, User &sender)
 	std::vector<std::string> argv = split(sanitize(message), ' ');
 	if (!argv.size()) return;
 
-	command_args args {};
+	command_args args;
+	for (size_t i = 0; i < sizeof(args); i++) ((char*)&args)[i] = 0;
 
 	bool contains_prefix = argv[0][0] == ':';
 	if (contains_prefix)
 	{
 		args.prefix = argv[0];
+		argv.erase(argv.begin());
 	}
-	argv.erase(argv.begin());
 
 	size_t func_i = (size_t)-1;
 	for (size_t i = 0; i < last_command && func_i == (size_t)-1; i++)
 		if (argv[0] == command_string[i]) func_i = i;
+
 
 	if (func_i == (size_t)-1 || !fun[func_i])
 	{
 		//server.add_msg("Invalid command!", sender);
 		return;
 	}
-	if (!sender.passwd_match_pop(0) && func_i != PASS && func_i != QUIT)
+	if (!sender.passwd_match_pop(0) && func_i != PASS && func_i != QUIT && func_i != HELP && func_i != PONG)
 	{
 		server.add_msg(server.get_prefix() + " 451 :You have not registered", sender);
 		server.add_msg("NOTICE " + sender.get_nick() + " you must use PASS command first", sender);
 		return;
 	}
-	if (!sender.is_registered() && func_i != NICK && func_i != USER && func_i != QUIT)
+	if (sender.passwd_match_pop(0) && !sender.is_registered() && func_i != NICK && func_i != USER && func_i != QUIT && func_i != HELP && func_i != PONG)
 	{
 		server.add_msg(server.get_prefix() + " 451 :You have not registered", sender);
 		server.add_msg("NOTICE " + sender.get_nick() + " you must use NICK and USER commands first", sender);
@@ -101,7 +109,13 @@ void router::operator()(std::string message, Server& server, User &sender)
 	}
 
 	std::vector<std::string> raw_argv = split(message, ' ');
-	for (size_t i = 1; i < raw_argv.size(); i++) args.raw_args += raw_argv[i];
+	for (size_t i = 1; i < raw_argv.size(); i++) args.raw_args += sanitize(raw_argv[i]);
 
-	fun[func_i](args, server, sender);
+	args.argv = argv;
+
+	//std::cout << "Called parsing function " << command_string[func_i] << std::endl;
+	//std::cout << "args:\nPrefix: " << args.prefix << "\nRaw args: " << args.raw_args << std::endl << "Argc: " << args.argv.size() << std::endl << "Args: " << std::endl;
+	//for (size_t i = 0; i < args.argv.size(); i++) std::cout << i << ": " << args.argv[i] << std::endl;
+
+	if (fun[func_i]) fun[func_i](args, server, sender);
 }
