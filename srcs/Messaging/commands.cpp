@@ -8,8 +8,11 @@
 #define notice_back(msg) server.add_msg("NOTICE " + sender.get_nick() + " " + msg, sender)
 #define send_return(msg) {send_back(msg); return;}
 
-#define register() send_back("Welcome to the Internet Relay Network " + sender.get_nick() + "!" + sender + "@" + sender.get_hostname()); \
-					send_back();
+#define register() {send_back("001 Welcome to the Internet Relay Network " + sender.get_nick() + "!" + sender.getUsername() + "@" + sender.getHostname()); \
+					send_back("002 Your host is " + server.get_prefix() + ", running version 4.2"); \
+					send_back("003 This server was created today, I bet ;)"); \
+					send_back("004 " + server.get_prefix() + " 4.2 TODO(usermodes) TODO(channelmodes)"); \
+					sender.register_user();}
 
 #define suppr() args.prefix = args.prefix; (User)sender; (std::vector<User>)server.getUsers();
 
@@ -28,11 +31,20 @@ void NICK_fn(command_args args, Server& server, User& sender)
 	if (args.argv.size() != 2) send_return("431 :No nickname given");
 	if (server.get_user_by_nick(args.argv[1])) send_return("433 " + args.argv[1] + " :Nickname is already in use");
 
-	bool had_nick = sender.get_nick().empty() == 0;
+	std::string prev_nick = sender.get_nick();
 
 	sender.setNick(args.argv[1]);
 	notice_back("Nick set to: " + args.argv[1]);
-	if (!sender.getUsername().empty() && !had_nick) {sender.register_user(); notice_back("Registered!");}
+	if (sender.is_registered() && prev_nick.size())
+	{
+		std::vector<size_t> channels = sender.get_joined_channels();
+		for (size_t i = 0; i < channels.size(); i++)
+		{
+			Channel &c = server.get_by_channel_id(channels[i]);
+			c.broadcast(server, "NOTICE #" + c.get_name() + " " + prev_nick + " changed his nick to: " + sender.get_nick());
+		}
+	}
+	if (!sender.getUsername().empty() && !prev_nick.size()) register();
 }
 
 void USER_fn(command_args args, Server& server, User& sender)
@@ -57,7 +69,7 @@ void USER_fn(command_args args, Server& server, User& sender)
 	sender.set_realname(realname);
 
 	notice_back("Username set to: " + sender.getUsername() + ". Hostname set to: " + sender.getHostname() + ". Realname set to: " + sender.getRealname());
-	if (!sender.get_nick().empty()) {sender.register_user(); notice_back("Registered!");}
+	if (!sender.get_nick().empty()) register();
 }
 
 
