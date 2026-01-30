@@ -73,7 +73,22 @@ void USER_fn(command_args args, Server& server, User& sender)
 }
 
 
-void JOIN_fn(command_args args, Server& server, User& sender) { suppr() };
+void JOIN_fn(command_args args, Server& server, User& sender)
+{
+	int	i;
+
+	i = 0;
+	while (args.argv[1][i])
+	{
+		if (args.argv[1][i] == 44 || args.argv[1][i] == 92)
+			send_return("403 :Invalid channel format: JOIN #channel")
+		i++;
+	}
+	std::cout << args.argv[1][0] << std::endl;
+	if (args.argv[1][0] != '#' || args.argv[1][0] != '&')
+		send_return("403 :Invalid channel format: JOIN #channel")
+	suppr();
+};
 void PRIVMSG_fn(command_args args, Server& server, User& sender) { suppr() };
 void PING_fn(command_args args, Server& server, User& sender)
 {
