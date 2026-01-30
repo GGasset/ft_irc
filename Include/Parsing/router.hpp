@@ -32,9 +32,9 @@ enum commands
 
 struct command_args
 {
-	std::string prefix;
-	std::vector<std::string> argv;
-	std::string raw_args;
+	std::string prefix; // Prefix that the user sent
+	std::vector<std::string> argv; // Doesn't contain the prefix. Is a split of spaces of the message that the user sent
+	std::string raw_args; // Concatenate of the argvs after COMMAND argv [excluded]
 };
 
 class router
