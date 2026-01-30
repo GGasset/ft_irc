@@ -9,9 +9,9 @@
 #define send_return(msg) {send_back(msg); return;}
 
 #define register() {send_back("001 Welcome to the Internet Relay Network " + sender.get_nick() + "!" + sender.getUsername() + "@" + sender.getHostname()); \
-					send_back("002 Your host is " + server.get_prefix() + ", running version 4.2"); \
+					send_back("002 Your host is " + server.get_prefix() + ", running version 42"); \
 					send_back("003 This server was created today, I bet ;)"); \
-					send_back("004 " + server.get_prefix() + " 4.2 TODO(usermodes) TODO(channelmodes)"); \
+					send_back("004 " + server.get_prefix() + " 42 TODO(usermodes) TODO(channelmodes)"); \
 					sender.register_user();}
 
 #define suppr() args.prefix = args.prefix; (User)sender; (std::vector<User>)server.getUsers();
@@ -96,6 +96,11 @@ void QUIT_fn(command_args args, Server& server, User& sender)
 	server.disconnect_user(server.get_user_index_by_id(sender.get_id()));
 	suppr()
 }
+
+void KICK_fn(command_args args, Server& server, User& sender) {suppr()};
+void INVITE_fn(command_args args, Server& server, User& sender) {suppr()};
+void TOPIC_fn(command_args args, Server& server, User& sender) {suppr()};
+void MODE_fn(command_args args, Server& server, User& sender) {suppr()};
 
 void HELP_fn(command_args args, Server& server, User& sender)
 {

@@ -33,7 +33,7 @@ router::router()
 	command_string[QUIT] = "QUIT";
 	fun[QUIT] = QUIT_fn;
 
-	/*command_string[KICK] = "KICK";
+	command_string[KICK] = "KICK";
 	fun[KICK] = KICK_fn;
 
 	command_string[INVITE] = "INVITE";
@@ -43,7 +43,7 @@ router::router()
 	fun[TOPIC] = TOPIC_fn;
 
 	command_string[MODE] = "MODE";
-	fun[MODE] = MODE_fn;*/
+	fun[MODE] = MODE_fn;
 
 	command_string[HELP] = "HELP";
 	fun[HELP] = HELP_fn;
@@ -92,7 +92,7 @@ void router::operator()(std::string message, Server& server, User &sender)
 
 	if (func_i == (size_t)-1 || !fun[func_i])
 	{
-		//server.add_msg("Invalid command!", sender);
+		server.add_msg("NOTICE " + sender.get_nick() + " 127 command not found.", sender);
 		return;
 	}
 	if (!sender.passwd_match_pop(0) && func_i != PASS && func_i != QUIT && func_i != HELP && func_i != PONG)
