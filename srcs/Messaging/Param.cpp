@@ -217,7 +217,7 @@ void	ModeParam::validateParam()
 		modeArg = tokens[i].str;
 }
 
-WhoisParam::WhoisParam(msgTokens tokens): Param(WHOIS, tokens) {}
+// WhoisParam::WhoisParam(msgTokens tokens): Param(WHOIS, tokens) {}
 
 // void	WhoisParam::validateParam()
 // {
