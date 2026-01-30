@@ -22,7 +22,7 @@ int main(int argc, char **argv)
 		{std::cerr << "Invalid PORT paramter, only digits expected >:(" << std::endl; return 0;}
 	int port = std::atoi(argv[1]);
 
-	bool pass_is_alnum = !argv[2][0];
+	bool pass_is_alnum = argv[2][0];
 	for (size_t i = 0; argv[2][i]; i++) pass_is_alnum = pass_is_alnum && std::isalnum(argv[2][i]);
 	if (!pass_is_alnum)
 		{std::cerr << "Invalid PASSW paramter, only alpha numeric digits expected >:(" << std::endl; return 0;}

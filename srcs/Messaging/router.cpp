@@ -108,8 +108,9 @@ void router::operator()(std::string message, Server& server, User &sender)
 		return;
 	}
 
-	std::vector<std::string> raw_argv = split(message, ' ');
-	for (size_t i = 1; i < raw_argv.size(); i++) args.raw_args += sanitize(raw_argv[i]);
+	for (size_t i = 1; i < argv.size(); i++) args.raw_args += " " + sanitize(argv[i]);
+
+	if (!args.raw_args.empty()) args.raw_args.erase(args.raw_args.begin());
 
 	args.argv = argv;
 
