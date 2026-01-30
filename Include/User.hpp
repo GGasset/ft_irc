@@ -1,6 +1,9 @@
-#pragma once
+
+#ifndef USER_HPP
+#define USER_HPP
 
 #include <cstddef>
+#include "aio.h"
 #include <string>
 #include <vector>
 #include <iostream>
@@ -11,20 +14,18 @@ class User
 {
 private:
 	// id set to -1 means user not registered
-	ssize_t id = -1;
-	bool is_channel_operator = false;
-	bool registered = false;
-	bool passwd_match = false;
-	std::string nick = "";
+	ssize_t id;
+	bool is_channel_operator;
+	bool registered;
+	bool passwd_match;
+	std::string nick;
 	std::string realname;
 	std::string username;
-	std::string hostname = ""; //This came from getnameinfo or is the ip from the client; used by broadcastin commmands like in NICK, RPL_WELCOME, etc.
+	std::string hostname; //This came from getnameinfo or is the ip from the client; used by broadcastin commmands like in NICK, RPL_WELCOME, etc.
 	std::vector<size_t> joined_channels_ids;
 
 	// current state of the received msg, may not be complete
-	// Is not saved to disk
 	std::string current_message;
-	std::string passw;
 
 public:
 	User();
@@ -40,8 +41,9 @@ public:
 	void	setNick(std::string nick);
 	void	set_username(std::string username);
 	void	set_realname(std::string realname);
+	void	set_hostname(std::string hostname);
 	bool	passwd_match_pop(bool cond);
-	
+
 	// Called when this user sends a message
 	// This function is part of the socket function collection
 	std::vector<std::string> msg_sent(std::string data);
@@ -51,3 +53,5 @@ public:
 	void		register_user();
 	bool		are_names_registered();
 };
+
+#endif

@@ -1,12 +1,14 @@
-// #include "Server.hpp"
-#include "fnHandlers.hpp"
-#include "ParserMessage.hpp"
+#include "Server.hpp"
+#include "router.hpp"
+
+//#include "fnHandlers.hpp"
+//#include "ParserMessage.hpp"
 
 /* Comandito para compilar.*/
 //c++ -g main.cpp Message.cpp ParserMessage.cpp Param.cpp MessageOut.cpp fnHandlers.cpp Server_Mock.cpp  ../Authentication/User.cpp  Channels/Channel.cpp -I../Authentication/ -IChannels/
 
 /* ---------- 2. LEXING + PARSING ----------- */
-bool prepare_message(const std::string &packet, Server &server, MessageIn &in, size_t sender_id) {
+/*bool prepare_message(const std::string &packet, Server &server, MessageIn &in, size_t sender_id) {
     msgTokens tokens;
     ParseStatus status = VALID_MSG;
 
@@ -15,10 +17,10 @@ bool prepare_message(const std::string &packet, Server &server, MessageIn &in, s
         return (false);
 
     in = parseMessage(tokens, status);
-    
+
     if (status != VALID_MSG)
     return false;
-    
+
     in.sender_id = sender_id;
     Param *params = ParamsFactory(in.getCommand(), tokens);
     if (params != NULL)
@@ -30,7 +32,7 @@ bool prepare_message(const std::string &packet, Server &server, MessageIn &in, s
             MessageOut *ret =
             NumericReplyFactory::create_and_target(e.getErrCode(), server, params,
             std::vector<size_t>{in.sender_id}, 'u');
-            
+
             ret->deliver();
             return false;
         }
@@ -40,8 +42,8 @@ bool prepare_message(const std::string &packet, Server &server, MessageIn &in, s
 }
 
 #include <unistd.h>
-/* ---------- 3. HANDLE MESSAGE ----------- */
-void handle_message(MessageIn &in, Server &server, const std::string &packet) {
+*//* ---------- 3. HANDLE MESSAGE ----------- */
+/*void handle_message(MessageIn &in, Server &server, const std::string &packet) {
     if (in.getCommand() == COMMAND0)
         return ;
     std::cout << "Raton de rata" << std::endl;
@@ -55,4 +57,9 @@ void Server::route_message(std::string msg, User &sender, size_t user_index) {
 
 	if (prepare_message(msg, *this, in, user_index))
 	    handle_message(in, *this, msg);
+}*/
+
+void Server::route_message(std::string msg, User &sender, size_t user_index) {
+	user_index = 0;
+	router()(msg, *this, sender);
 }

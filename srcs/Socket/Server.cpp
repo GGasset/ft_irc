@@ -1,5 +1,6 @@
 #include "Server.hpp"
 #include <cassert>
+#include <sys/types.h>
 #include <unistd.h>
 
 void Server::stop()
@@ -7,7 +8,7 @@ void Server::stop()
 	stop_server = true;
 }
 
-Server::Server()
+Server::Server(std::string passw)
 {
 	send_pings_actively = true;
 	stop_server = false;
@@ -15,6 +16,8 @@ Server::Server()
 	epollfd = -1;
 	max_client_id = 0;
 	max_channel_id = 0;
+	this->passw = passw;
+	replace_LF_to_CRLF = false;
 }
 
 Server::~Server()
@@ -71,6 +74,9 @@ void Server::add_msg(std::string msg, User &receiver)
 
 	if (user_index == -1) {std::cerr << "user not found" << std::endl; return;};
 
+	if (*(msg.end() - 1) != '\r' || *msg.end() != '\n') msg += "\r\n";
+
+	//std::cout << "Added mesage " << msg << " to " << receiver.get_nick() << std::endl;
 	messages[user_index].push(msg);
 }
 
@@ -78,23 +84,24 @@ void Server::set_pong_time(size_t user_id)
 {
 	ssize_t index = get_user_index_by_id(user_id);
 	if (index == -1) return;
-	last_pong_time[index] = time(NULL);
+	if (last_ping_time > last_pong_time[index])
+		last_pong_time[index] = time(NULL);
 }
 
 ssize_t Server::get_user_index_by_id(size_t id)
 {
 	for (size_t i = 0; i < clients.size(); i++)
-		if (clients[i].get_id() == id)
+		if (clients[i].get_id() == (ssize_t)id)
 			return i;
 	return -1;
 }
 
-User &Server::get_user_by_nick(std::string nick)
+User *Server::get_user_by_nick(std::string nick)
 {
 	for (size_t i = 0; i < clients.size(); i++)
 		if (clients[i].get_id() != -1 && clients[i].get_nick() == nick)
-			return clients[i];
-	return (clients[0]);
+			return &clients[i];
+	return (0);
 }
 
 User &Server::get_user_by_id(size_t id)
@@ -115,7 +122,7 @@ Channel &Server::get_by_channel_id(size_t id) {
 
 ssize_t Server::get_user_index_by_fd(int fd)
 {
-	for (ssize_t i = 0; i < client_fds.size(); i++)
+	for (size_t i = 0; i < client_fds.size(); i++)
 	{
 		int iter_fd = client_fds[i];
 		if (iter_fd == fd) return i;
@@ -126,7 +133,7 @@ ssize_t Server::get_user_index_by_fd(int fd)
 User *Server::get_user_by_fd(int fd)
 {
 	ssize_t user_index = get_user_index_by_fd(fd);
-	if (user_index) return 0;
+	if (user_index == -1) return 0;
 	return &clients[user_index];
 }
 
@@ -160,6 +167,11 @@ size_t	Server::n_users() {
 	return clients.size();
 }
 
+std::string	Server::get_server_password()
+{
+	return passw;
+}
+
 void	Server::addUser(User u) {
 	clients.push_back(u);
 	client_fds.push_back(-1);
@@ -180,4 +192,9 @@ std::vector<std::string> Server::get_nick_history() {
 
 std::vector<User>	&Server::getUsers(void) {
 	return (clients);
+}
+
+std::string Server::get_prefix()
+{
+	return ":Makako_el_Retorno_de_la_Arepa@localhost";
 }

@@ -17,7 +17,8 @@ public:
 
     /* WELCOME */
     static RplWelcome        *makeRplWelcome(Server &serv, UserParam* p) { return new RplWelcome(serv, p); }
-    static RplYourHost       *makeRplYourHost(Server &serv, UserParam* p) { return new RplYourHost(serv, p); }
+    static RplYourHost
+    *makeRplYourHost(Server &serv, UserParam* p) { return new RplYourHost(serv, p); }
     static RplCreated        *makeRplCreated(Server &serv, UserParam* p) { return new RplCreated(serv, p); }
 
     /* NICK */
@@ -85,7 +86,7 @@ public:
 
 class ForwardedCommandFactory {
 	Server	&server;
-	
+
 	public:
 	ForwardedCommandFactory(Server &server): server(server) {}
 	static ForwardedCommand	*makeNickForward(Server &serv, NickParam *param) {return new NickForwardedCommand(serv, param);}
