@@ -84,7 +84,8 @@ void Server::set_pong_time(size_t user_id)
 {
 	ssize_t index = get_user_index_by_id(user_id);
 	if (index == -1) return;
-	last_pong_time[index] = time(NULL);
+	if (last_ping_time > last_pong_time[index])
+		last_pong_time[index] = time(NULL);
 }
 
 ssize_t Server::get_user_index_by_id(size_t id)
