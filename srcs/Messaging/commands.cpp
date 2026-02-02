@@ -74,7 +74,77 @@ void USER_fn(command_args args, Server& server, User& sender)
 
 
 void JOIN_fn(command_args args, Server& server, User& sender) { suppr() };
-void PRIVMSG_fn(command_args args, Server& server, User& sender) { suppr() };
+
+// bool is_nick(Server &serv, std::string dest) {
+	
+// }
+
+void PRIVMSG_fn(command_args args, Server& server, User& sender) {
+	// 411, 412, 401,
+	// Cuando no se especifica un usuario/canal 411
+	// Cuando no se especifica un mensaje 412
+	// 		Esto incluye meter ":" y despues no meter nada.
+	// Cuando no existe el canal, entonces me sacas 401:
+	// Cuando tratas de escribir a un canal que no eres miembro 404:
+	//		Dejas hablar en el canal solo a miembros, y si no está dentro devuelves 404 igualmente como “cannot send to channel” 
+	//		(aunque no estés implementando +n, 
+	//		lo estás usando como “no puedes enviar porque no estás en el canal”)
+
+	// 407 para error de envio de demasiados usuarios. En la practica me la suda.
+
+
+	// Si el tamaño de argv es dos, se comprueba si el segundo argumento es un nick.
+	// Si lo es, devuelves error 412. Si no lo es, 411.
+
+	// Si el tamaño es tres entonces compruebas si está separado por comas. Si lo está.
+	// Le haces un split. Y compruebas por cada uno si existe. Si alguno no existe le mandas
+	// Un 401, y envias el resto a su destinatario. Si la lista es demasiado larga, 407
+
+	// Finalmente compruebas si estas dentro del canal. Si no estas, 404.
+	// Si no ocurre ninguna de las anteriores --> mandas el mensaje normal
+	// 		Si empieza por #canal, broadcast, si es usuario, add_msg.
+
+	// Para ver si el nick existe --> get_user_by_nick
+	// Para ver si el canal existe --> 
+	
+	std::string recipients;
+	int type_of_recipient = 0; // 0 para nicks, 1, para canales.
+
+	if (args.argv.size() <= 1)
+		send_return("411 :No recipient given (PRIVMSG)")
+	
+	recipients = args.argv[2];
+	std::vector<std::string> recip_list;
+	std::string::size_type start = 0;
+	std::string::size_type pos = recipients.find(',');
+	bool is_nick = server.get_user_by_nick(recipients);
+	bool is_channel = server.get_by_channel_name(recipients).get_name() == recipients;
+
+	if (args.argv.size() == 2) {
+		if (is_nick || is_channel)
+			send_return("411 :No recipients given (PRIVMSG)")
+		else
+			send_return("412 :No text to send");
+	}
+
+    while (true) {
+		
+        pos = recipients.find(',', start);
+        if (pos == std::string::npos) {
+			recip_list.push_back(recipients.substr(start));
+            break;
+		}
+		recip_list.push_back(recipients.substr(start, pos - start));
+        start = pos + 1; // saltar el delimitador
+    }
+
+	// if (recip_list)
+
+	for (size_t i = 0; i < recip_list.size(); i++) {
+
+	}
+}
+
 void PING_fn(command_args args, Server& server, User& sender)
 {
 	if (!sender.is_registered()) return;
