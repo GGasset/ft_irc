@@ -80,19 +80,6 @@ void JOIN_fn(command_args args, Server& server, User& sender) { suppr() };
 // }
 
 void PRIVMSG_fn(command_args args, Server& server, User& sender) {
-	// 411, 412, 401,
-	// Cuando no se especifica un usuario/canal 411
-	// Cuando no se especifica un mensaje 412
-	// 		Esto incluye meter ":" y despues no meter nada.
-	// Cuando no existe el canal, entonces me sacas 401:
-	// Cuando tratas de escribir a un canal que no eres miembro 404:
-	//		Dejas hablar en el canal solo a miembros, y si no está dentro devuelves 404 igualmente como “cannot send to channel” 
-	//		(aunque no estés implementando +n, 
-	//		lo estás usando como “no puedes enviar porque no estás en el canal”)
-
-	// 407 para error de envio de demasiados usuarios. En la practica me la suda.
-
-
 	// Si el tamaño de argv es dos, se comprueba si el segundo argumento es un nick.
 	// Si lo es, devuelves error 412. Si no lo es, 411.
 
@@ -146,8 +133,14 @@ void PRIVMSG_fn(command_args args, Server& server, User& sender) {
 		if (is_nick(recip_list[i]))
 			server.add_msg(":" + args.prefix + " PRIVMSG " + args.argv[3], sender);
 		else if (is_channel(recip_list[i])) {
-			c = server.get_by_channel_name(recip_list[i])
-			c.broadcast(serv, ":" + args.prefix + " PRIVMSG " + args.argv[3], sender);
+			Channel &c = server.get_by_channel_name(recip_list[i])
+			sender_chans = sender.get_joined_channels();
+			for (size_t i = 0; i < sender_chans.size(); i++) {
+				if (sender_chans[i].get_name() == c.get_name())
+					c.broadcast(serv, ":" + args.prefix + " PRIVMSG " + args.argv[3], sender);
+				else
+					send_back("404 " c.get_name() + ":Cannot send to channel")
+			}
 		}
 	}
 }
