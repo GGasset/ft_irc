@@ -134,6 +134,8 @@ void PRIVMSG_fn(command_args args, Server& server, User& sender) {
 					send_back("404 #" + c.get_name() + ":Cannot send to channel");
 			}
 		}
+		else
+			send_back("401 " + recip_list[i] + ":No such nick/channel");
 	}
 }
 
