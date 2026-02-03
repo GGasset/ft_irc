@@ -72,12 +72,7 @@ void USER_fn(command_args args, Server& server, User& sender)
 	if (!sender.get_nick().empty()) register();
 }
 
-
 void JOIN_fn(command_args args, Server& server, User& sender) { suppr() };
-
-// bool is_nick(Server &serv, std::string dest) {
-	
-// }
 
 void PRIVMSG_fn(command_args args, Server& server, User& sender) {
 	// Si el tamaño de argv es dos, se comprueba si el segundo argumento es un nick.
@@ -103,7 +98,7 @@ void PRIVMSG_fn(command_args args, Server& server, User& sender) {
 	std::string::size_type pos = recipients.find(',');
 
 	#define is_nick(recipients) server.get_user_by_nick(recipients) 
-	#define is_channel(recipients) server.get_by_channel_name(recipients).get_name() == recipients
+	#define is_channel(recipients) server.get_by_channel_name(recipients).get_name() == recipients.erase(0, 1)
 
 	if (args.argv.size() == 2) {
 		if (is_nick(recipients) || is_channel(recipients))
@@ -130,7 +125,7 @@ void PRIVMSG_fn(command_args args, Server& server, User& sender) {
 		if (is_nick(recip_list[i]))
 			server.add_msg(":" + args.prefix + " PRIVMSG " + args.argv[3], sender);
 		else if (is_channel(recip_list[i])) {
-			Channel &c = server.get_by_channel_name(recip_list[i]);
+			Channel &c = server.get_by_channel_name(recip_list[i]); //Tener en cuenta lo de #
 			std::vector<size_t> sender_chans = sender.get_joined_channels();
 			for (size_t i = 0; i < sender_chans.size(); i++) {
 				if (server.get_by_channel_id(sender_chans[i]).get_name() == c.get_name())
