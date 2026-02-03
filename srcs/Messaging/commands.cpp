@@ -117,11 +117,12 @@ void PRIVMSG_fn(command_args args, Server& server, User& sender) {
 	std::vector<std::string> recip_list;
 	std::string::size_type start = 0;
 	std::string::size_type pos = recipients.find(',');
-	bool is_nick = server.get_user_by_nick(recipients);
-	bool is_channel = server.get_by_channel_name(recipients).get_name() == recipients;
+
+	#define is_nick(recipients) server.get_user_by_nick(recipients) 
+	#define is_channel(recipients) server.get_by_channel_name(recipients).get_name() == recipients
 
 	if (args.argv.size() == 2) {
-		if (is_nick || is_channel)
+		if (is_nick(recipients) || is_channel(recipients))
 			send_return("411 :No recipients given (PRIVMSG)")
 		else
 			send_return("412 :No text to send");
@@ -138,10 +139,16 @@ void PRIVMSG_fn(command_args args, Server& server, User& sender) {
         start = pos + 1; // saltar el delimitador
     }
 
-	// if (recip_list)
+	// if (recip_list.size() > x)
+	// 	send_return("407 " + recip_list[x] + " Too many recipients. No message delivered.");
 
 	for (size_t i = 0; i < recip_list.size(); i++) {
-
+		if (is_nick(recip_list[i]))
+			server.add_msg(":" + args.prefix + " PRIVMSG " + args.argv[3], sender);
+		else if (is_channel(recip_list[i])) {
+			c = server.get_by_channel_name(recip_list[i])
+			c.broadcast(serv, ":" + args.prefix + " PRIVMSG " + args.argv[3], sender);
+		}
 	}
 }
 
