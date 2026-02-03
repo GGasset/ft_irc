@@ -16,6 +16,7 @@ int signal_server_stop;
 void handle_signals(int signal)
 {
 	signal = 0;
+	(void) signal;
 	signal_server_stop = true;
 }
 

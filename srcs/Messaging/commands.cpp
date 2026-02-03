@@ -94,13 +94,10 @@ void PRIVMSG_fn(command_args args, Server& server, User& sender) {
 	// Para ver si el nick existe --> get_user_by_nick
 	// Para ver si el canal existe --> 
 	
-	std::string recipients;
-	int type_of_recipient = 0; // 0 para nicks, 1, para canales.
-
 	if (args.argv.size() <= 1)
 		send_return("411 :No recipient given (PRIVMSG)")
-	
-	recipients = args.argv[2];
+
+	std::string recipients = args.argv[2];
 	std::vector<std::string> recip_list;
 	std::string::size_type start = 0;
 	std::string::size_type pos = recipients.find(',');
@@ -133,13 +130,13 @@ void PRIVMSG_fn(command_args args, Server& server, User& sender) {
 		if (is_nick(recip_list[i]))
 			server.add_msg(":" + args.prefix + " PRIVMSG " + args.argv[3], sender);
 		else if (is_channel(recip_list[i])) {
-			Channel &c = server.get_by_channel_name(recip_list[i])
-			sender_chans = sender.get_joined_channels();
+			Channel &c = server.get_by_channel_name(recip_list[i]);
+			std::vector<size_t> sender_chans = sender.get_joined_channels();
 			for (size_t i = 0; i < sender_chans.size(); i++) {
-				if (sender_chans[i].get_name() == c.get_name())
-					c.broadcast(serv, ":" + args.prefix + " PRIVMSG " + args.argv[3], sender);
+				if (server.get_by_channel_id(sender_chans[i]).get_name() == c.get_name())
+					c.broadcast(server, ":" + args.prefix + " PRIVMSG " + args.argv[3]);
 				else
-					send_back("404 " c.get_name() + ":Cannot send to channel")
+					send_back("404 #" + c.get_name() + ":Cannot send to channel");
 			}
 		}
 	}
