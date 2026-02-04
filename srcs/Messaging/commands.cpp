@@ -24,6 +24,8 @@ void PASS_fn(command_args args,  Server& server, User& sender)
 
 	sender.passwd_match_pop(true);
 	notice_back("Correct password, lets keep it a secret! Now send the combination of NICK and USER commands");
+	notice_back("\t NICK [nick]");
+	notice_back("\t USER [username] [hostname] [servername] :[realname ...]");
 }
 
 void NICK_fn(command_args args, Server& server, User& sender)
@@ -87,8 +89,8 @@ void PRIVMSG_fn(command_args args, Server& server, User& sender) {
 	// 		Si empieza por #canal, broadcast, si es usuario, add_msg.
 
 	// Para ver si el nick existe --> get_user_by_nick
-	// Para ver si el canal existe --> 
-	
+	// Para ver si el canal existe -->
+
 	if (args.argv.size() <= 1)
 		send_return("411 :No recipient given (PRIVMSG)")
 
@@ -97,7 +99,7 @@ void PRIVMSG_fn(command_args args, Server& server, User& sender) {
 	std::string::size_type start = 0;
 	std::string::size_type pos = recipients.find(',');
 
-	#define is_nick(recipients) server.get_user_by_nick(recipients) 
+	#define is_nick(recipients) server.get_user_by_nick(recipients)
 	#define is_channel(recipients) server.get_by_channel_name(recipients).get_name() == recipients.erase(0, 1)
 
 	if (args.argv.size() == 2) {
@@ -108,7 +110,7 @@ void PRIVMSG_fn(command_args args, Server& server, User& sender) {
 	}
 
     while (true) {
-		
+
         pos = recipients.find(',', start);
         if (pos == std::string::npos) {
 			recip_list.push_back(recipients.substr(start));
@@ -171,7 +173,7 @@ void HELP_fn(command_args args, Server& server, User& sender)
 	notice_back("Commands:");
 	notice_back("\t PASS [passw]");
 	notice_back("\t NICK [nick]");
-	notice_back("\t USER [username] [hostname] [servername] :[realname]");
+	notice_back("\t USER [username] [hostname] [servername] :[realname ...]");
 	notice_back("\t JOIN TODO");
 	notice_back("\t PRIVMSG TODO");
 	notice_back("\t PING <sender>");
