@@ -24,6 +24,8 @@ void PASS_fn(command_args args,  Server& server, User& sender)
 
 	sender.passwd_match_pop(true);
 	notice_back("Correct password, lets keep it a secret! Now send the combination of NICK and USER commands");
+	notice_back("\t NICK [nick]");
+	notice_back("\t USER [username] [hostname] [servername] :[realname ...]");
 }
 
 void NICK_fn(command_args args, Server& server, User& sender)
@@ -72,7 +74,6 @@ void USER_fn(command_args args, Server& server, User& sender)
 	if (!sender.get_nick().empty()) register();
 }
 
-
 void JOIN_fn(command_args args, Server& server, User& sender)
 {
 	int	i;
@@ -90,6 +91,7 @@ void JOIN_fn(command_args args, Server& server, User& sender)
 	// // 	send_return("403 :Invalid channel format: JOIN #channel")
 	// suppr();
 };
+
 void PRIVMSG_fn(command_args args, Server& server, User& sender) { suppr() };
 void PING_fn(command_args args, Server& server, User& sender)
 {
@@ -123,7 +125,7 @@ void HELP_fn(command_args args, Server& server, User& sender)
 	notice_back("Commands:");
 	notice_back("\t PASS [passw]");
 	notice_back("\t NICK [nick]");
-	notice_back("\t USER [username] [hostname] [servername] :[realname]");
+	notice_back("\t USER [username] [hostname] [servername] :[realname ...]");
 	notice_back("\t JOIN TODO");
 	notice_back("\t PRIVMSG TODO");
 	notice_back("\t PING <sender>");

@@ -61,5 +61,6 @@ void Server::route_message(std::string msg, User &sender, size_t user_index) {
 
 void Server::route_message(std::string msg, User &sender, size_t user_index) {
 	user_index = 0;
+    (void) user_index;
 	router()(msg, *this, sender);
 }
