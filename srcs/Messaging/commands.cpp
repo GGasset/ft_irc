@@ -24,6 +24,8 @@ void PASS_fn(command_args args,  Server& server, User& sender)
 
 	sender.passwd_match_pop(true);
 	notice_back("Correct password, lets keep it a secret! Now send the combination of NICK and USER commands");
+	notice_back("\t NICK [nick]");
+	notice_back("\t USER [username] [hostname] [servername] :[realname ...]");
 }
 
 void NICK_fn(command_args args, Server& server, User& sender)
@@ -72,9 +74,73 @@ void USER_fn(command_args args, Server& server, User& sender)
 	if (!sender.get_nick().empty()) register();
 }
 
-
 void JOIN_fn(command_args args, Server& server, User& sender) { suppr() };
-void PRIVMSG_fn(command_args args, Server& server, User& sender) { suppr() };
+
+void PRIVMSG_fn(command_args args, Server& server, User& sender) {
+	// Si el tamaño de argv es dos, se comprueba si el segundo argumento es un nick.
+	// Si lo es, devuelves error 412. Si no lo es, 411.
+
+	// Si el tamaño es tres entonces compruebas si está separado por comas. Si lo está.
+	// Le haces un split. Y compruebas por cada uno si existe. Si alguno no existe le mandas
+	// Un 401, y envias el resto a su destinatario. Si la lista es demasiado larga, 407
+
+	// Finalmente compruebas si estas dentro del canal. Si no estas, 404.
+	// Si no ocurre ninguna de las anteriores --> mandas el mensaje normal
+	// 		Si empieza por #canal, broadcast, si es usuario, add_msg.
+
+	// Para ver si el nick existe --> get_user_by_nick
+	// Para ver si el canal existe -->
+
+	if (args.argv.size() <= 1)
+		send_return("411 :No recipient given (PRIVMSG)")
+
+	std::string recipients = args.argv[2];
+	std::vector<std::string> recip_list;
+	std::string::size_type start = 0;
+	std::string::size_type pos = recipients.find(',');
+
+	#define is_nick(recipients) server.get_user_by_nick(recipients)
+	#define is_channel(recipients) server.get_by_channel_name(recipients).get_name() == recipients.erase(0, 1)
+
+	if (args.argv.size() == 2) {
+		if (is_nick(recipients) || is_channel(recipients))
+			send_return("411 :No recipients given (PRIVMSG)")
+		else
+			send_return("412 :No text to send");
+	}
+
+    while (true) {
+
+        pos = recipients.find(',', start);
+        if (pos == std::string::npos) {
+			recip_list.push_back(recipients.substr(start));
+            break;
+		}
+		recip_list.push_back(recipients.substr(start, pos - start));
+        start = pos + 1; // saltar el delimitador
+    }
+
+	// if (recip_list.size() > x)
+	// 	send_return("407 " + recip_list[x] + " Too many recipients. No message delivered.");
+
+	for (size_t i = 0; i < recip_list.size(); i++) {
+		if (is_nick(recip_list[i]))
+			server.add_msg(":" + args.prefix + " PRIVMSG " + args.argv[3], sender);
+		else if (is_channel(recip_list[i])) {
+			Channel &c = server.get_by_channel_name(recip_list[i]); //Tener en cuenta lo de #
+			std::vector<size_t> sender_chans = sender.get_joined_channels();
+			for (size_t i = 0; i < sender_chans.size(); i++) {
+				if (server.get_by_channel_id(sender_chans[i]).get_name() == c.get_name())
+					c.broadcast(server, ":" + args.prefix + " PRIVMSG " + args.argv[3]);
+				else
+					send_back("404 #" + c.get_name() + ":Cannot send to channel");
+			}
+		}
+		else
+			send_back("401 " + recip_list[i] + ":No such nick/channel");
+	}
+}
+
 void PING_fn(command_args args, Server& server, User& sender)
 {
 	if (!sender.is_registered()) return;
@@ -107,7 +173,7 @@ void HELP_fn(command_args args, Server& server, User& sender)
 	notice_back("Commands:");
 	notice_back("\t PASS [passw]");
 	notice_back("\t NICK [nick]");
-	notice_back("\t USER [username] [hostname] [servername] :[realname]");
+	notice_back("\t USER [username] [hostname] [servername] :[realname ...]");
 	notice_back("\t JOIN TODO");
 	notice_back("\t PRIVMSG TODO");
 	notice_back("\t PING <sender>");
