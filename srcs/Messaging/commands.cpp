@@ -42,7 +42,7 @@ void NICK_fn(command_args args, Server& server, User& sender)
 		std::vector<size_t> channels = sender.get_joined_channels();
 		for (size_t i = 0; i < channels.size(); i++)
 		{
-			Channel &c = server.get_by_channel_id(channels[i]);
+			Channel &c = *server.get_by_channel_id(channels[i]);
 			c.broadcast(server, "NOTICE #" + c.get_name() + " " + prev_nick + " changed his nick to: " + sender.get_nick());
 		}
 	}
@@ -71,7 +71,20 @@ void USER_fn(command_args args, Server& server, User& sender)
 	sender.set_realname(realname);
 
 	notice_back("Username set to: " + sender.getUsername() + ". Hostname set to: " + sender.getHostname() + ". Realname set to: " + sender.getRealname());
+	std::cout << "USER::" << sender.get_id() << std::endl;
 	if (!sender.get_nick().empty()) register();
+}
+
+int Server::check_channels(Channel &c, User &sender)
+{
+    Channel *existing = get_by_channel_name(c.get_name());
+    if (existing)
+    {
+        existing->add_member(&sender);
+        return 1;
+    }
+    addChannel(c);
+	return 0;
 }
 
 void JOIN_fn(command_args args, Server& server, User& sender)
@@ -81,15 +94,14 @@ void JOIN_fn(command_args args, Server& server, User& sender)
 	i = 0;
 	while (args.argv[1][i])
 	{
-		if ((args.argv[1][i] == 44 || args.argv[1][i] == 92) || \
-												(args.argv[1][0] != '#'))
+		if ((args.argv[1][0] != '#'))
 			send_return("403 :Invalid channel format: JOIN #channel");
 		i++;
 	}
-	// std::cout << args.argv[1][0] << std::endl;
-	// // if (args.argv[1][0] != '#' && args.argv[1][0] != '&')
-	// // 	send_return("403 :Invalid channel format: JOIN #channel")
-	// suppr();
+	Channel c = Channel(args.argv[1], &sender);
+	if (server.check_channels(c, sender))
+		send_return("443 :Already on channel");
+	server.addChannel(c);
 };
 
 void PRIVMSG_fn(command_args args, Server& server, User& sender) { suppr() };

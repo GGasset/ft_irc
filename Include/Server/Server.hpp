@@ -77,17 +77,19 @@ public:
 
 	void set_pong_time(size_t user_id);
 
-	ssize_t get_user_index_by_id(size_t id);
+	ssize_t get_user_index_by_id(ssize_t id);
 	User *get_user_by_nick(std::string nick);
-	User &get_user_by_id(size_t id);
+	User *get_user_by_id(ssize_t id);
+	int	check_channels(Channel &c, User &sender);
 	std::vector<User&> get_channel_users(const Channel channel);
-	Channel &get_by_channel_name(std::string name);
-	Channel &get_by_channel_id(size_t id);
+	Channel *get_by_channel_name(std::string name);
+	Channel *get_by_channel_id(ssize_t id);
+
 
 	std::string	get_server_password();
 
 	void	addUser(User u);
-	void	addChannel(Channel ch);
+	void	addChannel(Channel &ch);
 	void	addNickHistory(std::string nick);
 	std::vector<std::string> get_nick_history();
 
