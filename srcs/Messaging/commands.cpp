@@ -11,7 +11,7 @@
 #define register() {send_back("001 Welcome to the Internet Relay Network " + sender.get_nick() + "!" + sender.getUsername() + "@" + sender.getHostname()); \
 					send_back("002 Your host is " + server.get_prefix() + ", running version 42"); \
 					send_back("003 This server was created today, I bet ;)"); \
-					send_back("004 " + server.get_prefix() + " 42 TODO(usermodes) TODO(channelmodes)"); \
+					send_back("004 " + server.get_prefix() + " 42 TODO(usermodes) TODO(channelmodes)" RESET); \
 					sender.register_user();}
 
 #define suppr() args.prefix = args.prefix; (User)sender; (std::vector<User>)server.getUsers();
@@ -74,12 +74,12 @@ void USER_fn(command_args args, Server& server, User& sender)
 	if (!sender.get_nick().empty()) register();
 }
 
-int Server::check_channels(Channel &c, User &sender, Server &s)
+int Server::check_channels(Channel &c, User &sender, Server &s, command_args args)
 {
     Channel *existing = get_by_channel_name(c.get_name());
     if (existing)
     {
-        existing->add_member(&sender, &s, RED"443 :Already on channel" RESET);
+        existing->add_member(&sender, &s, ":" + s.get_prefix() + RESET " " + args.prefix + " " + RED"443 :Already on channel" RESET);
         return 0;
     }
     addChannel(c);
@@ -91,16 +91,29 @@ void JOIN_fn(command_args args, Server& server, User& sender)
 	int	i;
 
 	i = 0;
+	if (args.argv.size() <= 1 || args.argv[1].empty())
+		send_return(RED"461 :Not enough parameters" RESET);
 	while (args.argv[1][i])
 	{
 		if ((args.argv[1][0] != '#'))
 			send_return(RED"403 :Invalid channel format: JOIN #channel" RESET);
 		i++;
 	}
+	if (args.argv.size() == 3)
+	{
+	    const std::string &mask = args.argv[2];
+
+	    if (mask[0] != '+' && mask[0] != '-')
+	        send_return(RED"403 :BAD MASK" RESET);
+	    const std::string allowed = "iktol";
+	    for (size_t j = 1; j < mask.size(); ++j)
+	    {
+	        if (allowed.find(mask[j]) == std::string::npos)
+	            send_return(RED"403 :BAD MASK" RESET);
+	    }
+	}
 	Channel c = Channel(args.argv[1], &sender);
-	// if (server.check_channels(c, sender))
-	// 	send_return(RED"443 :Already on channel" RESET);
-	server.check_channels(c, sender, server);
+	server.check_channels(c, sender, server, args);
 	// server.addChannel(c);
     // Channel *ch = server.get_by_channel_name(args.argv[1]);
     // if (ch)
@@ -156,7 +169,7 @@ void HELP_fn(command_args args, Server& server, User& sender)
 	notice_back(BLUE"\t PASS [passw]" RESET);
 	notice_back(BLUE"\t NICK [nick]" RESET);
 	notice_back(BLUE"\t USER [username] [hostname] [servername] :[realname ...]" RESET);
-	notice_back(BLUE"\t JOIN TODO" RESET);
+	notice_back(BLUE"\t JOIN [#channel] [key]" RESET);
 	notice_back(BLUE"\t PRIVMSG TODO" RESET);
 	notice_back(BLUE"\t PING <sender>" RESET);
 	notice_back(BLUE"\t PONG" RESET);

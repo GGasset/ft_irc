@@ -30,6 +30,7 @@
 
 extern int signal_server_stop;
 
+struct command_args;  
 std::string sanitize(std::string in);
 
 class Server
@@ -89,7 +90,7 @@ public:
 	ssize_t get_user_index_by_id(ssize_t id);
 	User *get_user_by_nick(std::string nick);
 	User *get_user_by_id(ssize_t id);
-	int	check_channels(Channel &c, User &sender, Server &s);
+	int	check_channels(Channel &c, User &sender, Server &s, command_args args);
 	std::vector<User&> get_channel_users(const Channel channel);
 	Channel *get_by_channel_name(std::string name);
 	Channel *get_by_channel_id(ssize_t id);
