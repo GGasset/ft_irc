@@ -24,19 +24,29 @@ std::string Channel::get_name() {return name;}
 std::string Channel::get_topic() {return topic;}
 void        Channel::set_topic(std::string topic) {this->topic = topic;}
 
-int Channel::add_member(User* user)
+int Channel::add_member(User* user, Server *s, std::string msg)
 {
     if (!user) return 1;
     ssize_t uid = user->get_id();
     for (size_t i = 0; i < member_user_ids.size(); ++i)
         if (member_user_ids[i] == (size_t)uid)
 		{
-			// send_back()
+			s->add_msg(msg, *user);
             return 1;
 		}
     member_user_ids.push_back(uid);
     users.push_back(user);
 	return 0;
+}
+
+bool Channel::is_operator(const User* user) const
+{
+	if (!user) return false;
+	size_t uid = static_cast<size_t>(const_cast<User*>(user)->get_id());
+	for (size_t i = 0; i < mode.operator_user_id.size(); ++i)
+		if (mode.operator_user_id[i] == uid)
+			return true;
+	return false;
 }
 
 /*

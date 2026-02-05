@@ -162,7 +162,7 @@ void Server::send_pings()
 		User u = clients[i];
 		std::string prefix = u.get_nick() + "!" + u.getUsername() + "@"; //+ u.getHostname;
 		//std::string ping_msg = prefix + " PING " + u.getHostname() + "\r\n"; //En principio al mandarse por el socket se envia \r\n, pero no estoy del todo seguro.
-		std::string ping_msg = prefix + " PING " + "localhost\r\n"; //En principio al mandarse por el socket se envia \r\n, pero no estoy del todo seguro.
+		std::string ping_msg = prefix + " PING " + "localhost\r\n" RESET; //En principio al mandarse por el socket se envia \r\n, pero no estoy del todo seguro.
 
 		add_msg(ping_msg, clients[i]);
 	}
@@ -203,5 +203,5 @@ std::vector<User>	&Server::getUsers(void) {
 
 std::string Server::get_prefix()
 {
-	return ":Makako_el_Retorno_de_la_Arepa@localhost";
+	return (CYAN":Makako_el_Retorno_de_la_Arepa@localhost");
 }

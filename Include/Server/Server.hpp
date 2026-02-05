@@ -19,6 +19,15 @@
 #define N_PINGS_UNTIL_TIMEOUT 5
 #define PING_SEPARATION_S USER_TIMEOUT_S / N_PINGS_UNTIL_TIMEOUT - 1
 
+#define BOLD "\033[1m"
+#define RESET "\033[0m"
+#define RED "\033[1;31m"
+#define GREEN "\033[1;32m"
+#define YELLOW "\033[1;33m"
+#define BLUE "\033[1;34m"
+#define MAGENTA "\033[1;35m"
+#define CYAN "\033[1;36m"
+
 extern int signal_server_stop;
 
 std::string sanitize(std::string in);
@@ -80,7 +89,7 @@ public:
 	ssize_t get_user_index_by_id(ssize_t id);
 	User *get_user_by_nick(std::string nick);
 	User *get_user_by_id(ssize_t id);
-	int	check_channels(Channel &c, User &sender);
+	int	check_channels(Channel &c, User &sender, Server &s);
 	std::vector<User&> get_channel_users(const Channel channel);
 	Channel *get_by_channel_name(std::string name);
 	Channel *get_by_channel_id(ssize_t id);

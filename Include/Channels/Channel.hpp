@@ -36,11 +36,12 @@ public:
 	Channel(std::string _name, User* _user);
 	~Channel(void);
 	ssize_t get_id(void);
+	bool	is_operator(const User* user) const;
 	void set_id(ssize_t id);
 	std::string get_topic(void);
 	void set_topic(std::string topic);
 	const std::vector<User *>	&get_members(void) const;
-	int	add_member(User* user);
+	int	add_member(User* user, Server *s, std::string msg);
 	std::string get_name(void);
 
 	void	broadcast(Server& serv, const std::string &mgs);
