@@ -21,6 +21,9 @@ router::router()
 	command_string[JOIN] = "JOIN";
 	fun[JOIN] = JOIN_fn;
 
+	// command_string[NAMES] = "NAMES";
+	// fun[NAMES] = NAMES_fn;
+
 	command_string[PRIVMSG] = "PRIVMSG";
 	fun[PRIVMSG] = PRIVMSG_fn;
 
