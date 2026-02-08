@@ -46,6 +46,7 @@ void NICK_fn(command_args args, Server& server, User& sender)
 			c.broadcast(server, YELLOW"NOTICE #" + c.get_name() + " " + prev_nick + " changed his nick to: " + sender.get_nick() + RESET);
 		}
 	}
+	std::cout << "AParece coo registrado sin haber escrito nada" << std::endl;
 	if (!sender.getUsername().empty() && !prev_nick.size()) register();
 }
 
@@ -71,6 +72,7 @@ void USER_fn(command_args args, Server& server, User& sender)
 	sender.set_realname(realname);
 
 	notice_back(BLUE"Username set to: " + sender.getUsername() + ". Hostname set to: " + sender.getHostname() + ". Realname set to: " + sender.getRealname() + RESET);
+	std::cout << "AParece coo registrado sin haber escrito nada" << std::endl;
 	if (!sender.get_nick().empty()) register();
 }
 
@@ -121,7 +123,42 @@ void JOIN_fn(command_args args, Server& server, User& sender)
     // }
 };
 
-void PRIVMSG_fn(command_args args, Server& server, User& sender) { suppr() };
+void PRIVMSG_fn(command_args args, Server& server, User& sender) {	
+	if (args.argv.size() <= 1)
+		send_return("411: No recipient given (PRIVMSG)")
+
+	std::string recipients = args.argv[1];
+	bool	is_nick = server.get_user_by_nick(recipients) != NULL;
+	bool	is_channel = server.get_by_channel_name(recipients) != NULL; // NO se si hay que tener en cuenta lo del asterisco
+	std::string priv_msg = "";
+	for (std::size_t i = 2; i < args.argv.size() - 2; ++i) priv_msg += args.argv[i];
+
+	if (args.argv.size() == 2) {
+		if (is_nick || is_channel)
+			send_return("412: No text to send")
+		else
+			send_return("411: No recipients given (PRIVMSG)")
+	}
+
+	if (is_nick)
+		server.add_msg(":" + args.prefix + " PRIVMSG " + priv_msg, sender);
+	else if (is_channel) {
+		Channel *c = server.get_by_channel_name(recipients);
+		std::vector<size_t> sender_chans = sender.get_joined_channels();
+		size_t i = 0;
+		for (; i < sender_chans.size(); i++) {
+			if (server.get_by_channel_id(sender_chans[i]) == c) {
+				c->broadcast(server, ":" + args.prefix + " PRIVMSG " + priv_msg);
+				break ;
+			}
+		}
+		if (i < sender_chans.size())
+			send_back("404 #" + c->get_name() + ": Cannot send to channel");
+	}
+	else
+		send_back("401 " + recipients + ": No such nick/channel");
+}
+
 void NAMES_fn(command_args args, Server& server, User& sender) { suppr() };
 void PING_fn(command_args args, Server& server, User& sender)
 {
