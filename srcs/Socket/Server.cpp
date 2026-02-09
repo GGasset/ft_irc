@@ -3,6 +3,7 @@
 #include <cassert>
 #include <sys/types.h>
 #include <unistd.h>
+#include <vector>
 
 void Server::stop()
 {
@@ -205,7 +206,7 @@ std::vector<User>	&Server::getUsers(void) {
 
 std::string Server::get_prefix()
 {
-	return (CYAN":Arepa_de_makako@localhost");
+	return (CYAN":Arepa_de_makako@localhost" RESET);
 }
 
 std::vector<std::string> split(std::string in, char splitter)

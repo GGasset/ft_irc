@@ -46,6 +46,11 @@ std::vector<size_t>	User::get_joined_channels(void) {
 	return (joined_channels_ids);
 }
 
+void User::add_to_channel(size_t id)
+{
+	joined_channels_ids.push_back(id);
+}
+
 ssize_t User::get_id() {
 	return (id);
 }

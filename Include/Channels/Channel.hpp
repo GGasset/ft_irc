@@ -49,8 +49,9 @@ public:
 	void						set_key(char key);
 	void						set_mode(std::string key);
 	void						set_pass(std::string key);
-	void						set_limit(ssize_t limit, command_args args, Server& server, User* user);
-	void 						set_operator(Server& server, const std::string& user);	void						invite_user(User* user);
+	void						set_limit(ssize_t limit);
+	void 						set_operator(Server& server, const std::string& user);
+	void						invite_user(User* user);
 	void 						unset_operator(Server& server, const std::string& user);
 	void 						unset_limit(void);
 	void						set_topic(std::string topic, User *user, Server &server);

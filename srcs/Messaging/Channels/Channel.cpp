@@ -66,15 +66,10 @@ const std::vector<size_t> &Channel::get_member_ids() const { return member_user_
 std::string Channel::get_topic() {return topic;}
 const std::vector<size_t> &Channel::get_invited_ids(void) const { return invited_ids; }
 
-void	Channel::set_limit(ssize_t limit, command_args args, Server& server, User* user)
+void	Channel::set_limit(ssize_t limit)
 {
-	if (std::stoi(args.argv[3]) <= 0)
-		server.add_msg(std::string(RED "472 :Invalid channel user limit" ) + RESET, *user);	
-	else
-	{
-		this->mode.has_limit = true;
-		this->mode.user_limit = limit;
-	}
+	this->mode.has_limit = true;
+	this->mode.user_limit = limit;
 }
 
 void Channel::unset_limit()
@@ -200,6 +195,7 @@ int Channel::add_member(User* user, Server *s, std::string msg, command_args arg
 		}
     member_user_ids.push_back(uid);
     users.push_back(user);
+    user->add_to_channel(id);
 	if (s)
 		s->add_msg(std::string(GREEN "Welcome to channel ") + get_name() + RESET, *user);
 	return 0;
@@ -254,4 +250,3 @@ void	Channel::broadcast(Server& serv, const std::string &msg)
 		serv.add_msg(msg, *catcher);
 	}
 }
-

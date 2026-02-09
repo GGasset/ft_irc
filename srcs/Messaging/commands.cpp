@@ -2,6 +2,7 @@
 #include "Channel.hpp"
 #include "User.hpp"
 #include "router.hpp"
+#include <cctype>
 #include <complex>
 #include <vector>
 
@@ -87,6 +88,9 @@ int Server::check_channels(Channel &c, User &sender, Server &s, command_args arg
 		return 0;
     }
     addChannel(c);
+    existing = get_by_channel_name(c.get_name());
+    existing->add_member(&sender, &s, "", args);
+
 	s.add_msg(std::string(GREEN "Created channel: ") + c.get_name() + RESET, sender);
 	return 0;
 }
@@ -127,13 +131,13 @@ void JOIN_fn(command_args args, Server& server, User& sender)
 		send_return(RED"461 :Not enough parameters" RESET);
 	while (args.argv[1][i])
 	{
-		if ((args.argv[1][0] != '#'))
+		if ((args.argv[1][0] != '#' || args.argv[1].size() == 1))
 			send_return(RED"403 :Invalid channel format: JOIN #channel" RESET);
 		i++;
 	}
 	// if (server.check_modes(args, server, sender, key) == 1)
 	// 	return ;
-	Channel c = Channel(args.argv[1], &sender, key);
+	Channel c = Channel(std::string(args.argv[1].data() + 1), &sender, key);
 	server.check_channels(c, sender, server, args);
 };
 
@@ -150,7 +154,7 @@ Pendo de un hilo\n\
 A un SIGSEGV de una brisa\n\
 Carbonizada y amarilla\n\
 Pese a soleada, mala pinta\n\
-Cuando core tiran\n\
+Cuando el core se tira\n\
 El outer se enfría\n\
 \n\
 Una caida\n\
@@ -161,7 +165,7 @@ Pido clemencia\n\
 LLega al fín\n\
 Cansada del aquí\n\
 Buscando el allí\n\
-Gracias por el outstanding!\n\
+Gracias por el austandín!\n\
 \n\
 "
 
@@ -182,11 +186,14 @@ void PRIVMSG_fn(command_args args, Server& server, User& sender) {
 		return;
 	}
 
+	if (recipients.empty())	send_return(RED"411: No recipients given (PRIVMSG)" RESET);
 
 	bool	is_nick = server.get_user_by_nick(recipients) != NULL;
-	bool	is_channel = server.get_by_channel_name(recipients) != NULL; // NO se si hay que tener en cuenta lo del asterisco
+
+	std::string channel_name = std::string(recipients.data() + 1);
+	bool	is_channel = server.get_by_channel_name(channel_name) != NULL; // NO se si hay que tener en cuenta lo del asterisco
 	std::string priv_msg = "";
-	for (std::size_t i = 2; i < args.argv.size() - 2; ++i) priv_msg += args.argv[i] + " ";
+	for (std::size_t i = 2; i < args.argv.size(); ++i) priv_msg += args.argv[i] + " ";
 
 	if (args.argv.size() == 2) {
 		if (is_nick || is_channel)
@@ -196,18 +203,18 @@ void PRIVMSG_fn(command_args args, Server& server, User& sender) {
 	}
 
 	if (is_nick)
-		server.add_msg(":" + args.prefix + " PRIVMSG " + priv_msg, sender);
+		server.add_msg(":" + args.prefix + " PRIVMSG " + priv_msg, *server.get_user_by_nick(recipients));
 	else if (is_channel) {
-		Channel *c = server.get_by_channel_name(recipients);
+		Channel *c = server.get_by_channel_name(channel_name);
 		std::vector<size_t> sender_chans = sender.get_joined_channels();
 		size_t i = 0;
 		for (; i < sender_chans.size(); i++) {
-			if (server.get_by_channel_id(sender_chans[i]) == c) {
+			if (server.get_by_channel_id(sender_chans[i])->get_name() == c->get_name()) {
 				c->broadcast(server, ":" + args.prefix + " PRIVMSG " + priv_msg);
 				break ;
 			}
 		}
-		if (i < sender_chans.size())
+		if (i == sender_chans.size())
 			send_back("404 #" + c->get_name() + ": Cannot send to channel");
 	}
 	else
@@ -349,9 +356,20 @@ void MODE_fn(command_args args, Server& server, User& sender)
 		else if (args.argv[2] == "-o" && args.argv.size() > 3)
 			c->unset_operator(server, args.argv[3]);
 		else if (args.argv[2] == "+l" && args.argv.size() > 3)
-			c->set_limit(std::stoi(args.argv[3]), args, server, &sender);	
+		{
+			bool valid = args.argv.size() >= 4 && args.argv[3].size();
+			for (size_t i = 0; valid && args.argv[3][i]; i++) valid = valid && std::isdigit(args.argv[3][i]);
+
+			if (!valid || std::atoi(args.argv[3].c_str()) != std::atol(args.argv[3].c_str()))
+			{
+				server.add_msg(std::string(RED "472 :Invalid channel user limit" ) + RESET, sender);
+				return;
+			}
+
+			c->set_limit(std::atoi(args.argv[3].c_str()));
+		}
 		else if (args.argv[2] == "-l")
-			c->unset_limit();	
+			c->unset_limit();
 		else
 			server.add_msg(std::string(RED "461: Not enough parameters") + RESET, sender);
 	}

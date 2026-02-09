@@ -36,6 +36,9 @@ public:
 	std::string getHostname(void) const;
 	size_t	get_joined_channel(size_t id);
 	std::vector<size_t>	get_joined_channels(void);
+
+	void add_to_channel(size_t id);
+
 	void	setNick(std::string nick);
 	void	set_username(std::string username);
 	void	set_realname(std::string realname);
