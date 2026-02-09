@@ -250,3 +250,10 @@ void	Channel::broadcast(Server& serv, const std::string &msg)
 		serv.add_msg(msg, *catcher);
 	}
 }
+
+bool Channel::is_member(size_t user_id)
+{
+	for (size_t i = 0; i < member_user_ids.size(); i++)
+		if (member_user_ids[i] == user_id) return true;
+	return false;
+}

@@ -65,4 +65,6 @@ public:
 	const std::vector<User *>	&get_members(void) const;
 	const std::vector<size_t>	&get_member_ids(void) const;
 	const std::vector<size_t>	&get_invited_ids(void) const;
+
+	bool is_member(size_t user_id);
 };

@@ -186,7 +186,6 @@ void PRIVMSG_fn(command_args args, Server& server, User& sender) {
 		return;
 	}
 
-	if (recipients.empty())	send_return(RED"411: No recipients given (PRIVMSG)" RESET);
 
 	bool	is_nick = server.get_user_by_nick(recipients) != NULL;
 
@@ -206,15 +205,9 @@ void PRIVMSG_fn(command_args args, Server& server, User& sender) {
 		server.add_msg(":" + args.prefix + " PRIVMSG " + priv_msg, *server.get_user_by_nick(recipients));
 	else if (is_channel) {
 		Channel *c = server.get_by_channel_name(channel_name);
-		std::vector<size_t> sender_chans = sender.get_joined_channels();
-		size_t i = 0;
-		for (; i < sender_chans.size(); i++) {
-			if (server.get_by_channel_id(sender_chans[i])->get_name() == c->get_name()) {
-				c->broadcast(server, ":" + args.prefix + " PRIVMSG " + priv_msg);
-				break ;
-			}
-		}
-		if (i == sender_chans.size())
+		if (c->is_member(sender.get_id()))
+			c->broadcast(server, ":" + args.prefix + " PRIVMSG " + priv_msg);
+		else
 			send_back("404 #" + c->get_name() + ": Cannot send to channel");
 	}
 	else

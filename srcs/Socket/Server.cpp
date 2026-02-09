@@ -58,7 +58,6 @@ void Server::disconnect_user(size_t user_index)
 	close(client_fds[user_index]);
 
 #ifndef DONT_LOG
-	std::cout << (clients.begin() + user_index)->get_nick() << " disconnected" << std::endl;;
 	std::cout << clients[user_index].get_nick() << " disconnected" << std::endl;;
 #endif
 
