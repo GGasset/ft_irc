@@ -1,4 +1,5 @@
 #include "Server.hpp"
+#include "User.hpp"
 #include <cassert>
 #include <sys/types.h>
 #include <unistd.h>
@@ -10,7 +11,7 @@ void Server::stop()
 
 Server::Server(std::string passw)
 {
-	send_pings_actively = true;
+	send_pings_actively = false;
 	stop_server = false;
 	sockfd = -1;
 	epollfd = -1;
@@ -43,7 +44,7 @@ Server::~Server()
 
 void Server::disconnect_user(size_t user_index)
 {
-	if (user_index >= clients.size()) throw;
+	if (user_index >= clients.size()) return;
 
 	std::queue<std::string> user_messages = messages[user_index];
 	while (user_messages.size())
@@ -56,14 +57,14 @@ void Server::disconnect_user(size_t user_index)
 	close(client_fds[user_index]);
 
 #ifndef DONT_LOG
+	std::cout << (clients.begin() + user_index)->get_nick() << " disconnected" << std::endl;;
 	std::cout << clients[user_index].get_nick() << " disconnected" << std::endl;;
 #endif
 
+	clients.erase(clients.begin() + user_index);
 	client_fds.erase(client_fds.begin() + user_index);
 	last_pong_time.erase(last_pong_time.begin() + user_index);
 	messages.erase(messages.begin() + user_index);
-	clients.erase(clients.begin() + user_index);
-
 }
 
 void Server::add_msg(std::string msg, User &receiver)
@@ -91,7 +92,7 @@ void Server::set_pong_time(size_t user_id, bool force)
 
 ssize_t Server::get_user_index_by_id(ssize_t id)
 {
-	for (size_t i = 0; i < clients.size(); i++)
+	for (ssize_t i = 0; i < (ssize_t)clients.size(); i++)
 		if (clients[i].get_id() == id)
 			return i;
 	return -1;

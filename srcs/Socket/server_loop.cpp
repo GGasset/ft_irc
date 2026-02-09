@@ -158,7 +158,7 @@ void Server::handle_write_event(int fd)
 	messages[user_i].pop();
 
 	#ifndef DONT_LOG
-		std::cout << "Sending message to " << clients[user_i].get_nick() << ": " << sanitize(next_msg) << std::endl;
+		std::cout << "Sending message to " << clients[user_i].get_nick() << " of " << next_msg.size() << " bytes" << std::endl;
 	#endif
 
 	write(fd, next_msg.data(), next_msg.size() + 1);
@@ -224,9 +224,8 @@ int Server::loop(size_t PORT)
 	event.data.fd = 0;
 	if (epoll_ctl(epollfd, EPOLL_CTL_ADD, 0, &event)) err = true;
 
-#ifndef DONT_LOG
 	std::cout << BLUE"Bluetooth device is ready to peal at: " BOLD << RESET << MAGENTA << PORT << RESET << std::endl;
-#endif
+
 
 	last_ping_time = std::time(0);
 	while (!stop_server && !err && !signal_server_stop)

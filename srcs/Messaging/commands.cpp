@@ -5,13 +5,13 @@
 #include <vector>
 
 #define send_back(msg) server.add_msg(":" + server.get_prefix() + RESET " " + args.prefix + " " + msg, sender)
-#define notice_back(msg) server.add_msg(YELLOW"NOTICE " + sender.get_nick() + " " + msg, sender)
+#define notice_back(msg) server.add_msg(YELLOW"NOTICE " + sender.get_nick() + " " + msg RESET, sender)
 #define send_return(msg) {send_back(msg); return;}
 
 #define register() {send_back("001 Welcome to the Internet Relay Network " + sender.get_nick() + "!" + sender.getUsername() + "@" + sender.getHostname()); \
 					send_back("002 Your host is " + server.get_prefix() + ", running version 42"); \
 					send_back("003 This server was created today, I bet ;)"); \
-					send_back("004 " + server.get_prefix() + " 42 TODO(usermodes) TODO(channelmodes)" RESET); \
+					send_back("004 " + server.get_prefix() + " 42 operator normal +i +k +l +o +t" RESET); \
 					sender.register_user();}
 
 #define suppr() args.prefix = args.prefix; (User)sender; (std::vector<User>)server.getUsers();
@@ -46,7 +46,7 @@ void NICK_fn(command_args args, Server& server, User& sender)
 			c.broadcast(server, YELLOW"NOTICE #" + c.get_name() + " " + prev_nick + " changed his nick to: " + sender.get_nick() + RESET);
 		}
 	}
-	std::cout << "AParece coo registrado sin haber escrito nada" << std::endl;
+	//std::cout << "AParece coo registrado sin haber escrito nada" << std::endl;
 	if (!sender.getUsername().empty() && !prev_nick.size()) register();
 }
 
@@ -65,6 +65,7 @@ void USER_fn(command_args args, Server& server, User& sender)
 
 		size_t start_index = 4 + (args.argv[4] == ":");
 		if (*args.argv[4].begin() == ':') args.argv[4].erase(args.argv[4].begin());
+		if (args.argv[4].empty() && args.argv.size() == 5) send_return(RED"461 " + args.argv[0] + ":Not enough parameters" RESET);
 
 		for (size_t i = start_index; i < args.argv.size(); i++) realname += " " + args.argv[i];
 		realname.erase(realname.begin());
@@ -72,7 +73,7 @@ void USER_fn(command_args args, Server& server, User& sender)
 	sender.set_realname(realname);
 
 	notice_back(BLUE"Username set to: " + sender.getUsername() + ". Hostname set to: " + sender.getHostname() + ". Realname set to: " + sender.getRealname() + RESET);
-	std::cout << "AParece coo registrado sin haber escrito nada" << std::endl;
+	//std::cout << "AParece coo registrado sin haber escrito nada" << std::endl;
 	if (!sender.get_nick().empty()) register();
 }
 
@@ -134,15 +135,23 @@ void JOIN_fn(command_args args, Server& server, User& sender)
 	server.check_channels(c, sender, server, args);
 };
 
-void PRIVMSG_fn(command_args args, Server& server, User& sender) {	
+void PRIVMSG_fn(command_args args, Server& server, User& sender) {
 	if (args.argv.size() <= 1)
 		send_return(RED"411: No recipient given (PRIVMSG)" RESET)
 
+
 	std::string recipients = args.argv[1];
+	if (recipients == "@bot")
+	{
+		notice_back("Hello, I'm the bot. I'm sleeping right now, sorry, please write me back after the evaluation.");
+		return;
+	}
+
+
 	bool	is_nick = server.get_user_by_nick(recipients) != NULL;
 	bool	is_channel = server.get_by_channel_name(recipients) != NULL; // NO se si hay que tener en cuenta lo del asterisco
 	std::string priv_msg = "";
-	for (std::size_t i = 2; i < args.argv.size() - 2; ++i) priv_msg += args.argv[i];
+	for (std::size_t i = 2; i < args.argv.size() - 2; ++i) priv_msg += args.argv[i] + " ";
 
 	if (args.argv.size() == 2) {
 		if (is_nick || is_channel)
@@ -189,7 +198,10 @@ void PONG_fn(command_args args, Server& server, User& sender)
 
 void QUIT_fn(command_args args, Server& server, User& sender)
 {
-	server.disconnect_user(server.get_user_index_by_id(sender.get_id()));
+	size_t id =sender.get_id();
+	size_t index = server.get_user_index_by_id(id);
+
+	server.disconnect_user(index);
 	suppr()
 }
 
@@ -267,7 +279,7 @@ void TOPIC_fn(command_args args, Server& server, User& sender)
         newtopic += std::string(" ") + args.argv[i];
     c->set_topic(newtopic, &sender, server);
 };
-void MODE_fn(command_args args, Server& server, User& sender) 
+void MODE_fn(command_args args, Server& server, User& sender)
 {
 	if (args.argv.size() < 3)
         send_return(RED"461 :Not enough parameters" RESET);

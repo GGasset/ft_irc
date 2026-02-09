@@ -29,7 +29,6 @@ private:
 public:
 	User();
 	User(std::string nick, size_t id);
-	User &operator=(const User &other);
 
 	std::string get_nick() const;
 	std::string getUsername(void) const;
