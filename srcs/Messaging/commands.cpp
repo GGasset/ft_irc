@@ -81,10 +81,11 @@ int Server::check_channels(Channel &c, User &sender, Server &s, command_args arg
     Channel *existing = get_by_channel_name(c.get_name());
     if (existing)
     {
-        existing->add_member(&sender, &s, ":" + s.get_prefix() + RESET " " + args.prefix + " " + RED"443 :Already on channel" RESET);
-        return 0;
+        existing->add_member(&sender, &s, ":" + s.get_prefix() + RESET " " + args.prefix + " " + RED"443 :Already on channel" RESET, args);
+		return 0;
     }
     addChannel(c);
+	s.add_msg(std::string(GREEN "Created channel: ") + c.get_name() + RESET, sender);
 	return 0;
 }
 
@@ -236,7 +237,7 @@ void INVITE_fn(command_args args, Server& server, User& sender)
     if (!sender_is_member)
         send_return(RED"442 " + channel_name + " :You're not on that channel" RESET);
     c->invite_user(target);
-    server.add_msg(GREEN":" + sender.get_nick() + " INVITED  " + target->get_nick() + "TO :" + c->get_name() + RESET, *target);
+    server.add_msg(GREEN":" + sender.get_nick() + " INVITED  " + target->get_nick() + " TO: " + c->get_name() + RESET, *target);
 };
 
 void TOPIC_fn(command_args args, Server& server, User& sender)
@@ -255,7 +256,7 @@ void TOPIC_fn(command_args args, Server& server, User& sender)
         if (topic.empty())
             send_return(RED"331 :No topic defined" RESET);
 
-        server.add_msg(":" + server.get_prefix() + " 332: " + sender.get_nick() + " " + c->get_name() + " :" + topic, sender);
+        server.add_msg(":" + server.get_prefix() + " 332: " + GREEN + sender.get_nick() + " " + MAGENTA + c->get_name() + ": " + YELLOW + topic + RESET, sender);
         return;
     }
     std::string newtopic;
@@ -292,7 +293,27 @@ void MODE_fn(command_args args, Server& server, User& sender)
 		server.add_msg(std::string(RED "403 " ) + args.argv[1] + " :No such channel" + RESET, sender);
 		return ;
 	}
-	c->set_mode(args.argv[2]);
+	if (c->is_operator(&sender))
+	{
+		c->set_mode(args.argv[2]);
+		if (args.argv[2] == "+k" && args.argv.size() > 3)
+			c->set_pass(args.argv[3]);
+		else if (args.argv[2] == "+o" && args.argv.size() > 3)
+			c->set_operator(server, args.argv[3]);
+		else if (args.argv[2] == "-o" && args.argv.size() > 3)
+			c->unset_operator(server, args.argv[3]);
+		else if (args.argv[2] == "+l" && args.argv.size() > 3)
+			c->set_limit(std::stoi(args.argv[3]), args, server, &sender);	
+		else if (args.argv[2] == "-l")
+			c->unset_limit();	
+		else
+			server.add_msg(std::string(RED "461: Not enough parameters") + RESET, sender);
+	}
+	else
+	{
+		server.add_msg(std::string(RED "403 " ) + args.argv[1] + " :You are not channel operator" + RESET, sender);
+		return ;
+	}
 };
 
 void	WHOIS_fn(command_args args, Server& server, User& sender)
@@ -332,7 +353,7 @@ void HELP_fn(command_args args, Server& server, User& sender)
 	notice_back(BLUE"\t QUIT <reason>" RESET);
 	notice_back(BLUE"\t KICK TODO" RESET);
 	notice_back(BLUE"\t INVITE [user] [#channel]" RESET);
-	notice_back(BLUE"\t TOPIC TODO" RESET);
+	notice_back(BLUE"\t TOPIC [#channel] [:topic]>" RESET);
 	notice_back(BLUE"\t MODE [channel] [mode]" RESET);
 	suppr()
 }
