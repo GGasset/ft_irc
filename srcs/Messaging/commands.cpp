@@ -359,13 +359,14 @@ void MODE_fn(command_args args, Server& server, User& sender)
 			bool valid = args.argv.size() >= 4 && args.argv[3].size();
 			for (size_t i = 0; valid && args.argv[3][i]; i++) valid = valid && std::isdigit(args.argv[3][i]);
 
-			if (!valid || std::atoi(args.argv[3].c_str()) != std::atol(args.argv[3].c_str()))
+			int limit = std::atoi(args.argv[3].c_str());
+			if (!valid || std::atoi(args.argv[3].c_str()) != std::atol(args.argv[3].c_str()) || limit >= c->get_members().size())
 			{
 				server.add_msg(std::string(RED "472 :Invalid channel user limit" ) + RESET, sender);
 				return;
 			}
 
-			c->set_limit(std::atoi(args.argv[3].c_str()));
+			c->set_limit(limit);
 		}
 		else if (args.argv[2] == "-l")
 			c->unset_limit();

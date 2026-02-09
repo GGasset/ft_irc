@@ -148,6 +148,16 @@ int Channel::add_member(User* user, Server *s, std::string msg, command_args arg
 {
 	if (!user) return 1;
 	ssize_t uid = user->get_id();
+
+	bool already_member = false;
+        for (size_t i = 0; i < member_user_ids.size(); ++i)
+            if (member_user_ids[i] == (size_t)uid)
+            {
+                already_member = true;
+                break;
+            }
+    if (already_member) return 1;
+
     if (mode.need_pass)
     {
         if (args.argv.size() <= 2 || args.argv[2].empty())
@@ -166,14 +176,7 @@ int Channel::add_member(User* user, Server *s, std::string msg, command_args arg
 	if (mode.invite_only)
     {
         bool invited = is_invited(user);
-        bool already_member = false;
-        for (size_t i = 0; i < member_user_ids.size(); ++i)
-            if (member_user_ids[i] == (size_t)uid)
-            {
-                already_member = true;
-                break;
-            }
-        if (!invited && !already_member)
+        if (!invited)
         {
             if (s)
                 s->add_msg(std::string(RED"473 :Cannot join channel (+i)" RESET), *user);
