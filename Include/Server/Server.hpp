@@ -6,7 +6,7 @@
 #include <vector>
 #include <queue>
 #include <sys/epoll.h>
-
+#include <algorithm>
 #include <ctime>
 
 #include "User.hpp"
@@ -86,7 +86,7 @@ public:
 	void add_msg(std::string msg, Channel receivers);
 
 	void set_pong_time(size_t user_id);
-
+	int	check_modes(command_args args, Server &server, User &user, std::string &key);
 	ssize_t get_user_index_by_id(ssize_t id);
 	User *get_user_by_nick(std::string nick);
 	User *get_user_by_id(ssize_t id);

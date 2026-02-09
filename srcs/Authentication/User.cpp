@@ -1,8 +1,17 @@
 #include "User.hpp"
 
-User::User() {}
+User::User() {
+	id = 0;
+	is_channel_operator = 0;
+	registered = 0;
+	passwd_match = 0;
+}
 
-User::User(std::string nick, size_t id): id(id), nick(nick)  {}
+User::User(std::string nick, size_t id) {
+	*this = User();
+	this->nick = nick;
+	this->id = id;
+}
 
 User &User::operator=(const User &other) {
 	id = other.id;

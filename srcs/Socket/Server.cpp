@@ -203,5 +203,5 @@ std::vector<User>	&Server::getUsers(void) {
 
 std::string Server::get_prefix()
 {
-	return (CYAN":Makako_el_Retorno_de_la_Arepa@localhost");
+	return (CYAN":Arepa_de_makako@localhost");
 }

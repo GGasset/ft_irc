@@ -25,6 +25,7 @@ enum commands
 	TOPIC,
 	MODE,
 	HELP,
+	WHOIS,
 	last_command
 };
 
@@ -60,6 +61,7 @@ void INVITE_fn(command_args args, Server& server, User& sender);
 void TOPIC_fn(command_args args, Server& server, User& sender);
 void MODE_fn(command_args args, Server& server, User& sender);
 void HELP_fn(command_args args, Server& server, User& sender);
+void WHOIS_fn(command_args args, Server& server, User& sender);
 
 
 #endif

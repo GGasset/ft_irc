@@ -88,11 +88,38 @@ int Server::check_channels(Channel &c, User &sender, Server &s, command_args arg
 	return 0;
 }
 
+int	Server::check_modes(command_args args, Server &server, User &user, std::string &key)
+{
+	if (args.argv.size() == 3)
+	{
+	    const std::string &mask = args.argv[2];
+
+	    if (mask[0] != '+' && mask[0] != '-')
+		{
+	        server.add_msg(std::string(RED "403: Bad Mask") + RESET, user);
+			return 1;
+		}
+	    const std::string allowed = "iktol";
+	    for (size_t j = 1; j < mask.size(); ++j)
+	    {
+	        if (allowed.find(mask[j]) == std::string::npos)
+	    	{
+	        	server.add_msg(std::string(RED "403: Bad Mask") + RESET, user);
+				return 1;
+			}
+	    }
+		key = args.argv[2];
+	}
+	return 0;
+}
+
 void JOIN_fn(command_args args, Server& server, User& sender)
 {
-	int	i;
+	int		i;
+	std::string	key;
 
 	i = 0;
+	key = "\0";
 	if (args.argv.size() <= 1 || args.argv[1].empty())
 		send_return(RED"461 :Not enough parameters" RESET);
 	while (args.argv[1][i])
@@ -101,44 +128,15 @@ void JOIN_fn(command_args args, Server& server, User& sender)
 			send_return(RED"403 :Invalid channel format: JOIN #channel" RESET);
 		i++;
 	}
-	if (args.argv.size() == 3)
-	{
-	    const std::string &mask = args.argv[2];
-
-	    if (mask[0] != '+' && mask[0] != '-')
-	        send_return(RED"403 :BAD MASK" RESET);
-	    const std::string allowed = "iktol";
-	    for (size_t j = 1; j < mask.size(); ++j)
-	    {
-	        if (allowed.find(mask[j]) == std::string::npos)
-	            send_return(RED"403 :BAD MASK" RESET);
-	    }
-	}
-	Channel c = Channel(args.argv[1], &sender);
+	// if (server.check_modes(args, server, sender, key) == 1)
+	// 	return ;
+	Channel c = Channel(args.argv[1], &sender, key);
 	server.check_channels(c, sender, server, args);
-	// server.addChannel(c);
-    // Channel *ch = server.get_by_channel_name(args.argv[1]);
-    // if (ch)
-    // {
-    //     const std::vector<User *> &members = ch->get_members();
-    //     std::cout << "Members of " << ch->get_name() << ": ";
-    //     for (size_t idx = 0; idx < members.size(); ++idx)
-    //     {
-    //         User *m = members[idx];
-    //         if (!m) continue;
-    //         if (ch->is_operator(m))
-    //             std::cout << "@" << m->get_nick();
-    //         else
-    //             std::cout << m->get_nick();
-    //         if (idx + 1 < members.size()) std::cout << ", ";
-    //     }
-    //     std::cout << std::endl;
-    // }
 };
 
 void PRIVMSG_fn(command_args args, Server& server, User& sender) {	
 	if (args.argv.size() <= 1)
-		send_return("411: No recipient given (PRIVMSG)")
+		send_return(RED"411: No recipient given (PRIVMSG)" RESET)
 
 	std::string recipients = args.argv[1];
 	bool	is_nick = server.get_user_by_nick(recipients) != NULL;
@@ -148,9 +146,9 @@ void PRIVMSG_fn(command_args args, Server& server, User& sender) {
 
 	if (args.argv.size() == 2) {
 		if (is_nick || is_channel)
-			send_return("412: No text to send")
+			send_return(RED"412: No text to send" RESET)
 		else
-			send_return("411: No recipients given (PRIVMSG)")
+			send_return(RED"411: No recipients given (PRIVMSG)" RESET)
 	}
 
 	if (is_nick)
@@ -169,7 +167,7 @@ void PRIVMSG_fn(command_args args, Server& server, User& sender) {
 			send_back("404 #" + c->get_name() + ": Cannot send to channel");
 	}
 	else
-		send_back("401 " + recipients + ": No such nick/channel");
+		send_back(RED"401 " + recipients + ": No such nick/channel" RESET);
 }
 
 void NAMES_fn(command_args args, Server& server, User& sender) { suppr() };
@@ -195,10 +193,131 @@ void QUIT_fn(command_args args, Server& server, User& sender)
 	suppr()
 }
 
-void KICK_fn(command_args args, Server& server, User& sender) {suppr()};
-void INVITE_fn(command_args args, Server& server, User& sender) {suppr()};
-void TOPIC_fn(command_args args, Server& server, User& sender) {suppr()};
-void MODE_fn(command_args args, Server& server, User& sender) {suppr()};
+void KICK_fn(command_args args, Server& server, User& sender)
+{
+	if (args.argv.size() < 3)
+        send_return(RED"461 :Not enough parameters" RESET);
+    std::string target_nick = args.argv[1];
+    std::string channel_name = args.argv[2];
+    User *target = server.get_user_by_nick(target_nick);
+    if (!target)
+        send_return(RED"401 " + target_nick + " :No such nick" RESET);
+    Channel *c = server.get_by_channel_name(channel_name);
+    if (!c)
+        send_return(RED"403 " + channel_name + " :No such channel" RESET);
+    bool sender_is_member = false;
+    const std::vector<size_t> &members = c->get_member_ids();
+    for (size_t i = 0; i < members.size(); ++i)
+        if (members[i] == static_cast<size_t>(sender.get_id()))
+        { sender_is_member = true; break; }
+    if (!sender_is_member)
+        send_return(RED"442 " + channel_name + " :You're not on that channel" RESET);
+    c->kick_user(target);
+	 server.add_msg(RED":" + sender.get_nick() + " KICKED " + target->get_nick() + " :"  + "FROM: " + c->get_name() + RESET, *target);
+};
+
+void INVITE_fn(command_args args, Server& server, User& sender)
+{
+    if (args.argv.size() < 3)
+        send_return(RED"461 :Not enough parameters" RESET);
+    std::string target_nick = args.argv[1];
+    std::string channel_name = args.argv[2];
+    User *target = server.get_user_by_nick(target_nick);
+    if (!target)
+        send_return(RED"401 " + target_nick + " :No such nick" RESET);
+    Channel *c = server.get_by_channel_name(channel_name);
+    if (!c)
+        send_return(RED"403 " + channel_name + " :No such channel" RESET);
+    bool sender_is_member = false;
+    const std::vector<size_t> &members = c->get_member_ids();
+    for (size_t i = 0; i < members.size(); ++i)
+        if (members[i] == static_cast<size_t>(sender.get_id()))
+        { sender_is_member = true; break; }
+    if (!sender_is_member)
+        send_return(RED"442 " + channel_name + " :You're not on that channel" RESET);
+    c->invite_user(target);
+    server.add_msg(GREEN":" + sender.get_nick() + " INVITED  " + target->get_nick() + "TO :" + c->get_name() + RESET, *target);
+};
+
+void TOPIC_fn(command_args args, Server& server, User& sender)
+{
+    if (args.argv.size() < 2)
+        send_return(RED"461 :Not enough parameters" RESET);
+    Channel *c = server.get_by_channel_name(args.argv[1]);
+    if (!c)
+    {
+        server.add_msg(std::string(RED "403 " ) + args.argv[1] + " :No such channel" + RESET, sender);
+        return ;
+    }
+    if (args.argv.size() == 2)
+    {
+        std::string topic = c->get_topic();
+        if (topic.empty())
+            send_return(RED"331 :No topic defined" RESET);
+
+        server.add_msg(":" + server.get_prefix() + " 332: " + sender.get_nick() + " " + c->get_name() + " :" + topic, sender);
+        return;
+    }
+    std::string newtopic;
+    if (!args.argv[2].empty() && args.argv[2][0] == ':')
+        newtopic = args.argv[2].substr(1);
+    else
+        newtopic = args.argv[2];
+    for (size_t i = 3; i < args.argv.size(); ++i)
+        newtopic += std::string(" ") + args.argv[i];
+    c->set_topic(newtopic, &sender, server);
+};
+void MODE_fn(command_args args, Server& server, User& sender) 
+{
+	if (args.argv.size() < 3)
+        send_return(RED"461 :Not enough parameters" RESET);
+	const std::string &mask = args.argv[2];
+	if (mask[0] != '+' && mask[0] != '-')
+	{
+		server.add_msg(std::string(RED "403: Bad Mask") + RESET, sender);
+		return ;
+	}
+	const std::string allowed = "iktol";
+	for (size_t j = 1; j < mask.size(); ++j)
+	{
+		if (allowed.find(mask[j]) == std::string::npos)
+		{
+			server.add_msg(std::string(RED "403: Bad Mask") + RESET, sender);
+			return ;
+		}
+	}
+	Channel *c = server.get_by_channel_name(args.argv[1]);
+	if (!c)
+	{
+		server.add_msg(std::string(RED "403 " ) + args.argv[1] + " :No such channel" + RESET, sender);
+		return ;
+	}
+	c->set_mode(args.argv[2]);
+};
+
+void	WHOIS_fn(command_args args, Server& server, User& sender)
+{
+	if (args.argv.size() <= 1)
+		send_return(RED"461 :Not enough parameters" RESET);
+	Channel *ch = server.get_by_channel_name(args.argv[1]);
+	if (!ch)
+		send_return(RED"461 :No such channel" RESET);
+    if (ch)
+    {
+        const std::vector<size_t> &member_ids = ch->get_member_ids();
+        notice_back(CYAN"Members of " + ch->get_name() + ": " RESET);
+		for (size_t idx = 0; idx < member_ids.size(); ++idx)
+		{
+			User *m = server.get_user_by_id(static_cast<ssize_t>(member_ids[idx]));
+			if (!m) continue;
+			if (ch->is_operator(m))
+				server.add_msg(std::string(RED "@") + MAGENTA + m->get_nick() + RESET, sender);
+			else
+				server.add_msg(MAGENTA + m->get_nick() + RESET, sender);
+		}
+        std::cout << std::endl;
+    }
+}
 
 void HELP_fn(command_args args, Server& server, User& sender)
 {
@@ -212,8 +331,8 @@ void HELP_fn(command_args args, Server& server, User& sender)
 	notice_back(BLUE"\t PONG" RESET);
 	notice_back(BLUE"\t QUIT <reason>" RESET);
 	notice_back(BLUE"\t KICK TODO" RESET);
-	notice_back(BLUE"\t INVITE TODO" RESET);
+	notice_back(BLUE"\t INVITE [user] [#channel]" RESET);
 	notice_back(BLUE"\t TOPIC TODO" RESET);
-	notice_back(BLUE"\t MODE TODO" RESET);
+	notice_back(BLUE"\t MODE [channel] [mode]" RESET);
 	suppr()
 }
