@@ -1,15 +1,139 @@
 #include "Channel.hpp"
 #include "Server.hpp"
+#include <algorithm>
 
 Channel::Channel(void){}
-Channel::Channel(std::string _name) : name(_name) {}
+Channel::Channel(std::string _name, User* _user, std::string _key) : name(_name), id(-1)
+{
+	this->name = _name;
+	this->key = _key;
+	this->mode.passw = "";
+	this->mode.topic = "";
+	this->mode_active = false;
+	this->mode.invite_only = false;
+	this->mode.topic_protected = false;
+	this->mode.user_limit = 100;
+	member_user_ids.push_back(_user->get_id());
+	users.push_back(_user);
+	mode.operator_user_id.clear();
+	mode.operator_user_id.push_back(_user->get_id());
+	this->topic = "";
+}
+
 Channel::~Channel(void){}
 ssize_t Channel::get_id() {return id;}
 void Channel::set_id(ssize_t id) {this->id = id;}
-std::vector<size_t>	Channel::get_members() {return member_user_ids;}
+const std::vector<User *>	&Channel::get_members() const {return users;}
+// const std::vector<size_t>& Channel::get_member_ids() const { return member_user_ids; }
+std::string	Channel::get_key(void) {return key;}
+void	Channel::set_key(char key){this->key = key;}
+bool	Channel::get_mode(void) {return this->mode_active;}
 std::string Channel::get_name() {return name;}
+const std::vector<size_t> &Channel::get_member_ids() const { return member_user_ids; }
 std::string Channel::get_topic() {return topic;}
-void        Channel::set_topic(std::string topic) {this->topic = topic;}
+const std::vector<size_t> &Channel::get_invited_ids(void) const { return invited_ids; }
+
+void        Channel::set_topic(std::string topic, User *user, Server& server)
+{
+	if (!is_operator(user) && this->mode.topic_protected == true)
+	{
+		server.add_msg(std::string(RED"482 #canal :You're not channel operator (+t)" RESET), *user);
+	}
+	else
+		this->topic = topic;
+}
+void Channel::set_mode(std::string key)
+{
+	this->mode_active = true;
+	if (key == "+i")
+		this->mode.invite_only = true;
+	else if (key == "-i")
+		this->mode.invite_only = false;
+	else if (key == "+t")
+		this->mode.topic_protected = true;
+	else if (key == "-t")
+		this->mode.topic_protected = false;	
+}
+
+void Channel::invite_user(User* user)
+{
+    if (!user) return;
+    size_t uid = static_cast<size_t>(user->get_id());
+    for (size_t i = 0; i < invited_ids.size(); ++i)
+        if (invited_ids[i] == uid)
+            return;
+    invited_ids.push_back(uid);
+}
+
+void Channel::kick_user(User* user)
+{
+	if (!user) return;
+	size_t uid = static_cast<size_t>(user->get_id());
+	std::vector<size_t>::iterator it_id = std::find(member_user_ids.begin(), member_user_ids.end(), uid);
+	if (it_id != member_user_ids.end())
+		member_user_ids.erase(it_id);
+	std::vector<User*>::iterator it_user = std::find(users.begin(), users.end(), user);
+	if (it_user != users.end())
+		users.erase(it_user);
+	std::vector<size_t>::iterator it_op = std::find(mode.operator_user_id.begin(), mode.operator_user_id.end(), uid);
+	if (it_op != mode.operator_user_id.end())
+		mode.operator_user_id.erase(it_op);
+	std::vector<size_t>::iterator it_inv = std::find(invited_ids.begin(), invited_ids.end(), uid);
+	if (it_inv != invited_ids.end())
+		invited_ids.erase(it_inv);
+}
+
+bool Channel::is_invited(const User* user) const
+{
+    if (!user) return false;
+    size_t uid = static_cast<size_t>(const_cast<User*>(user)->get_id());
+    for (size_t i = 0; i < invited_ids.size(); ++i)
+        if (invited_ids[i] == uid)
+            return true;
+    return false;
+}
+
+int Channel::add_member(User* user, Server *s, std::string msg)
+{
+    if (!user) return 1;
+    ssize_t uid = user->get_id();
+	if (mode.invite_only)
+    {
+        bool invited = is_invited(user);
+        bool already_member = false;
+        for (size_t i = 0; i < member_user_ids.size(); ++i)
+            if (member_user_ids[i] == (size_t)uid)
+            {
+                already_member = true;
+                break;
+            }
+        if (!invited && !already_member)
+        {
+            if (s)
+                s->add_msg(std::string(RED"473 :Cannot join channel (+i)" RESET), *user);
+            return 1;
+        }
+    }
+    for (size_t i = 0; i < member_user_ids.size(); ++i)
+        if (member_user_ids[i] == (size_t)uid)
+		{
+			s->add_msg(msg, *user);
+            return 1;
+		}
+    member_user_ids.push_back(uid);
+    users.push_back(user);
+	return 0;
+}
+
+bool Channel::is_operator(const User* user) const
+{
+	if (!user) return false;
+	size_t uid = static_cast<size_t>(const_cast<User*>(user)->get_id());
+	for (size_t i = 0; i < mode.operator_user_id.size(); ++i)
+		if (mode.operator_user_id[i] == uid)
+			return true;
+	return false;
+}
 
 /*
 	boradcast (aun debo hacer el join bien)
@@ -40,7 +164,7 @@ void	Channel::broadcast(Server& serv, const std::string &msg)
 	users = member_user_ids;
 	for (size_t i = 0; i < users.size(); i++)
 	{
-		catcher = &serv.get_user_by_id(users[i]);
+		catcher = serv.get_user_by_id(users[i]);
 		if (!catcher)
 			continue;
 		// len = msg.size();
@@ -50,3 +174,4 @@ void	Channel::broadcast(Server& serv, const std::string &msg)
 		serv.add_msg(msg, *catcher);
 	}
 }
+

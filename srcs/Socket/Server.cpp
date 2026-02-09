@@ -89,10 +89,10 @@ void Server::set_pong_time(size_t user_id, bool force)
 		last_pong_time[index] = time(NULL);
 }
 
-ssize_t Server::get_user_index_by_id(size_t id)
+ssize_t Server::get_user_index_by_id(ssize_t id)
 {
 	for (size_t i = 0; i < clients.size(); i++)
-		if (clients[i].get_id() == (ssize_t)id)
+		if (clients[i].get_id() == id)
 			return i;
 	return -1;
 }
@@ -105,20 +105,26 @@ User *Server::get_user_by_nick(std::string nick)
 	return (0);
 }
 
-User &Server::get_user_by_id(size_t id)
+User *Server::get_user_by_id(ssize_t id)
 {
-	return (clients[id]);
+	for (size_t i = 0; i < clients.size(); i++)
+		if (clients[i].get_id() != -1 && clients[i].get_id() == id)
+			return &clients[i];
+	return (0);
 }
 
-Channel &Server::get_by_channel_name(std::string name) {
+Channel *Server::get_by_channel_name(std::string name) {
 	for (size_t i = 0; i < servers.size(); i++)
 		if (servers[i].get_id() != -1 && servers[i].get_name() == name)
-			return servers[i];
-	return (servers[0]);
+			return &servers[i];
+	return (0);
 }
 
-Channel &Server::get_by_channel_id(size_t id) {
-	return (servers[id]);
+Channel *Server::get_by_channel_id(ssize_t id) {
+	  for (size_t i = 0; i < servers.size(); i++)
+		if (servers[i].get_id() != -1 && servers[i].get_id() == id)
+			return &servers[i];
+	return (0);
 }
 
 ssize_t Server::get_user_index_by_fd(int fd)
@@ -157,7 +163,7 @@ void Server::send_pings()
 		User u = clients[i];
 		std::string prefix = u.get_nick() + "!" + u.getUsername() + "@"; //+ u.getHostname;
 		//std::string ping_msg = prefix + " PING " + u.getHostname() + "\r\n"; //En principio al mandarse por el socket se envia \r\n, pero no estoy del todo seguro.
-		std::string ping_msg = prefix + " PING " + "localhost\r\n"; //En principio al mandarse por el socket se envia \r\n, pero no estoy del todo seguro.
+		std::string ping_msg = prefix + " PING " + "localhost\r\n" RESET; //En principio al mandarse por el socket se envia \r\n, pero no estoy del todo seguro.
 
 		add_msg(ping_msg, clients[i]);
 	}
@@ -179,7 +185,8 @@ void	Server::addUser(User u) {
 	messages.push_back(std::queue<std::string>());
 }
 
-void	Server::addChannel(Channel ch) {
+void	Server::addChannel(Channel &ch) {
+	ch.set_id(max_channel_id++);
 	servers.push_back(ch);
 }
 
@@ -197,7 +204,7 @@ std::vector<User>	&Server::getUsers(void) {
 
 std::string Server::get_prefix()
 {
-	return ":Makako_el_Retorno_de_la_Arepa@localhost";
+	return (CYAN":Arepa_de_makako@localhost");
 }
 
 std::vector<std::string> split(std::string in, char splitter)

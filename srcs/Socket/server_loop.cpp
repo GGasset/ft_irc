@@ -174,7 +174,7 @@ void Server::handle_event(const epoll_event event, int sockfd)
 		) return;
 
 #ifndef DONT_LOG
-		std::cout << "Bluetooth device aconnected successfully" << std::endl;
+		std::cout << BLUE"Bluetooth device aconnected successfully" BOLD << RESET << std::endl;
 #endif
 
 		// Add client
@@ -189,7 +189,7 @@ void Server::handle_event(const epoll_event event, int sockfd)
 		this->event.data.fd = new_client_fd;
 		if (epoll_ctl(epollfd, EPOLL_CTL_ADD, new_client_fd, &this->event)) stop();
 
-		add_msg("NOTICE " + (std::string)"unregistered" + "\nWelcome! Go ahead and login with PASS [passw].\nYou may also write HELP to get a list of commands", clients.end()[-1]);
+		add_msg(GREEN"NOTICE " + (std::string)"unregistered" + "\nWelcome! Go ahead and login with PASS [passw].\nYou may also write HELP to get a list of commands" BOLD + RESET, clients.end()[-1]);
 	}
 	else
 	{
@@ -225,7 +225,7 @@ int Server::loop(size_t PORT)
 	if (epoll_ctl(epollfd, EPOLL_CTL_ADD, 0, &event)) err = true;
 
 #ifndef DONT_LOG
-	std::cout << "Bluetooth device is ready to peal at " << PORT << std::endl;
+	std::cout << BLUE"Bluetooth device is ready to peal at: " BOLD << RESET << MAGENTA << PORT << RESET << std::endl;
 #endif
 
 	last_ping_time = std::time(0);

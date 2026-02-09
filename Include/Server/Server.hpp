@@ -6,7 +6,7 @@
 #include <vector>
 #include <queue>
 #include <sys/epoll.h>
-
+#include <algorithm>
 #include <ctime>
 
 #include "User.hpp"
@@ -19,8 +19,18 @@
 #define N_PINGS_UNTIL_TIMEOUT 5
 #define PING_SEPARATION_S 20
 
+#define BOLD "\033[1m"
+#define RESET "\033[0m"
+#define RED "\033[1;31m"
+#define GREEN "\033[1;32m"
+#define YELLOW "\033[1;33m"
+#define BLUE "\033[1;34m"
+#define MAGENTA "\033[1;35m"
+#define CYAN "\033[1;36m"
+
 extern int signal_server_stop;
 
+struct command_args;  
 std::string sanitize(std::string in);
 
 // FG
@@ -80,18 +90,20 @@ public:
 	//void add_msg(std::string msg, Channel receivers);
 
 	void set_pong_time(size_t user_id, bool force = false);
-
-	ssize_t get_user_index_by_id(size_t id);
+	int	check_modes(command_args args, Server &server, User &user, std::string &key);
+	ssize_t get_user_index_by_id(ssize_t id);
 	User *get_user_by_nick(std::string nick);
-	User &get_user_by_id(size_t id);
+	User *get_user_by_id(ssize_t id);
+	int	check_channels(Channel &c, User &sender, Server &s, command_args args);
 	std::vector<User&> get_channel_users(const Channel channel);
-	Channel &get_by_channel_name(std::string name);
-	Channel &get_by_channel_id(size_t id);
+	Channel *get_by_channel_name(std::string name);
+	Channel *get_by_channel_id(ssize_t id);
+
 
 	std::string	get_server_password();
 
 	void	addUser(User u);
-	void	addChannel(Channel ch);
+	void	addChannel(Channel &ch);
 	void	addNickHistory(std::string nick);
 	std::vector<std::string> get_nick_history();
 

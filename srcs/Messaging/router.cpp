@@ -21,6 +21,9 @@ router::router()
 	command_string[JOIN] = "JOIN";
 	fun[JOIN] = JOIN_fn;
 
+	// command_string[NAMES] = "NAMES";
+	// fun[NAMES] = NAMES_fn;
+
 	command_string[PRIVMSG] = "PRIVMSG";
 	fun[PRIVMSG] = PRIVMSG_fn;
 
@@ -77,6 +80,7 @@ void router::operator()(std::string message, Server& server, User &sender)
 	}
 	if (!sender.passwd_match_pop(0) && func_i != PASS && func_i != QUIT && func_i != HELP && func_i != PONG)
 	{
+		std::cout << "A";
 		server.add_msg(server.get_prefix() + " 451 :You have not registered", sender);
 		server.add_msg("NOTICE " + sender.get_nick() + " you must use PASS command first", sender);
 		return;
@@ -84,6 +88,7 @@ void router::operator()(std::string message, Server& server, User &sender)
 	if (sender.passwd_match_pop(0) && !sender.is_registered() && func_i != NICK && func_i != USER && func_i != QUIT && func_i != HELP && func_i != PONG)
 	{
 		if (func_i == PASS)
+		std::cout << "B";
 		server.add_msg(server.get_prefix() + " 451 :You have not registered", sender);
 		server.add_msg("NOTICE " + sender.get_nick() + " you must use NICK and USER commands first", sender);
 		return;

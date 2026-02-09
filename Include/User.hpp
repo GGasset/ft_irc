@@ -13,7 +13,6 @@
 class User
 {
 private:
-	// id set to -1 means user not registered
 	ssize_t id;
 	bool is_channel_operator;
 	bool registered;
