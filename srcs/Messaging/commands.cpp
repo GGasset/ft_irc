@@ -74,6 +74,7 @@ void USER_fn(command_args args, Server& server, User& sender)
 	if (!sender.get_nick().empty()) register();
 }
 
+// If a user creates a channel by joining it, make him the admin
 void JOIN_fn(command_args args, Server& server, User& sender) { suppr() };
 
 void PRIVMSG_fn(command_args args, Server& server, User& sender) {

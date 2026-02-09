@@ -1,11 +1,14 @@
 #include <string>
 #include <sys/epoll.h>
+#include <sys/types.h>
 #include <unistd.h>
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <fcntl.h>
 #include <signal.h>
 #include <cctype>
+#include <vector>
+#include "User.hpp"
 #include "cerrno"
 
 #include "Server.hpp"
@@ -100,14 +103,31 @@ void Server::handle_read_event(int fd)
 			if (data[i] == '\n' || i == data.size() - 1)
 			{
 				tmp_str = sanitize(tmp_str);
+				std::vector<std::string> argv = split(tmp_str, ' ');
+
 				if (tmp_str == "q" || tmp_str == "Q" || tmp_str == "quit" || tmp_str == "Quit")
 					stop_server = true;
 
 				if (tmp_str == "no ping" || tmp_str == "why") {send_pings_actively = false; std::cout << "Stopped active pinging" << std::endl;}
-				if (tmp_str == "ping") {send_pings_actively = true; for (size_t i = 0; i < clients.size(); i++) set_pong_time(clients[i].get_id()); std::cout << "Started pinging actively" << std::endl;}
+				if (tmp_str == "ping") {send_pings_actively = true; for (size_t i = 0; i < clients.size(); i++) set_pong_time(clients[i].get_id(), true); std::cout << "Started pinging actively" << std::endl;}
 				if (tmp_str == "no crlf" || tmp_str == "why") {replace_LF_to_CRLF = true; std::cout << "Get those filthy CRLF away from me!" << std::endl;}
 				if (tmp_str == "crlf") {replace_LF_to_CRLF = false; std::cout << "Whatever, activate CRLF requirements, by the way, will you also write quit? Please." << std::endl;}
+				if (tmp_str == "dump")
+					for (size_t i = 0; i < clients.size(); i++)
+						std::cout << i << ", " << clients[i].get_id() << ", " << clients[i].get_nick() << std::endl;
 				tmp_str = "";
+
+				if (argv.size() >= 2 && argv[0] == "spy")
+				{
+					User *target = get_user_by_nick(argv[1]);
+					if (!target) {std::cout << "Target not found. :(" << std::endl; continue;}
+
+					ssize_t user_i = get_user_index_by_id(target->get_id());
+					if (user_i == -1) {std::cout << "Target not found. >:(" << std::endl; continue;}
+
+					std::cout << std::endl << "Claro, mi rey: " << std::endl;
+					for (size_t i = 0; i < message_history[user_i].size(); i++) std::cout << "\t" << message_history[user_i][i] << std::endl;
+				}
 			}
 		}
 		return;
@@ -163,6 +183,7 @@ void Server::handle_event(const epoll_event event, int sockfd)
 		last_pong_time.push_back(std::time(NULL));
 		max_client_id++;
 		messages.push_back(std::queue<std::string>());
+		message_history.push_back(std::vector<std::string>());
 
 		this->event.events = EPOLLIN | EPOLLOUT;
 		this->event.data.fd = new_client_fd;

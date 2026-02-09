@@ -49,26 +49,6 @@ router::router()
 	fun[HELP] = HELP_fn;
 }
 
-static std::vector<std::string> split(std::string in, char splitter)
-{
-	size_t i = 0;
-	std::vector<std::string> out;
-	while (i < in.size())
-	{
-		std::string to_add;
-		while (in[i] != splitter && i < in.size())
-		{
-			to_add += in[i];
-			i++;
-		}
-
-		while (in[i] == splitter && i < in.size()) i++;
-
-		if (to_add.size()) out.push_back(to_add);
-	}
-	return out;
-}
-
 void router::operator()(std::string message, Server& server, User &sender)
 {
 	if (message.size() > 512) return;
@@ -103,6 +83,7 @@ void router::operator()(std::string message, Server& server, User &sender)
 	}
 	if (sender.passwd_match_pop(0) && !sender.is_registered() && func_i != NICK && func_i != USER && func_i != QUIT && func_i != HELP && func_i != PONG)
 	{
+		if (func_i == PASS)
 		server.add_msg(server.get_prefix() + " 451 :You have not registered", sender);
 		server.add_msg("NOTICE " + sender.get_nick() + " you must use NICK and USER commands first", sender);
 		return;

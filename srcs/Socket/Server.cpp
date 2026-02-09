@@ -78,13 +78,14 @@ void Server::add_msg(std::string msg, User &receiver)
 
 	//std::cout << "Added mesage " << msg << " to " << receiver.get_nick() << std::endl;
 	messages[user_index].push(msg);
+	message_history[user_index].push_back(msg);
 }
 
-void Server::set_pong_time(size_t user_id)
+void Server::set_pong_time(size_t user_id, bool force)
 {
 	ssize_t index = get_user_index_by_id(user_id);
 	if (index == -1) return;
-	if (last_ping_time > last_pong_time[index])
+	if (last_ping_time > last_pong_time[index] || force)
 		last_pong_time[index] = time(NULL);
 }
 
@@ -197,4 +198,24 @@ std::vector<User>	&Server::getUsers(void) {
 std::string Server::get_prefix()
 {
 	return ":Makako_el_Retorno_de_la_Arepa@localhost";
+}
+
+std::vector<std::string> split(std::string in, char splitter)
+{
+	size_t i = 0;
+	std::vector<std::string> out;
+	while (i < in.size())
+	{
+		std::string to_add;
+		while (in[i] != splitter && i < in.size())
+		{
+			to_add += in[i];
+			i++;
+		}
+
+		while (in[i] == splitter && i < in.size()) i++;
+
+		if (to_add.size()) out.push_back(to_add);
+	}
+	return out;
 }

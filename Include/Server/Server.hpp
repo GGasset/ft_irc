@@ -17,11 +17,13 @@
 #define MAX_EVENTS 69
 #define USER_TIMEOUT_S 420
 #define N_PINGS_UNTIL_TIMEOUT 5
-#define PING_SEPARATION_S USER_TIMEOUT_S / N_PINGS_UNTIL_TIMEOUT - 1
+#define PING_SEPARATION_S 20
 
 extern int signal_server_stop;
 
 std::string sanitize(std::string in);
+
+// FG
 
 class Server
 {
@@ -43,6 +45,8 @@ private:
 	std::vector<size_t>	last_pong_time; // TODO: set during message handling
 	std::vector<User>	clients;
 	std::vector<std::queue<std::string> > messages;
+	std::vector<std::vector<std::string> > message_history;
+
 	std::vector<Channel> servers;
 
 	std::vector<std::string> nick_history;
@@ -73,9 +77,9 @@ public:
 	size_t	n_users();
 	void disconnect_user(size_t user_index);
 	void add_msg(std::string msg, User &receiver);
-	void add_msg(std::string msg, Channel receivers);
+	//void add_msg(std::string msg, Channel receivers);
 
-	void set_pong_time(size_t user_id);
+	void set_pong_time(size_t user_id, bool force = false);
 
 	ssize_t get_user_index_by_id(size_t id);
 	User *get_user_by_nick(std::string nick);
@@ -101,3 +105,5 @@ public:
 	// Returns true on errors
 	int loop(size_t PORT);
 };
+
+std::vector<std::string> split(std::string in, char splitter);

@@ -1,16 +1,6 @@
+
 # ft_irc
-Este proyecto de tres ases del codigo se propone crear un chat en línea mediante el protocolo IRC:
-El protocolo que inspira a slack y esta en la base del chat de Twitch es el objeto de nuestros desmanes.
 
-## Some best practices
-* Minimize Malloc usage, does it really need to be on the heap? (Containers with destructors like std::vector)
-* Clean file structure, makes sense for that function to be in the same file or else?
-* Don't make functions much bigger than a A4 (~40 lines, ~60 chars)
-* for loop good, too much nesting bad
-* Empty lines in functions are pretty
+_This project has been created as part of the 42 curriculum by layala-d alvmoral ggasset-_
 
-* When creating files, in the Makefile:
-	* Don't add the relative path from the Makefile
-	* Instead, create, or add to, a variable containing the paths of that folder.
-	* Add to that variable the name of the folder incrementally (outwards) with addprefix
-	* Concatenate C_FILES with that variable
+## Description
