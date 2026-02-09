@@ -214,7 +214,7 @@ void PRIVMSG_fn(command_args args, Server& server, User& sender) {
 		send_back(RED"401 " + recipients + ": No such nick/channel" RESET);
 }
 
-void NAMES_fn(command_args args, Server& server, User& sender) { suppr() };
+//void NAMES_fn(command_args args, Server& server, User& sender) { suppr() };
 void PING_fn(command_args args, Server& server, User& sender)
 {
 	if (!sender.is_registered()) return;
@@ -245,7 +245,8 @@ void KICK_fn(command_args args, Server& server, User& sender)
 	if (args.argv.size() < 3)
         send_return(RED"461 :Not enough parameters" RESET);
     std::string target_nick = args.argv[1];
-    std::string channel_name = args.argv[2];
+    std::string channel_name = std::string(args.argv[2].c_str() + 1);
+
     User *target = server.get_user_by_nick(target_nick);
     if (!target)
         send_return(RED"401 " + target_nick + " :No such nick" RESET);
@@ -268,7 +269,7 @@ void INVITE_fn(command_args args, Server& server, User& sender)
     if (args.argv.size() < 3)
         send_return(RED"461 :Not enough parameters" RESET);
     std::string target_nick = args.argv[1];
-    std::string channel_name = args.argv[2];
+    std::string channel_name = std::string(args.argv[2].c_str() + 1);
     User *target = server.get_user_by_nick(target_nick);
     if (!target)
         send_return(RED"401 " + target_nick + " :No such nick" RESET);
@@ -290,7 +291,9 @@ void TOPIC_fn(command_args args, Server& server, User& sender)
 {
     if (args.argv.size() < 2)
         send_return(RED"461 :Not enough parameters" RESET);
-    Channel *c = server.get_by_channel_name(args.argv[1]);
+
+    std::string channel_name = std::string(args.argv[1].c_str() + 1);
+    Channel *c = server.get_by_channel_name(channel_name);
     if (!c)
     {
         server.add_msg(std::string(RED "403 " ) + args.argv[1] + " :No such channel" + RESET, sender);
@@ -314,6 +317,7 @@ void TOPIC_fn(command_args args, Server& server, User& sender)
         newtopic += std::string(" ") + args.argv[i];
     c->set_topic(newtopic, &sender, server);
 };
+
 void MODE_fn(command_args args, Server& server, User& sender)
 {
 	if (args.argv.size() < 3)
@@ -333,7 +337,9 @@ void MODE_fn(command_args args, Server& server, User& sender)
 			return ;
 		}
 	}
-	Channel *c = server.get_by_channel_name(args.argv[1]);
+
+	std::string channel_name = std::string(args.argv[1].c_str() + 1);
+	Channel *c = server.get_by_channel_name(channel_name);
 	if (!c)
 	{
 		server.add_msg(std::string(RED "403 " ) + args.argv[1] + " :No such channel" + RESET, sender);
@@ -408,9 +414,9 @@ void HELP_fn(command_args args, Server& server, User& sender)
 	notice_back(BLUE"\t PING <sender>" RESET);
 	notice_back(BLUE"\t PONG" RESET);
 	notice_back(BLUE"\t QUIT <reason>" RESET);
-	notice_back(BLUE"\t KICK TODO" RESET);
+	notice_back(BLUE"\t KICK [#channel] [user] [comment]" RESET);
 	notice_back(BLUE"\t INVITE [user] [#channel]" RESET);
 	notice_back(BLUE"\t TOPIC [#channel] [:topic]>" RESET);
-	notice_back(BLUE"\t MODE [channel] [mode]" RESET);
+	notice_back(BLUE"\t MODE [#channel] [mode]" RESET);
 	suppr()
 }
