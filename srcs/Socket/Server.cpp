@@ -75,7 +75,7 @@ void Server::add_msg(std::string msg, User &receiver)
 
 	if (user_index == -1) {std::cerr << "user not found" << std::endl; return;};
 
-	if (*(msg.end() - 1) != '\r' || *msg.end() != '\n') msg += "\r\n";
+	if ((*(msg.end() - 1) != '\r' || *msg.end() != '\n')) msg += "\r\n";
 
 	//std::cout << "Added mesage " << msg << " to " << receiver.get_nick() << std::endl;
 	messages[user_index].push(msg);

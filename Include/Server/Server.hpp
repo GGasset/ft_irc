@@ -30,7 +30,7 @@
 
 extern int signal_server_stop;
 
-struct command_args;  
+struct command_args;
 std::string sanitize(std::string in);
 
 // FG

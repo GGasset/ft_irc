@@ -70,7 +70,7 @@ void Server::handle_read_event(int fd)
 	ssize_t bytes_read;
 	do
 	{
-		for (size_t i = 0; i < READ_SIZE; i++) tmp[i] = 0;
+		for (size_t i = 0; i <= READ_SIZE; i++) tmp[i] = 0;
 		bytes_read = read(fd, tmp, READ_SIZE);
 		data += tmp;
 	}
