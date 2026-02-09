@@ -2,6 +2,7 @@
 #include "Channel.hpp"
 #include "User.hpp"
 #include "router.hpp"
+#include <complex>
 #include <vector>
 
 #define send_back(msg) server.add_msg(":" + server.get_prefix() + RESET " " + args.prefix + " " + msg, sender)
@@ -135,6 +136,34 @@ void JOIN_fn(command_args args, Server& server, User& sender)
 	server.check_channels(c, sender, server, args);
 };
 
+#define POEM "\
+\n\nLa evaluación\n\
+Buena actuación\n\
+De verde olor\n\
+Que nos aprobó\n\
+Y dulce brillo\n\
+Pese a tal frío\n\
+\n\
+Decide que no decido\n\
+Pendo de un hilo\n\
+A un SIGSEGV de una brisa\n\
+Carbonizada y amarilla\n\
+Pese a soleada, mala pinta\n\
+Cuando core tiran\n\
+El outer se enfría\n\
+\n\
+Una caida\n\
+Tres días,\n\
+Duraía.\n\
+Pido clemencia\n\
+\n\
+LLega al fín\n\
+Cansada del aquí\n\
+Buscando el allí\n\
+Gracias por el outstanding!\n\
+\n\
+"
+
 void PRIVMSG_fn(command_args args, Server& server, User& sender) {
 	if (args.argv.size() <= 1)
 		send_return(RED"411: No recipient given (PRIVMSG)" RESET)
@@ -143,7 +172,12 @@ void PRIVMSG_fn(command_args args, Server& server, User& sender) {
 	std::string recipients = args.argv[1];
 	if (recipients == "@bot")
 	{
-		notice_back("Hello, I'm the bot. I'm sleeping right now, sorry, please write me back after the evaluation.");
+		if (args.argv.size() >= 3 && args.argv[2] == "help") {HELP_fn(args, server, sender); return;}
+		notice_back("Hello, I'm the bot.");
+		notice_back("I'm sleeping right now.\n");
+		notice_back("You see a note inbetween it's metal sheets.");
+		notice_back("You grab it and you see a poem that reads:");
+		notice_back(POEM);
 		return;
 	}
 
