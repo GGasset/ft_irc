@@ -1,5 +1,6 @@
 
 #include "Channel.hpp"
+#include "Server.hpp"
 #include "User.hpp"
 #include "router.hpp"
 #include <cctype>
@@ -37,6 +38,10 @@ void NICK_fn(command_args args, Server& server, User& sender)
 
 	std::string prev_nick = sender.get_nick();
 
+	bool is_valid = true;
+	for (size_t i = 0; args.argv[1][i] && is_valid; i++) is_valid = is_valid && is_valid_character(args.argv[1][i]);
+	if (!is_valid) { notice_back("Invalid characters in nick"); return; }
+
 	sender.setNick(args.argv[1]);
 	notice_back("Nick set to: " + args.argv[1] + RESET);
 	if (sender.is_registered() && prev_nick.size())
@@ -57,6 +62,10 @@ void USER_fn(command_args args, Server& server, User& sender)
 	if (sender.is_registered()) send_return(RED"462 :You may not reregister" RESET);
 	if (args.argv.size() < 5 || (args.argv[4].begin()[0] != ':')) send_return(RED"461 " + args.argv[0] + ":Not enough parameters" RESET);
 
+	bool is_valid = true;
+	for (size_t i = 0; args.argv[1][i] && is_valid; i++) is_valid = is_valid && is_valid_character(args.argv[1][i]);
+	if (!is_valid) { notice_back("Invalid character in username"); return; }
+
 	sender.set_username(args.argv[1]);
 	sender.set_hostname(args.argv[2]);
 
@@ -72,6 +81,10 @@ void USER_fn(command_args args, Server& server, User& sender)
 		for (size_t i = start_index; i < args.argv.size(); i++) realname += " " + args.argv[i];
 		realname.erase(realname.begin());
 	}
+
+	for (size_t i = 0; realname[i] && is_valid; i++) is_valid = is_valid && is_valid_character(realname[i]) || realname[i] == ' ';
+	if (!is_valid) { notice_back("Invalid characters in realname"); return; }
+
 	sender.set_realname(realname);
 
 	notice_back(BLUE"Username set to: " + sender.getUsername() + ". Hostname set to: " + sender.getHostname() + ". Realname set to: " + sender.getRealname() + RESET);
@@ -122,23 +135,34 @@ int	Server::check_modes(command_args args, Server &server, User &user, std::stri
 
 void JOIN_fn(command_args args, Server& server, User& sender)
 {
-	int		i;
 	std::string	key;
 
-	i = 0;
 	key = "\0";
 	if (args.argv.size() <= 1 || args.argv[1].empty())
 		send_return(RED"461 :Not enough parameters" RESET);
-	while (args.argv[1][i])
+
+	std::vector<std::string> comma_separated = split(args.argv[1], ',');
+
+	for (size_t i = 0; i < comma_separated.size(); i++)
 	{
-		if ((args.argv[1][0] != '#' || args.argv[1].size() == 1))
-			send_return(RED"403 :Invalid channel format: JOIN #channel" RESET);
-		i++;
+		if ((comma_separated[i][0] != '#' || comma_separated[i].size() == 1))
+		{send_back(RED"403 :Invalid channel format: JOIN #channel " + comma_separated[i] + RESET" "); continue;};
+
+		bool valid = true;
+		for (size_t j = 1; comma_separated[i][j] && valid; j++)
+			valid = valid && is_valid_character(comma_separated[i][j]);
+
+		if (!valid)
+		{
+			send_back("NOTICE " + sender.get_nick() + RED" invalid characters in channel name: " + comma_separated[i] + RESET"");
+			continue;
+		}
+
+		// if (server.check_modes(args, server, sender, key) == 1)
+		// 	return ;
+		Channel c = Channel(std::string(comma_separated[i].data() + 1), &sender, key);
+		server.check_channels(c, sender, server, args);
 	}
-	// if (server.check_modes(args, server, sender, key) == 1)
-	// 	return ;
-	Channel c = Channel(std::string(args.argv[1].data() + 1), &sender, key);
-	server.check_channels(c, sender, server, args);
 };
 
 #define POEM "\
@@ -190,9 +214,14 @@ void PRIVMSG_fn(command_args args, Server& server, User& sender) {
 	bool	is_nick = server.get_user_by_nick(recipients) != NULL;
 
 	std::string channel_name = std::string(recipients.data() + 1);
-	bool	is_channel = server.get_by_channel_name(channel_name) != NULL; // NO se si hay que tener en cuenta lo del asterisco
+	bool	is_channel = recipients[0] == '#' && server.get_by_channel_name(channel_name) != NULL; // NO se si hay que tener en cuenta lo del asterisco
+
+	if (args.argv[2][0] != ':') send_return(RED"412: No text to send" RESET);
+	args.argv[2].erase(args.argv[2].begin());
+
 	std::string priv_msg = "";
-	for (std::size_t i = 2; i < args.argv.size(); ++i) priv_msg += args.argv[i] + " ";
+	for (std::size_t i = 2; i < args.argv.size(); i++) if (args.argv[i].size()) priv_msg += args.argv[i] + " ";
+	if (sanitize(priv_msg).size() <= 1) send_return(RED"412: No text to send" RESET);
 
 	if (args.argv.size() == 2) {
 		if (is_nick || is_channel)
@@ -236,6 +265,13 @@ void QUIT_fn(command_args args, Server& server, User& sender)
 	size_t id =sender.get_id();
 	size_t index = server.get_user_index_by_id(id);
 
+	std::string msg = sender.get_nick();
+	if (args.argv.size() > 1)
+	{
+		//TODO
+		std::cout << "TODO";
+	}
+
 	server.disconnect_user(index);
 	suppr()
 }
@@ -245,6 +281,8 @@ void KICK_fn(command_args args, Server& server, User& sender)
 	if (args.argv.size() < 3)
         send_return(RED"461 :Not enough parameters" RESET);
     std::string target_nick = args.argv[1];
+
+    if (args.argv[2][0] != '#') {notice_back("Invalid format on channel name: " + args.argv[2] + ". Must use '#' as a prefix"); return;}
     std::string channel_name = std::string(args.argv[2].c_str() + 1);
 
     User *target = server.get_user_by_nick(target_nick);
@@ -269,6 +307,9 @@ void INVITE_fn(command_args args, Server& server, User& sender)
     if (args.argv.size() < 3)
         send_return(RED"461 :Not enough parameters" RESET);
     std::string target_nick = args.argv[1];
+
+    if (args.argv[2][0] != '#') {notice_back("Invalid format on channel name: " + args.argv[2] + ". Must use '#' as a prefix"); return;}
+
     std::string channel_name = std::string(args.argv[2].c_str() + 1);
     User *target = server.get_user_by_nick(target_nick);
     if (!target)
@@ -292,6 +333,7 @@ void TOPIC_fn(command_args args, Server& server, User& sender)
     if (args.argv.size() < 2)
         send_return(RED"461 :Not enough parameters" RESET);
 
+    if (args.argv[1][0] != '#') {notice_back("Invalid format on channel name: " + args.argv[1] + ". Must use '#' as a prefix"); return;}
     std::string channel_name = std::string(args.argv[1].c_str() + 1);
     Channel *c = server.get_by_channel_name(channel_name);
     if (!c)
@@ -323,21 +365,18 @@ void MODE_fn(command_args args, Server& server, User& sender)
 	if (args.argv.size() < 3)
         send_return(RED"461 :Not enough parameters" RESET);
 	const std::string &mask = args.argv[2];
-	if (mask[0] != '+' && mask[0] != '-')
+	if ((mask[0] != '+' && mask[0] != '-') || mask.size() > 2)
 	{
 		server.add_msg(std::string(RED "403: Bad Mask") + RESET, sender);
 		return ;
 	}
 	const std::string allowed = "iktol";
-	for (size_t j = 1; j < mask.size(); ++j)
-	{
-		if (allowed.find(mask[j]) == std::string::npos)
-		{
-			server.add_msg(std::string(RED "403: Bad Mask") + RESET, sender);
-			return ;
-		}
-	}
+	ssize_t mask_i = -1;
+	for (ssize_t i = 0; allowed[i]; i++) mask_i += (i - mask_i) * (allowed[i] == mask[1]);
+	if (mask_i == -1)
+		send_return(std::string(RED"403: Bad Mask") + RESET);
 
+	if (args.argv[1][0] != '#') {notice_back("Invalid format on channel name: " + args.argv[1] + ". Must use '#' as a prefix"); return;}
 	std::string channel_name = std::string(args.argv[1].c_str() + 1);
 	Channel *c = server.get_by_channel_name(channel_name);
 	if (!c)
@@ -345,38 +384,58 @@ void MODE_fn(command_args args, Server& server, User& sender)
 		server.add_msg(std::string(RED "403 " ) + args.argv[1] + " :No such channel" + RESET, sender);
 		return ;
 	}
-	if (c->is_operator(&sender))
-	{
-		c->set_mode(args.argv[2]);
-		if (args.argv[2] == "+k" && args.argv.size() > 3)
-			c->set_pass(args.argv[3]);
-		else if (args.argv[2] == "+o" && args.argv.size() > 3)
-			c->set_operator(server, args.argv[3]);
-		else if (args.argv[2] == "-o" && args.argv.size() > 3)
-			c->unset_operator(server, args.argv[3]);
-		else if (args.argv[2] == "+l" && args.argv.size() > 3)
-		{
-			bool valid = args.argv.size() >= 4 && args.argv[3].size();
-			for (size_t i = 0; valid && args.argv[3][i]; i++) valid = valid && std::isdigit(args.argv[3][i]);
 
-			int limit = std::atoi(args.argv[3].c_str());
-			if (!valid || std::atoi(args.argv[3].c_str()) != std::atol(args.argv[3].c_str()) || limit >= c->get_members().size())
-			{
-				server.add_msg(std::string(RED "472 :Invalid channel user limit" ) + RESET, sender);
-				return;
-			}
-
-			c->set_limit(limit);
-		}
-		else if (args.argv[2] == "-l")
-			c->unset_limit();
-		else
-			server.add_msg(std::string(RED "461: Not enough parameters") + RESET, sender);
-	}
-	else
+	if (!c->is_operator(&sender))
 	{
 		server.add_msg(std::string(RED "403 " ) + args.argv[1] + " :You are not channel operator" + RESET, sender);
 		return ;
+	}
+
+	c->set_mode(args.argv[2]);
+	switch (mask_i)
+	{
+	case 0: // i
+		break;
+	case 1: // k
+		if (mask[0] == '-') break;
+		if (args.argv.size() <= 3) send_return(std::string(RED "461: Not enough parameters") + RESET);
+
+		c->set_pass(args.argv[3]);
+		break;
+	case 2: // t
+		break;
+	case 3: // o
+		if (args.argv.size() <= 3) send_return(std::string(RED "461: Not enough parameters") + RESET);
+
+		if (mask[0] == '-')
+		{
+			c->unset_operator(server, args.argv[3]);
+			return;
+		}
+		c->set_operator(server, args.argv[3]);
+		break;
+	case 4: // l
+		if (mask[0] == '-')
+		{
+			c->unset_limit();
+			return;
+		}
+
+		if (args.argv.size() <= 3) send_return(std::string(RED "461: Not enough parameters") + RESET);
+
+
+		bool valid = args.argv.size() >= 4 && args.argv[3].size();
+		for (size_t i = 0; valid && args.argv[3][i]; i++) valid = valid && std::isdigit(args.argv[3][i]);
+
+		int limit = std::atoi(args.argv[3].c_str());
+		if (!valid || std::atoi(args.argv[3].c_str()) != std::atol(args.argv[3].c_str()) || (unsigned long)limit < c->get_members().size())
+		{
+			server.add_msg(std::string(RED "472 :Invalid channel user limit" ) + RESET, sender);
+			return;
+		}
+
+		c->set_limit(limit);
+		break;
 	}
 };
 
@@ -384,7 +443,8 @@ void	WHOIS_fn(command_args args, Server& server, User& sender)
 {
 	if (args.argv.size() <= 1)
 		send_return(RED"461 :Not enough parameters" RESET);
-	Channel *ch = server.get_by_channel_name(args.argv[1]);
+	if (args.argv[1][0] != '#') {notice_back("Invalid format on channel name: " + args.argv[1] + ". Must use '#' as a prefix"); return;}
+	Channel *ch = server.get_by_channel_name(std::string(args.argv[1].data() + 1));
 	if (!ch)
 		send_return(RED"461 :No such channel" RESET);
     if (ch)

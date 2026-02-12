@@ -29,6 +29,8 @@ enum commands
 	last_command
 };
 
+#define is_valid_character(c) std::isalnum(c) || c == '-' || c == '_'
+
 // Canales # o &
 
 struct command_args

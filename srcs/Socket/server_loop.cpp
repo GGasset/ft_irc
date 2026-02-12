@@ -30,6 +30,7 @@ std::string sanitize(std::string in)
 	{
 		if (std::isprint(in[i]))
 		{
+			if (i && std::isspace(in[i]) && std::isspace(in[i - 1])) continue;
 			if (std::isspace(in[i]))
 				out += " ";
 			else
@@ -141,7 +142,7 @@ void Server::handle_read_event(int fd)
 	for (size_t i = 0; i < msgs.size(); i++) {
 #ifndef DONT_LOG
 		std::string msg = msgs[i];
-		std::cout << std::endl << "Msg received from " << sender->getUsername() << ": " << sanitize(msg) << std::endl;
+		std::cout << std::endl << GREEN"Msg received from " << sender->getUsername() << " of " << (msg.size()) << RESET" bytes" << std::endl;
 #endif
 		route_message(msgs[i], *sender, sender_index);
 	}
@@ -158,7 +159,7 @@ void Server::handle_write_event(int fd)
 	messages[user_i].pop();
 
 	#ifndef DONT_LOG
-		std::cout << "Sending message to " << clients[user_i].get_nick() << " of " << next_msg.size() << " bytes" << std::endl;
+		std::cout << BLUE"Sending message to " << clients[user_i].get_nick() << " of " << next_msg.size() << RESET" bytes" << std::endl;
 	#endif
 
 	write(fd, next_msg.data(), next_msg.size() + 1);
@@ -174,7 +175,7 @@ void Server::handle_event(const epoll_event event, int sockfd)
 		) return;
 
 #ifndef DONT_LOG
-		std::cout << BLUE"Bluetooth device aconnected successfully" BOLD << RESET << std::endl;
+		std::cout << YELLOW"Bluetooth device aconnected successfully" BOLD << RESET << std::endl;
 #endif
 
 		// Add client
@@ -224,7 +225,7 @@ int Server::loop(size_t PORT)
 	event.data.fd = 0;
 	if (epoll_ctl(epollfd, EPOLL_CTL_ADD, 0, &event)) err = true;
 
-	std::cout << BLUE"Bluetooth device is ready to peal at: " BOLD << RESET << MAGENTA << PORT << RESET << std::endl;
+	std::cout << RESET BOLD"Bluetooth device is ready to peal at: " BOLD << RESET << MAGENTA << PORT << RESET << std::endl;
 
 
 	last_ping_time = std::time(0);

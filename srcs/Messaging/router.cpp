@@ -48,6 +48,9 @@ router::router()
 	command_string[MODE] = "MODE";
 	fun[MODE] = MODE_fn;
 
+	command_string[WHOIS] = "WHOIS";
+	fun[WHOIS] = WHOIS_fn;
+
 	command_string[HELP] = "HELP";
 	fun[HELP] = HELP_fn;
 }
