@@ -262,18 +262,25 @@ void PONG_fn(command_args args, Server& server, User& sender)
 
 void QUIT_fn(command_args args, Server& server, User& sender)
 {
-	size_t id =sender.get_id();
+	size_t id = sender.get_id();
 	size_t index = server.get_user_index_by_id(id);
 
 	std::string msg = sender.get_nick();
 	if (args.argv.size() > 1)
 	{
-		//TODO
-		std::cout << "TODO";
+		if (args.argv[2][0] != ':') {notice_back(std::string(RED"Invalid message") + RESET""); goto disconnect;}
+		args.argv[2].erase(args.argv[2].begin());
+
+		std::string reason;
+		for (size_t i = 2 + !args.argv[2].empty(); i < args.argv.size(); i++) reason += args.argv[i] + " ";
+		if (reason.empty()) {notice_back(std::string(RED"Invalid message") + RESET""); goto disconnect;}
+
+		msg = reason;
 	}
 
+disconnect:
+	send_back(msg);
 	server.disconnect_user(index);
-	suppr()
 }
 
 void KICK_fn(command_args args, Server& server, User& sender)
@@ -470,11 +477,11 @@ void HELP_fn(command_args args, Server& server, User& sender)
 	notice_back(BLUE"\t PASS [passw]" RESET);
 	notice_back(BLUE"\t NICK [nick]" RESET);
 	notice_back(BLUE"\t USER [username] [hostname] [servername] :[realname ...]" RESET);
-	notice_back(BLUE"\t JOIN [#channel] [key]" RESET);
-	notice_back(BLUE"\t PRIVMSG TODO" RESET);
+	notice_back(BLUE"\t JOIN [#channel_name_0,#channel_name_1,...,#channel_name_N] [key]" RESET);
+	notice_back(BLUE"\t PRIVMSG [receiver | #channel] :[ msg ...]" RESET);
 	notice_back(BLUE"\t PING <sender>" RESET);
 	notice_back(BLUE"\t PONG" RESET);
-	notice_back(BLUE"\t QUIT <reason>" RESET);
+	notice_back(BLUE"\t QUIT" RESET);
 	notice_back(BLUE"\t KICK [#channel] [user] [comment]" RESET);
 	notice_back(BLUE"\t INVITE [user] [#channel]" RESET);
 	notice_back(BLUE"\t TOPIC [#channel] [:topic]>" RESET);
