@@ -280,10 +280,10 @@ void KICK_fn(command_args args, Server& server, User& sender)
 {
 	if (args.argv.size() < 3)
         send_return(RED"461 :Not enough parameters" RESET);
-    std::string target_nick = args.argv[1];
+    std::string target_nick = args.argv[2];
 
-    if (args.argv[2][0] != '#') {notice_back("Invalid format on channel name: " + args.argv[2] + ". Must use '#' as a prefix"); return;}
-    std::string channel_name = std::string(args.argv[2].c_str() + 1);
+    if (args.argv[1][0] != '#') {notice_back("Invalid format on channel name: " + args.argv[1] + ". Must use '#' as a prefix"); return;}
+    std::string channel_name = std::string(args.argv[1].c_str() + 1);
 
     User *target = server.get_user_by_nick(target_nick);
     if (!target)
