@@ -206,7 +206,7 @@ Gracias por el austandín!\n\
 "
 
 void PRIVMSG_fn(command_args args, Server& server, User& sender) {
-	if (args.argv.size() <= 1)
+	if (args.argv.size() <= 2)
 		send_return(RED"411: No recipient given (PRIVMSG)" RESET)
 
 
