@@ -53,6 +53,15 @@ router::router()
 
 	command_string[HELP] = "HELP";
 	fun[HELP] = HELP_fn;
+
+	command_string[SEND] = "SEND";
+	fun[SEND] = SEND_fn;
+
+	command_string[ACCEPT] = "ACCEPT";
+	fun[ACCEPT] = ACCEPT_fn;
+
+	command_string[REFUSE] = "REFUSE";
+	fun[REFUSE] = REFUSE_fn;
 }
 
 void router::operator()(std::string message, Server& server, User &sender)

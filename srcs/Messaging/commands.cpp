@@ -3,9 +3,21 @@
 #include "Server.hpp"
 #include "User.hpp"
 #include "router.hpp"
+#include "File.hpp"
 #include <cctype>
 #include <complex>
 #include <vector>
+#include <fstream>
+#include <sstream>
+
+// C++98 compatible function to convert number to string
+template <typename T>
+std::string to_str(T num)
+{
+	std::stringstream ss;
+	ss << num;
+	return ss.str();
+}
 
 #define send_back(msg) server.add_msg(":" + server.get_prefix() + RESET " " + args.prefix + " " + msg, sender)
 #define notice_back(msg) server.add_msg(YELLOW"NOTICE " + sender.get_nick() + " " + msg RESET, sender)
@@ -39,7 +51,7 @@ void NICK_fn(command_args args, Server& server, User& sender)
 	std::string prev_nick = sender.get_nick();
 
 	bool is_valid = true;
-	for (size_t i = 0; args.argv[1][i] && is_valid; i++) is_valid = is_valid && is_valid_character(args.argv[1][i]);
+	for (size_t i = 0; args.argv[1][i] && is_valid; i++) is_valid = (is_valid && is_valid_character(args.argv[1][i]));
 	if (!is_valid) { notice_back("Invalid characters in nick"); return; }
 
 	sender.setNick(args.argv[1]);
@@ -63,7 +75,7 @@ void USER_fn(command_args args, Server& server, User& sender)
 	if (args.argv.size() < 5 || (args.argv[4].begin()[0] != ':')) send_return(RED"461 " + args.argv[0] + ":Not enough parameters" RESET);
 
 	bool is_valid = true;
-	for (size_t i = 0; args.argv[1][i] && is_valid; i++) is_valid = is_valid && is_valid_character(args.argv[1][i]);
+	for (size_t i = 0; args.argv[1][i] && is_valid; i++) is_valid = (is_valid && is_valid_character(args.argv[1][i]));
 	if (!is_valid) { notice_back("Invalid character in username"); return; }
 
 	sender.set_username(args.argv[1]);
@@ -82,7 +94,7 @@ void USER_fn(command_args args, Server& server, User& sender)
 		realname.erase(realname.begin());
 	}
 
-	for (size_t i = 0; realname[i] && is_valid; i++) is_valid = is_valid && is_valid_character(realname[i]) || realname[i] == ' ';
+	for (size_t i = 0; realname[i] && is_valid; i++) is_valid = (is_valid && is_valid_character(realname[i]) || realname[i] == ' ');
 	if (!is_valid) { notice_back("Invalid characters in realname"); return; }
 
 	sender.set_realname(realname);
@@ -150,7 +162,7 @@ void JOIN_fn(command_args args, Server& server, User& sender)
 
 		bool valid = true;
 		for (size_t j = 1; comma_separated[i][j] && valid; j++)
-			valid = valid && is_valid_character(comma_separated[i][j]);
+			valid = (valid && is_valid_character(comma_separated[i][j]));
 
 		if (!valid)
 		{
@@ -471,6 +483,99 @@ void	WHOIS_fn(command_args args, Server& server, User& sender)
     }
 }
 
+void SEND_fn(command_args args, Server& server, User& sender)
+{
+	if (args.argv.size() < 3)
+	{
+		send_return(RED"461 SEND :Not enough parameters" RESET);
+	}
+
+	std::string target_nick = args.argv[1];
+	std::string file_name = args.argv[2];
+
+	std::ifstream test_file(file_name.c_str());
+	if (!test_file.is_open())
+	{
+		notice_back(RED"File not found: " + file_name + RESET);
+		return;
+	}
+	test_file.close();
+
+	User *target_user = server.get_user_by_nick(target_nick);
+	if (!target_user)
+	{
+		send_back(RED"401 " + target_nick + " :No such nick" RESET);
+		return;
+	}
+
+	File transfer(file_name, file_name, sender.get_nick(), target_nick);
+	
+	if (!transfer.open_file())
+	{
+		notice_back(RED"Cannot open file: " + file_name + RESET);
+		return;
+	}
+
+	unsigned long file_size = transfer.get_file_size();
+
+	server.add_msg(YELLOW"NOTICE " + target_nick + " :Incoming file from " + sender.get_nick() 
+		+ ": " + file_name + " (" + to_str(file_size) + " bytes)" RESET, *target_user);
+
+	notice_back(GREEN"Transferring " + file_name + " to " + target_nick + RESET);
+
+	std::string chunk;
+	size_t chunk_count = 0;
+	
+	while (!transfer.is_complete())
+	{
+		chunk = transfer.read_chunk();
+		if (chunk.empty())
+			break;
+		
+		std::string ft_msg = ":" + sender.get_nick() + " FT " + file_name 
+			+ " " + to_str(chunk_count) + " :" + chunk;
+		
+		server.add_msg(ft_msg, *target_user);
+		chunk_count++;
+	}
+
+	server.add_msg(GREEN"NOTICE " + target_nick + " :File transfer complete from " + sender.get_nick() 
+		+ " - " + file_name + " (" + to_str(transfer.bytes_sent) + " bytes)" RESET, *target_user);
+
+	notice_back(GREEN"File transfer complete!" RESET);
+	transfer.close_file();
+}
+
+void ACCEPT_fn(command_args args, Server& server, User& sender)
+{
+	if (args.argv.size() < 2)
+	{
+		send_return(RED"461 ACCEPT :Not enough parameters" RESET);
+	}
+
+	std::string sender_nick = args.argv[1];
+	std::string save_path = (args.argv.size() > 2) ? args.argv[2] : sender_nick + "_file";
+
+	notice_back(GREEN"Ready to receive file from " + sender_nick + " and save as: " + save_path + RESET);
+}
+
+void REFUSE_fn(command_args args, Server& server, User& sender)
+{
+	if (args.argv.size() < 2)
+	{
+		send_return(RED"461 REFUSE :Not enough parameters" RESET);
+	}
+
+	std::string sender_nick = args.argv[1];
+	User *target = server.get_user_by_nick(sender_nick);
+	if (target)
+	{
+		server.add_msg(RED"NOTICE " + sender_nick + " :" + sender.get_nick() 
+			+ " refused the file transfer" RESET, *target);
+	}
+
+	notice_back(YELLOW"File transfer refused" RESET);
+}
 void HELP_fn(command_args args, Server& server, User& sender)
 {
 	notice_back("Commands:");
@@ -486,5 +591,6 @@ void HELP_fn(command_args args, Server& server, User& sender)
 	notice_back(BLUE"\t INVITE [user] [#channel]" RESET);
 	notice_back(BLUE"\t TOPIC [#channel] [:topic]>" RESET);
 	notice_back(BLUE"\t MODE [#channel] [mode]" RESET);
+	notice_back(BLUE"\t SEND [target_nick] [filepath]" RESET);
 	suppr()
 }

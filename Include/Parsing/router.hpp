@@ -26,6 +26,9 @@ enum commands
 	MODE,
 	HELP,
 	WHOIS,
+	SEND,
+	ACCEPT,
+	REFUSE,
 	last_command
 };
 
@@ -64,6 +67,8 @@ void TOPIC_fn(command_args args, Server& server, User& sender);
 void MODE_fn(command_args args, Server& server, User& sender);
 void HELP_fn(command_args args, Server& server, User& sender);
 void WHOIS_fn(command_args args, Server& server, User& sender);
-
+void SEND_fn(command_args args, Server& server, User& sender);
+void ACCEPT_fn(command_args args, Server& server, User& sender);
+void REFUSE_fn(command_args args, Server& server, User& sender);
 
 #endif
